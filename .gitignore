@@ -1,6 +1,14 @@
+# Visual Studio
 .vs/
-bin/
-obj/
 *.user
 *.suo
+
+# Build
+bin/
+obj/
+
+# Logs
+*.log
+
+# Secrets
 appsettings.Development.json
