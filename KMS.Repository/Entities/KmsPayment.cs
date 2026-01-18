@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace KMS.Repository.Entities;
+
+public partial class KmsPayment
+{
+    public int PaymentId { get; set; }
+
+    public int InvoiceId { get; set; }
+
+    public string? PaymentNumber { get; set; }
+
+    public decimal PaidAmount { get; set; }
+
+    public DateOnly PaymentDate { get; set; }
+
+    public string PaymentMethod { get; set; } = null!;
+
+    public string? TransactionReference { get; set; }
+
+    public string? Notes { get; set; }
+
+    public int ReceivedBy { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public virtual KmsInvoice Invoice { get; set; } = null!;
+
+    public virtual KmsUser ReceivedByNavigation { get; set; } = null!;
+}

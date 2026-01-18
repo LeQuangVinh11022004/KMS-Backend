@@ -1,0 +1,794 @@
+﻿using KMS.Repository.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+
+namespace KMS.Repository.Data;
+
+public partial class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext()
+    {
+    }
+
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<KmsActivityPhoto> KmsActivityPhotos { get; set; }
+
+    public virtual DbSet<KmsAnnouncement> KmsAnnouncements { get; set; }
+
+    public virtual DbSet<KmsAttendance> KmsAttendances { get; set; }
+
+    public virtual DbSet<KmsAuditLog> KmsAuditLogs { get; set; }
+
+    public virtual DbSet<KmsClass> KmsClasses { get; set; }
+
+    public virtual DbSet<KmsClassActivity> KmsClassActivities { get; set; }
+
+    public virtual DbSet<KmsClassStudent> KmsClassStudents { get; set; }
+
+    public virtual DbSet<KmsClassTeacher> KmsClassTeachers { get; set; }
+
+    public virtual DbSet<KmsInvoice> KmsInvoices { get; set; }
+
+    public virtual DbSet<KmsInvoiceItem> KmsInvoiceItems { get; set; }
+
+    public virtual DbSet<KmsMenu> KmsMenus { get; set; }
+
+    public virtual DbSet<KmsNotification> KmsNotifications { get; set; }
+
+    public virtual DbSet<KmsParent> KmsParents { get; set; }
+
+    public virtual DbSet<KmsParentRegistration> KmsParentRegistrations { get; set; }
+
+    public virtual DbSet<KmsPasswordResetToken> KmsPasswordResetTokens { get; set; }
+
+    public virtual DbSet<KmsPayment> KmsPayments { get; set; }
+
+    public virtual DbSet<KmsRole> KmsRoles { get; set; }
+
+    public virtual DbSet<KmsSchoolYear> KmsSchoolYears { get; set; }
+
+    public virtual DbSet<KmsSemester> KmsSemesters { get; set; }
+
+    public virtual DbSet<KmsStudent> KmsStudents { get; set; }
+
+    public virtual DbSet<KmsStudentParent> KmsStudentParents { get; set; }
+
+    public virtual DbSet<KmsSystemSetting> KmsSystemSettings { get; set; }
+
+    public virtual DbSet<KmsTeacher> KmsTeachers { get; set; }
+
+    public virtual DbSet<KmsTimetable> KmsTimetables { get; set; }
+
+    public virtual DbSet<KmsTuitionItem> KmsTuitionItems { get; set; }
+
+    public virtual DbSet<KmsTuitionTemplate> KmsTuitionTemplates { get; set; }
+
+    public virtual DbSet<KmsUser> KmsUsers { get; set; }
+
+    public virtual DbSet<KmsUserRole> KmsUserRoles { get; set; }
+
+    public static string GetConnectionString(string connectionStringName)
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        string connectionString = config.GetConnectionString(connectionStringName);
+        return connectionString;
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+       => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection"));
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<KmsActivityPhoto>(entity =>
+        {
+            entity.HasKey(e => e.PhotoId).HasName("PK__KMS_Acti__21B7B5E281F8DFE7");
+
+            entity.ToTable("KMS_ActivityPhotos");
+
+            entity.Property(e => e.Caption).HasMaxLength(255);
+            entity.Property(e => e.PhotoUrl).HasMaxLength(500);
+            entity.Property(e => e.UploadedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Activity).WithMany(p => p.KmsActivityPhotos)
+                .HasForeignKey(d => d.ActivityId)
+                .HasConstraintName("FK__KMS_Activ__Activ__32AB8735");
+        });
+
+        modelBuilder.Entity<KmsAnnouncement>(entity =>
+        {
+            entity.HasKey(e => e.AnnouncementId).HasName("PK__KMS_Anno__9DE44574ECDC7FEA");
+
+            entity.ToTable("KMS_Announcements");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExpiresAt).HasColumnType("datetime");
+            entity.Property(e => e.IsPublished).HasDefaultValue(false);
+            entity.Property(e => e.Priority)
+                .HasMaxLength(20)
+                .HasDefaultValue("Normal");
+            entity.Property(e => e.PublishedAt).HasColumnType("datetime");
+            entity.Property(e => e.TargetAudience).HasMaxLength(20);
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsAnnouncementCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Annou__Creat__59C55456");
+
+            entity.HasOne(d => d.TargetClass).WithMany(p => p.KmsAnnouncements)
+                .HasForeignKey(d => d.TargetClassId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK__KMS_Annou__Targe__58D1301D");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsAnnouncementUpdatedByNavigations)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK__KMS_Annou__Updat__5AB9788F");
+        });
+
+        modelBuilder.Entity<KmsAttendance>(entity =>
+        {
+            entity.HasKey(e => e.AttendanceId).HasName("PK__KMS_Atte__8B69261CFE50F6AD");
+
+            entity.ToTable("KMS_Attendance");
+
+            entity.HasIndex(e => new { e.ClassId, e.AttendanceDate }, "IX_Attendance_ClassId_Date");
+
+            entity.HasIndex(e => e.AttendanceDate, "IX_Attendance_Date");
+
+            entity.HasIndex(e => new { e.StudentId, e.AttendanceDate }, "IX_Attendance_StudentId_Date");
+
+            entity.HasIndex(e => new { e.StudentId, e.AttendanceDate }, "UQ_Student_Date").IsUnique();
+
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.TakenAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsAttendances)
+                .HasForeignKey(d => d.ClassId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Atten__Class__160F4887");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.KmsAttendances)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__KMS_Atten__Stude__151B244E");
+
+            entity.HasOne(d => d.TakenByNavigation).WithMany(p => p.KmsAttendanceTakenByNavigations)
+                .HasForeignKey(d => d.TakenBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Atten__Taken__17036CC0");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsAttendanceUpdatedByNavigations)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK__KMS_Atten__Updat__17F790F9");
+        });
+
+        modelBuilder.Entity<KmsAuditLog>(entity =>
+        {
+            entity.HasKey(e => e.LogId).HasName("PK__KMS_Audi__5E548648AB50351A");
+
+            entity.ToTable("KMS_AuditLogs");
+
+            entity.Property(e => e.Action).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Ipaddress)
+                .HasMaxLength(50)
+                .HasColumnName("IPAddress");
+            entity.Property(e => e.TableName).HasMaxLength(50);
+            entity.Property(e => e.UserAgent).HasMaxLength(255);
+
+            entity.HasOne(d => d.User).WithMany(p => p.KmsAuditLogs)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__KMS_Audit__UserI__662B2B3B");
+        });
+
+        modelBuilder.Entity<KmsClass>(entity =>
+        {
+            entity.HasKey(e => e.ClassId).HasName("PK__KMS_Clas__CB1927C01398404C");
+
+            entity.ToTable("KMS_Classes");
+
+            entity.HasIndex(e => e.IsActive, "IX_Classes_IsActive");
+
+            entity.HasIndex(e => e.SchoolYearId, "IX_Classes_SchoolYearId");
+
+            entity.Property(e => e.AgeGroup).HasMaxLength(20);
+            entity.Property(e => e.ClassName).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.CurrentEnrollment).HasDefaultValue(0);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.MaxCapacity).HasDefaultValue(20);
+            entity.Property(e => e.Room).HasMaxLength(50);
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsClasses)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__KMS_Class__Creat__02084FDA");
+
+            entity.HasOne(d => d.SchoolYear).WithMany(p => p.KmsClasses)
+                .HasForeignKey(d => d.SchoolYearId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Class__Schoo__01142BA1");
+        });
+
+        modelBuilder.Entity<KmsClassActivity>(entity =>
+        {
+            entity.HasKey(e => e.ActivityId).HasName("PK__KMS_Clas__45F4A791513B8698");
+
+            entity.ToTable("KMS_ClassActivities");
+
+            entity.HasIndex(e => new { e.ClassId, e.ActivityDate }, "IX_Activities_ClassId_Date");
+
+            entity.Property(e => e.ActivityDate).HasDefaultValueSql("(CONVERT([date],getdate()))");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsClassActivities)
+                .HasForeignKey(d => d.ClassId)
+                .HasConstraintName("FK__KMS_Class__Class__2CF2ADDF");
+
+            entity.HasOne(d => d.PostedByNavigation).WithMany(p => p.KmsClassActivityPostedByNavigations)
+                .HasForeignKey(d => d.PostedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Class__Poste__2DE6D218");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsClassActivityUpdatedByNavigations)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK__KMS_Class__Updat__2EDAF651");
+        });
+
+        modelBuilder.Entity<KmsClassStudent>(entity =>
+        {
+            entity.HasKey(e => new { e.ClassId, e.StudentId }).HasName("PK__KMS_Clas__48357579646941D3");
+
+            entity.ToTable("KMS_ClassStudents");
+
+            entity.Property(e => e.EnrolledAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsClassStudents)
+                .HasForeignKey(d => d.ClassId)
+                .HasConstraintName("FK__KMS_Class__Class__06CD04F7");
+
+            entity.HasOne(d => d.EnrolledByNavigation).WithMany(p => p.KmsClassStudents)
+                .HasForeignKey(d => d.EnrolledBy)
+                .HasConstraintName("FK__KMS_Class__Enrol__08B54D69");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.KmsClassStudents)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__KMS_Class__Stude__07C12930");
+        });
+
+        modelBuilder.Entity<KmsClassTeacher>(entity =>
+        {
+            entity.HasKey(e => new { e.ClassId, e.TeacherId }).HasName("PK__KMS_Clas__95C602562E9BB923");
+
+            entity.ToTable("KMS_ClassTeachers");
+
+            entity.Property(e => e.AssignedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Role)
+                .HasMaxLength(20)
+                .HasDefaultValue("Main");
+
+            entity.HasOne(d => d.AssignedByNavigation).WithMany(p => p.KmsClassTeachers)
+                .HasForeignKey(d => d.AssignedBy)
+                .HasConstraintName("FK__KMS_Class__Assig__0F624AF8");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsClassTeachers)
+                .HasForeignKey(d => d.ClassId)
+                .HasConstraintName("FK__KMS_Class__Class__0D7A0286");
+
+            entity.HasOne(d => d.Teacher).WithMany(p => p.KmsClassTeachers)
+                .HasForeignKey(d => d.TeacherId)
+                .HasConstraintName("FK__KMS_Class__Teach__0E6E26BF");
+        });
+
+        modelBuilder.Entity<KmsInvoice>(entity =>
+        {
+            entity.HasKey(e => e.InvoiceId).HasName("PK__KMS_Invo__D796AAB5B0D6993D");
+
+            entity.ToTable("KMS_Invoices");
+
+            entity.HasIndex(e => e.DueDate, "IX_Invoices_DueDate");
+
+            entity.HasIndex(e => e.MonthYear, "IX_Invoices_MonthYear");
+
+            entity.HasIndex(e => e.Status, "IX_Invoices_Status");
+
+            entity.HasIndex(e => e.StudentId, "IX_Invoices_StudentId");
+
+            entity.HasIndex(e => e.InvoiceNumber, "UQ__KMS_Invo__D776E9813BD504E3").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DiscountAmount)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.FinalAmount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.InvoiceNumber).HasMaxLength(50);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("Unpaid");
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsInvoiceCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__KMS_Invoi__Creat__45BE5BA9");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.KmsInvoices)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__KMS_Invoi__Stude__43D61337");
+
+            entity.HasOne(d => d.Template).WithMany(p => p.KmsInvoices)
+                .HasForeignKey(d => d.TemplateId)
+                .HasConstraintName("FK__KMS_Invoi__Templ__44CA3770");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsInvoiceUpdatedByNavigations)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK__KMS_Invoi__Updat__46B27FE2");
+        });
+
+        modelBuilder.Entity<KmsInvoiceItem>(entity =>
+        {
+            entity.HasKey(e => e.InvoiceItemId).HasName("PK__KMS_Invo__478FE09CA89613D4");
+
+            entity.ToTable("KMS_InvoiceItems");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.ItemName).HasMaxLength(100);
+
+            entity.HasOne(d => d.Invoice).WithMany(p => p.KmsInvoiceItems)
+                .HasForeignKey(d => d.InvoiceId)
+                .HasConstraintName("FK__KMS_Invoi__Invoi__4B7734FF");
+        });
+
+        modelBuilder.Entity<KmsMenu>(entity =>
+        {
+            entity.HasKey(e => e.MenuId).HasName("PK__KMS_Menu__C99ED230B8A24143");
+
+            entity.ToTable("KMS_Menus");
+
+            entity.Property(e => e.Allergens).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.MealType).HasMaxLength(20);
+            entity.Property(e => e.MenuContent).HasMaxLength(1000);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsMenus)
+                .HasForeignKey(d => d.ClassId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK__KMS_Menus__Class__25518C17");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsMenuCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__KMS_Menus__Creat__2645B050");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsMenuUpdatedByNavigations)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK__KMS_Menus__Updat__2739D489");
+        });
+
+        modelBuilder.Entity<KmsNotification>(entity =>
+        {
+            entity.HasKey(e => e.NotificationId).HasName("PK__KMS_Noti__20CF2E123D11272E");
+
+            entity.ToTable("KMS_Notifications");
+
+            entity.HasIndex(e => e.CreatedAt, "IX_Notifications_CreatedAt");
+
+            entity.HasIndex(e => new { e.UserId, e.IsRead }, "IX_Notifications_UserId_IsRead");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsRead).HasDefaultValue(false);
+            entity.Property(e => e.Message).HasMaxLength(1000);
+            entity.Property(e => e.ReadAt).HasColumnType("datetime");
+            entity.Property(e => e.RelatedEntityType).HasMaxLength(50);
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.Type).HasMaxLength(50);
+
+            entity.HasOne(d => d.User).WithMany(p => p.KmsNotifications)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__KMS_Notif__UserI__6166761E");
+        });
+
+        modelBuilder.Entity<KmsParent>(entity =>
+        {
+            entity.HasKey(e => e.ParentId).HasName("PK__KMS_Pare__D339516F1BCA9927");
+
+            entity.ToTable("KMS_Parents");
+
+            entity.HasIndex(e => e.UserId, "UQ__KMS_Pare__1788CC4D1D3A231F").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.EmergencyContact).HasMaxLength(20);
+            entity.Property(e => e.Occupation).HasMaxLength(100);
+            entity.Property(e => e.WorkAddress).HasMaxLength(255);
+
+            entity.HasOne(d => d.User).WithOne(p => p.KmsParent)
+                .HasForeignKey<KmsParent>(d => d.UserId)
+                .HasConstraintName("FK__KMS_Paren__UserI__6D0D32F4");
+        });
+
+        modelBuilder.Entity<KmsParentRegistration>(entity =>
+        {
+            entity.HasKey(e => e.RegistrationId).HasName("PK__KMS_Pare__6EF5881075497442");
+
+            entity.ToTable("KMS_ParentRegistrations");
+
+            entity.Property(e => e.ChildFullName).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.RequestMessage).HasMaxLength(500);
+            entity.Property(e => e.ReviewNote).HasMaxLength(500);
+            entity.Property(e => e.ReviewedAt).HasColumnType("datetime");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("Pending");
+
+            entity.HasOne(d => d.ReviewedByNavigation).WithMany(p => p.KmsParentRegistrations)
+                .HasForeignKey(d => d.ReviewedBy)
+                .HasConstraintName("FK__KMS_Paren__Revie__5DCAEF64");
+        });
+
+        modelBuilder.Entity<KmsPasswordResetToken>(entity =>
+        {
+            entity.HasKey(e => e.TokenId).HasName("PK__KMS_Pass__658FEEEAED7F3545");
+
+            entity.ToTable("KMS_PasswordResetTokens");
+
+            entity.HasIndex(e => e.Token, "UQ__KMS_Pass__1EB4F81773B60CD6").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExpiresAt).HasColumnType("datetime");
+            entity.Property(e => e.IsUsed).HasDefaultValue(false);
+            entity.Property(e => e.Token).HasMaxLength(255);
+
+            entity.HasOne(d => d.User).WithMany(p => p.KmsPasswordResetTokens)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__KMS_Passw__UserI__59063A47");
+        });
+
+        modelBuilder.Entity<KmsPayment>(entity =>
+        {
+            entity.HasKey(e => e.PaymentId).HasName("PK__KMS_Paym__9B556A38AC9BD8F6");
+
+            entity.ToTable("KMS_Payments");
+
+            entity.HasIndex(e => e.InvoiceId, "IX_Payments_InvoiceId");
+
+            entity.HasIndex(e => e.PaymentDate, "IX_Payments_PaymentDate");
+
+            entity.HasIndex(e => e.PaymentNumber, "UQ__KMS_Paym__E2C1723B80BD1D7D").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.PaidAmount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+            entity.Property(e => e.PaymentNumber).HasMaxLength(50);
+            entity.Property(e => e.TransactionReference).HasMaxLength(100);
+
+            entity.HasOne(d => d.Invoice).WithMany(p => p.KmsPayments)
+                .HasForeignKey(d => d.InvoiceId)
+                .HasConstraintName("FK__KMS_Payme__Invoi__503BEA1C");
+
+            entity.HasOne(d => d.ReceivedByNavigation).WithMany(p => p.KmsPayments)
+                .HasForeignKey(d => d.ReceivedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Payme__Recei__51300E55");
+        });
+
+        modelBuilder.Entity<KmsRole>(entity =>
+        {
+            entity.HasKey(e => e.RoleId).HasName("PK__KMS_Role__8AFACE1A43F655F4");
+
+            entity.ToTable("KMS_Roles");
+
+            entity.HasIndex(e => e.RoleName, "UQ__KMS_Role__8A2B6160F1E24A8D").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.RoleName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<KmsSchoolYear>(entity =>
+        {
+            entity.HasKey(e => e.SchoolYearId).HasName("PK__KMS_Scho__9BAABCE05B92293D");
+
+            entity.ToTable("KMS_SchoolYears");
+
+            entity.HasIndex(e => e.YearName, "UQ__KMS_Scho__294C4DA9B489BF14").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.YearName).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<KmsSemester>(entity =>
+        {
+            entity.HasKey(e => e.SemesterId).HasName("PK__KMS_Seme__043301DDD1EF2750");
+
+            entity.ToTable("KMS_Semesters");
+
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.SemesterName).HasMaxLength(50);
+
+            entity.HasOne(d => d.SchoolYear).WithMany(p => p.KmsSemesters)
+                .HasForeignKey(d => d.SchoolYearId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Semes__Schoo__3E52440B");
+        });
+
+        modelBuilder.Entity<KmsStudent>(entity =>
+        {
+            entity.HasKey(e => e.StudentId).HasName("PK__KMS_Stud__32C52B9992AC213F");
+
+            entity.ToTable("KMS_Students");
+
+            entity.HasIndex(e => e.EnrollmentDate, "IX_Students_EnrollmentDate");
+
+            entity.HasIndex(e => e.IsActive, "IX_Students_IsActive");
+
+            entity.HasIndex(e => e.StudentCode, "IX_Students_StudentCode");
+
+            entity.HasIndex(e => e.StudentCode, "UQ__KMS_Stud__1FC886041491367A").IsUnique();
+
+            entity.Property(e => e.Address).HasMaxLength(255);
+            entity.Property(e => e.Allergies).HasMaxLength(500);
+            entity.Property(e => e.BloodType).HasMaxLength(5);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.EnrollmentDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.Gender).HasMaxLength(10);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.MedicalNotes).HasMaxLength(1000);
+            entity.Property(e => e.Photo).HasMaxLength(255);
+            entity.Property(e => e.StudentCode).HasMaxLength(20);
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsStudentCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__KMS_Stude__Creat__66603565");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsStudentUpdatedByNavigations)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK__KMS_Stude__Updat__6754599E");
+        });
+
+        modelBuilder.Entity<KmsStudentParent>(entity =>
+        {
+            entity.HasKey(e => new { e.StudentId, e.ParentId }).HasName("PK__KMS_Stud__DFF6BE8F8A57F675");
+
+            entity.ToTable("KMS_StudentParents");
+
+            entity.Property(e => e.AssignedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsPrimaryContact).HasDefaultValue(false);
+            entity.Property(e => e.Relationship).HasMaxLength(20);
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.KmsStudentParents)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK__KMS_Stude__Paren__72C60C4A");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.KmsStudentParents)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__KMS_Stude__Stude__71D1E811");
+        });
+
+        modelBuilder.Entity<KmsSystemSetting>(entity =>
+        {
+            entity.HasKey(e => e.SettingId).HasName("PK__KMS_Syst__54372B1D6DB2F15A");
+
+            entity.ToTable("KMS_SystemSettings");
+
+            entity.HasIndex(e => e.SettingKey, "UQ__KMS_Syst__01E719AD812AFC6A").IsUnique();
+
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.SettingKey).HasMaxLength(100);
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsSystemSettings)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("FK__KMS_Syste__Updat__6AEFE058");
+        });
+
+        modelBuilder.Entity<KmsTeacher>(entity =>
+        {
+            entity.HasKey(e => e.TeacherId).HasName("PK__KMS_Teac__EDF25964C1FE86C7");
+
+            entity.ToTable("KMS_Teachers");
+
+            entity.HasIndex(e => e.UserId, "UQ__KMS_Teac__1788CC4D4AB63943").IsUnique();
+
+            entity.HasIndex(e => e.TeacherCode, "UQ__KMS_Teac__9B8A194E99E44B57").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Salary).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.Specialization).HasMaxLength(100);
+            entity.Property(e => e.TeacherCode).HasMaxLength(20);
+
+            entity.HasOne(d => d.User).WithOne(p => p.KmsTeacher)
+                .HasForeignKey<KmsTeacher>(d => d.UserId)
+                .HasConstraintName("FK__KMS_Teach__UserI__7A672E12");
+        });
+
+        modelBuilder.Entity<KmsTimetable>(entity =>
+        {
+            entity.HasKey(e => e.TimetableId).HasName("PK__KMS_Time__68413F602020BDAB");
+
+            entity.ToTable("KMS_Timetables");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Room).HasMaxLength(50);
+            entity.Property(e => e.Subject).HasMaxLength(100);
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsTimetables)
+                .HasForeignKey(d => d.ClassId)
+                .HasConstraintName("FK__KMS_Timet__Class__1DB06A4F");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsTimetables)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__KMS_Timet__Creat__1F98B2C1");
+
+            entity.HasOne(d => d.Teacher).WithMany(p => p.KmsTimetables)
+                .HasForeignKey(d => d.TeacherId)
+                .HasConstraintName("FK__KMS_Timet__Teach__1EA48E88");
+        });
+
+        modelBuilder.Entity<KmsTuitionItem>(entity =>
+        {
+            entity.HasKey(e => e.ItemId).HasName("PK__KMS_Tuit__727E838BF80F77B1");
+
+            entity.ToTable("KMS_TuitionItems");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.ItemName).HasMaxLength(100);
+            entity.Property(e => e.ItemOrder).HasDefaultValue(1);
+
+            entity.HasOne(d => d.Template).WithMany(p => p.KmsTuitionItems)
+                .HasForeignKey(d => d.TemplateId)
+                .HasConstraintName("FK__KMS_Tuiti__Templ__3C34F16F");
+        });
+
+        modelBuilder.Entity<KmsTuitionTemplate>(entity =>
+        {
+            entity.HasKey(e => e.TemplateId).HasName("PK__KMS_Tuit__F87ADD2763F3022F");
+
+            entity.ToTable("KMS_TuitionTemplates");
+
+            entity.Property(e => e.BaseAmount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.TemplateName).HasMaxLength(100);
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsTuitionTemplates)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__KMS_Tuiti__Creat__37703C52");
+        });
+
+        modelBuilder.Entity<KmsUser>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PK__KMS_User__1788CC4CB27F8459");
+
+            entity.ToTable("KMS_Users");
+
+            entity.HasIndex(e => e.Email, "IX_Users_Email");
+
+            entity.HasIndex(e => e.IsActive, "IX_Users_IsActive");
+
+            entity.HasIndex(e => e.Username, "IX_Users_Username");
+
+            entity.HasIndex(e => e.Username, "UQ__KMS_User__536C85E48F8B3924").IsUnique();
+
+            entity.HasIndex(e => e.Email, "UQ__KMS_User__A9D105340604369E").IsUnique();
+
+            entity.Property(e => e.Avatar).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsEmailVerified).HasDefaultValue(false);
+            entity.Property(e => e.IsPhoneVerified).HasDefaultValue(false);
+            entity.Property(e => e.LastLoginAt).HasColumnType("datetime");
+            entity.Property(e => e.PasswordChangedAt).HasColumnType("datetime");
+            entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Username).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<KmsUserRole>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__KMS_User__AF2760AD630D7518");
+
+            entity.ToTable("KMS_UserRoles");
+
+            entity.Property(e => e.AssignedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.AssignedByNavigation).WithMany(p => p.KmsUserRoleAssignedByNavigations)
+                .HasForeignKey(d => d.AssignedBy)
+                .HasConstraintName("FK__KMS_UserR__Assig__534D60F1");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.KmsUserRoles)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_UserR__RoleI__52593CB8");
+
+            entity.HasOne(d => d.User).WithMany(p => p.KmsUserRoleUsers)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__KMS_UserR__UserI__5165187F");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}

@@ -1,0 +1,49 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace KMS.Repository.Entities;
+
+public partial class KmsInvoice
+{
+    public int InvoiceId { get; set; }
+
+    public string InvoiceNumber { get; set; } = null!;
+
+    public int StudentId { get; set; }
+
+    public int? TemplateId { get; set; }
+
+    public DateOnly MonthYear { get; set; }
+
+    public decimal TotalAmount { get; set; }
+
+    public decimal? DiscountAmount { get; set; }
+
+    public decimal FinalAmount { get; set; }
+
+    public string? Status { get; set; }
+
+    public DateOnly? DueDate { get; set; }
+
+    public string? Notes { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public int? CreatedBy { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public int? UpdatedBy { get; set; }
+
+    public virtual KmsUser? CreatedByNavigation { get; set; }
+
+    public virtual ICollection<KmsInvoiceItem> KmsInvoiceItems { get; set; } = new List<KmsInvoiceItem>();
+
+    public virtual ICollection<KmsPayment> KmsPayments { get; set; } = new List<KmsPayment>();
+
+    public virtual KmsStudent Student { get; set; } = null!;
+
+    public virtual KmsTuitionTemplate? Template { get; set; }
+
+    public virtual KmsUser? UpdatedByNavigation { get; set; }
+}

@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace KMS.Repository.Entities;
+
+public partial class KmsUserRole
+{
+    public int UserId { get; set; }
+
+    public int RoleId { get; set; }
+
+    public DateTime? AssignedAt { get; set; }
+
+    public int? AssignedBy { get; set; }
+
+    public virtual KmsUser? AssignedByNavigation { get; set; }
+
+    public virtual KmsRole Role { get; set; } = null!;
+
+    public virtual KmsUser User { get; set; } = null!;
+}

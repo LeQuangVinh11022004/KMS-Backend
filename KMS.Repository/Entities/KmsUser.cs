@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace KMS.Repository.Entities;
+
+public partial class KmsUser
+{
+    public int UserId { get; set; }
+
+    public string Username { get; set; } = null!;
+
+    public string PasswordHash { get; set; } = null!;
+
+    public string FullName { get; set; } = null!;
+
+    public string? Email { get; set; }
+
+    public string? Phone { get; set; }
+
+    public string? Avatar { get; set; }
+
+    public bool? IsActive { get; set; }
+
+    public bool? IsEmailVerified { get; set; }
+
+    public bool? IsPhoneVerified { get; set; }
+
+    public DateTime? LastLoginAt { get; set; }
+
+    public DateTime? PasswordChangedAt { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public virtual ICollection<KmsAnnouncement> KmsAnnouncementCreatedByNavigations { get; set; } = new List<KmsAnnouncement>();
+
+    public virtual ICollection<KmsAnnouncement> KmsAnnouncementUpdatedByNavigations { get; set; } = new List<KmsAnnouncement>();
+
+    public virtual ICollection<KmsAuditLog> KmsAuditLogs { get; set; } = new List<KmsAuditLog>();
+
+    public virtual ICollection<KmsClassStudent> KmsClassStudents { get; set; } = new List<KmsClassStudent>();
+
+    public virtual ICollection<KmsClassTeacher> KmsClassTeachers { get; set; } = new List<KmsClassTeacher>();
+
+    public virtual ICollection<KmsClass> KmsClasses { get; set; } = new List<KmsClass>();
+
+    public virtual ICollection<KmsInvoice> KmsInvoiceCreatedByNavigations { get; set; } = new List<KmsInvoice>();
+
+    public virtual ICollection<KmsInvoice> KmsInvoiceUpdatedByNavigations { get; set; } = new List<KmsInvoice>();
+
+    public virtual ICollection<KmsMenu> KmsMenuCreatedByNavigations { get; set; } = new List<KmsMenu>();
+
+    public virtual ICollection<KmsMenu> KmsMenuUpdatedByNavigations { get; set; } = new List<KmsMenu>();
+
+    public virtual ICollection<KmsNotification> KmsNotifications { get; set; } = new List<KmsNotification>();
+
+    public virtual KmsParent? KmsParent { get; set; }
+
+    public virtual ICollection<KmsParentRegistration> KmsParentRegistrations { get; set; } = new List<KmsParentRegistration>();
+
+    public virtual ICollection<KmsPasswordResetToken> KmsPasswordResetTokens { get; set; } = new List<KmsPasswordResetToken>();
+
+    public virtual ICollection<KmsPayment> KmsPayments { get; set; } = new List<KmsPayment>();
+
+    public virtual ICollection<KmsStudent> KmsStudentCreatedByNavigations { get; set; } = new List<KmsStudent>();
+
+    public virtual ICollection<KmsStudent> KmsStudentUpdatedByNavigations { get; set; } = new List<KmsStudent>();
+
+    public virtual ICollection<KmsSystemSetting> KmsSystemSettings { get; set; } = new List<KmsSystemSetting>();
+
+    public virtual KmsTeacher? KmsTeacher { get; set; }
+
+    public virtual ICollection<KmsTimetable> KmsTimetables { get; set; } = new List<KmsTimetable>();
+
+    public virtual ICollection<KmsTuitionTemplate> KmsTuitionTemplates { get; set; } = new List<KmsTuitionTemplate>();
+
+    public virtual ICollection<KmsUserRole> KmsUserRoleAssignedByNavigations { get; set; } = new List<KmsUserRole>();
+
+    public virtual ICollection<KmsUserRole> KmsUserRoleUsers { get; set; } = new List<KmsUserRole>();
+}
