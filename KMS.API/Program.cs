@@ -127,6 +127,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 // Logging
 builder.Logging.ClearProviders();

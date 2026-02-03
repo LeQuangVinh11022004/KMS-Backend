@@ -7,6 +7,7 @@ namespace KMS.Repository.Repositories
     {
         private readonly ApplicationDbContext _context;
         private IUserRepository? _userRepository;
+        private IUserRoleRepository? _userRoleRepository;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -14,6 +15,8 @@ namespace KMS.Repository.Repositories
         }
 
         public IUserRepository Users => _userRepository ??= new UserRepository(_context);
+
+        public IUserRoleRepository UserRoles => _userRoleRepository ??= new UserRoleRepository(_context);
 
         public async Task<int> SaveChangesAsync()
         {
