@@ -81,5 +81,63 @@ namespace KMS.Repository.Repositories
             return await _context.KmsUsers
                 .AnyAsync(u => u.Email == email);
         }
+
+        public async Task<bool> ActivateUserAsync(int userId, int activatedBy)
+        {
+            var user = await _context.KmsUsers.FindAsync(userId);
+            if (user == null) return false;
+
+            user.IsActive = true;
+            user.UpdatedAt = DateTime.Now;
+            // Note: Có thể log vào AuditLogs với activatedBy
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeactivateUserAsync(int userId, int deactivatedBy)
+        {
+            var user = await _context.KmsUsers.FindAsync(userId);
+            if (user == null) return false;
+
+            user.IsActive = false;
+            user.UpdatedAt = DateTime.Now;
+            // Note: Có thể log vào AuditLogs với deactivatedBy
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<KmsUser>> GetPendingUsersAsync()
+        {
+            // Users IsActive = false hoặc null
+            return await _context.KmsUsers
+                .Where(u => u.IsActive != true)
+                .OrderByDescending(u => u.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<KmsUser>> GetActiveUsersAsync()
+        {
+            return await _context.KmsUsers
+                .Where(u => u.IsActive == true)
+                .OrderBy(u => u.Username)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<KmsUser>> GetInactiveUsersAsync()
+        {
+            // Tương đương GetPendingUsers, nhưng có thể filter thêm
+            return await _context.KmsUsers
+                .Where(u => u.IsActive == false)
+                .OrderByDescending(u => u.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<int> CountPendingUsersAsync()
+        {
+            return await _context.KmsUsers
+                .CountAsync(u => u.IsActive != true);
+        }
     }
 }

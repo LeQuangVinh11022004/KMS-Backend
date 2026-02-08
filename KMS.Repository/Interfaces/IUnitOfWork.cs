@@ -11,6 +11,7 @@ namespace KMS.Repository.Interfaces
         IUserRepository Users { get; }
 
         IUserRoleRepository UserRoles { get; }
+
         Task<int> SaveChangesAsync();
     }
 }
