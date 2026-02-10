@@ -139,7 +139,12 @@ builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<ISchoolYearService, SchoolYearService>();
 builder.Services.AddScoped<ISchoolYearRepository, SchoolYearRepository>();
-
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IParentRepository, ParentRepository>();
+builder.Services.AddScoped<IParentService, ParentService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 // Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
