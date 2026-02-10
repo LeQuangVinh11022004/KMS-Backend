@@ -61,7 +61,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Register new user endpoint
+        /// Register new account
         /// </summary>
         [HttpPost("register")]
         [AllowAnonymous]
@@ -98,7 +98,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Get current user profile (requires authentication)
+        /// Get current user profile
         /// </summary>
         [HttpGet("profile")]
         [Authorize]

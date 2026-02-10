@@ -15,6 +15,10 @@ namespace KMS.Service.Services
             _userRoleRepository = userRoleRepository;
         }
 
+        // ============================================================
+        // ROLES
+        // ============================================================
+
         public async Task<BaseResponseDTO> GetAllRolesAsync()
         {
             try
@@ -82,7 +86,11 @@ namespace KMS.Service.Services
             }
         }
 
-        public async Task<BaseResponseDTO> GetUserRolesAsync(int userId)
+        // ============================================================
+        // GET USER ROLE (SINGULAR)
+        // ============================================================
+
+        public async Task<BaseResponseDTO> GetUserRoleAsync(int userId)
         {
             try
             {
@@ -96,27 +104,33 @@ namespace KMS.Service.Services
                     };
                 }
 
-                var userRoles = await _userRoleRepository.GetUserRolesAsync(userId);
-                var roleDTOs = userRoles.Select(ur => new RoleDTO
-                {
-                    RoleId = ur.Role.RoleId,
-                    RoleName = ur.Role.RoleName,
-                    Description = ur.Role.Description
-                }).ToList();
+                var userRole = await _userRoleRepository.GetUserRoleAsync(userId);
 
-                var userRoleDTO = new UserRoleDTO
+                RoleDTO? roleDTO = null;
+                if (userRole != null)
+                {
+                    roleDTO = new RoleDTO
+                    {
+                        RoleId = userRole.Role.RoleId,
+                        RoleName = userRole.Role.RoleName,
+                        Description = userRole.Role.Description
+                    };
+                }
+
+                var result = new
                 {
                     UserId = user.UserId,
                     Username = user.Username,
                     FullName = user.FullName,
-                    Roles = roleDTOs
+                    Role = roleDTO,
+                    HasRole = roleDTO != null
                 };
 
                 return new BaseResponseDTO
                 {
                     Success = true,
-                    Message = "User roles retrieved successfully",
-                    Data = userRoleDTO
+                    Message = "User role retrieved successfully",
+                    Data = result
                 };
             }
             catch (Exception ex)
@@ -128,6 +142,10 @@ namespace KMS.Service.Services
                 };
             }
         }
+
+        // ============================================================
+        // ASSIGN ROLE
+        // ============================================================
 
         public async Task<BaseResponseDTO> AssignRoleToUserAsync(int userId, AssignRoleRequestDTO request, int assignedBy)
         {
@@ -144,7 +162,7 @@ namespace KMS.Service.Services
                     return new BaseResponseDTO
                     {
                         Success = false,
-                        Message = "Failed to assign role. User or role not found, or user already has this role."
+                        Message = "Failed to assign role. User or role not found."
                     };
                 }
 
@@ -189,7 +207,7 @@ namespace KMS.Service.Services
                     return new BaseResponseDTO
                     {
                         Success = false,
-                        Message = "Failed to assign role. User not found or already has this role."
+                        Message = "Failed to assign role. User not found."
                     };
                 }
 
@@ -209,17 +227,60 @@ namespace KMS.Service.Services
             }
         }
 
-        public async Task<BaseResponseDTO> RemoveRoleFromUserAsync(int userId, int roleId)
+        // ============================================================
+        // UPDATE ROLE
+        // ============================================================
+
+        public async Task<BaseResponseDTO> UpdateUserRoleAsync(int userId, AssignRoleRequestDTO request, int updatedBy)
         {
             try
             {
-                var success = await _userRoleRepository.RemoveRoleFromUserAsync(userId, roleId);
+                var success = await _userRoleRepository.UpdateUserRoleAsync(
+                    userId,
+                    request.RoleId,
+                    updatedBy
+                );
+
                 if (!success)
                 {
                     return new BaseResponseDTO
                     {
                         Success = false,
-                        Message = "Failed to remove role. User-role relationship not found."
+                        Message = "Failed to update role. User or role not found."
+                    };
+                }
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = "Role updated successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        // ============================================================
+        // REMOVE ROLE
+        // ============================================================
+
+        public async Task<BaseResponseDTO> RemoveRoleFromUserAsync(int userId)
+        {
+            try
+            {
+                var success = await _userRoleRepository.RemoveRoleFromUserAsync(userId);
+                if (!success)
+                {
+                    return new BaseResponseDTO
+                    {
+                        Success = false,
+                        Message = "Failed to remove role. User has no role."
                     };
                 }
 
@@ -238,6 +299,10 @@ namespace KMS.Service.Services
                 };
             }
         }
+
+        // ============================================================
+        // GET USERS BY ROLE
+        // ============================================================
 
         public async Task<BaseResponseDTO> GetUsersByRoleAsync(int roleId)
         {
@@ -303,42 +368,110 @@ namespace KMS.Service.Services
             }
         }
 
-        public async Task<BaseResponseDTO> GetAllUsersWithRolesAsync()
+        // ============================================================
+        // FILTER USERS
+        // ============================================================
+
+        public async Task<BaseResponseDTO> GetUsersWithoutRoleAsync()
         {
             try
             {
-                var allRoles = await _userRoleRepository.GetAllRolesAsync();
-                var result = new List<UserRoleDTO>();
-
-                foreach (var role in allRoles)
+                var users = await _userRoleRepository.GetUsersWithoutRoleAsync();
+                var userDTOs = users.Select(u => new UserDTO
                 {
-                    var users = await _userRoleRepository.GetUsersByRoleAsync(role.RoleId);
-                    foreach (var user in users)
-                    {
-                        var existingUser = result.FirstOrDefault(r => r.UserId == user.UserId);
-                        if (existingUser == null)
-                        {
-                            var userRoles = await _userRoleRepository.GetUserRolesAsync(user.UserId);
-                            result.Add(new UserRoleDTO
-                            {
-                                UserId = user.UserId,
-                                Username = user.Username,
-                                FullName = user.FullName,
-                                Roles = userRoles.Select(ur => new RoleDTO
-                                {
-                                    RoleId = ur.Role.RoleId,
-                                    RoleName = ur.Role.RoleName,
-                                    Description = ur.Role.Description
-                                }).ToList()
-                            });
-                        }
-                    }
-                }
+                    UserId = u.UserId,
+                    Username = u.Username,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    Phone = u.Phone,
+                    IsActive = u.IsActive == true,
+                    Roles = new List<string>()
+                }).ToList();
 
                 return new BaseResponseDTO
                 {
                     Success = true,
-                    Message = "All users with roles retrieved successfully",
+                    Message = $"Found {userDTOs.Count} users without role",
+                    Data = userDTOs
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<BaseResponseDTO> GetActiveUsersWithoutRoleAsync()
+        {
+            try
+            {
+                var users = await _userRoleRepository.GetActiveUsersWithoutRoleAsync();
+                var userDTOs = users.Select(u => new UserDTO
+                {
+                    UserId = u.UserId,
+                    Username = u.Username,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    Phone = u.Phone,
+                    IsActive = true,
+                    Roles = new List<string>()
+                }).ToList();
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"Found {userDTOs.Count} active users without role",
+                    Data = userDTOs
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        // ============================================================
+        // STATISTICS
+        // ============================================================
+
+        public async Task<BaseResponseDTO> GetRoleStatisticsAsync()
+        {
+            try
+            {
+                var roles = await _userRoleRepository.GetAllRolesAsync();
+                var stats = new List<object>();
+
+                foreach (var role in roles)
+                {
+                    var count = await _userRoleRepository.CountUsersByRoleAsync(role.RoleId);
+                    stats.Add(new
+                    {
+                        RoleId = role.RoleId,
+                        RoleName = role.RoleName,
+                        UserCount = count
+                    });
+                }
+
+                var usersWithoutRole = await _userRoleRepository.CountUsersWithoutRoleAsync();
+
+                var result = new
+                {
+                    RoleStatistics = stats,
+                    UsersWithoutRole = usersWithoutRole
+                };
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = "Statistics retrieved successfully",
                     Data = result
                 };
             }

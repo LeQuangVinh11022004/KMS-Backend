@@ -8,17 +8,24 @@ namespace KMS.Service.Interfaces
         Task<BaseResponseDTO> GetAllRolesAsync();
         Task<BaseResponseDTO> GetRoleByIdAsync(int roleId);
 
-        // User Roles
-        Task<BaseResponseDTO> GetUserRolesAsync(int userId);
+        // User Role
+        Task<BaseResponseDTO> GetUserRoleAsync(int userId);
+
+        // Assign/Update/Remove
         Task<BaseResponseDTO> AssignRoleToUserAsync(int userId, AssignRoleRequestDTO request, int assignedBy);
         Task<BaseResponseDTO> AssignRoleByNameAsync(int userId, AssignRoleByNameRequestDTO request, int assignedBy);
-        Task<BaseResponseDTO> RemoveRoleFromUserAsync(int userId, int roleId);
+        Task<BaseResponseDTO> UpdateUserRoleAsync(int userId, AssignRoleRequestDTO request, int updatedBy);
+        Task<BaseResponseDTO> RemoveRoleFromUserAsync(int userId);
 
         // Get users by role
         Task<BaseResponseDTO> GetUsersByRoleAsync(int roleId);
         Task<BaseResponseDTO> GetUsersByRoleNameAsync(string roleName);
 
-        // Get all users with their roles
-        Task<BaseResponseDTO> GetAllUsersWithRolesAsync();
+        // Filter
+        Task<BaseResponseDTO> GetUsersWithoutRoleAsync();
+        Task<BaseResponseDTO> GetActiveUsersWithoutRoleAsync();
+
+        // Statistics
+        Task<BaseResponseDTO> GetRoleStatisticsAsync();
     }
 }

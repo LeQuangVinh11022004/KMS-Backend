@@ -12,14 +12,24 @@ namespace KMS.Repository.Interfaces
         Task<IEnumerable<KmsRole>> GetAllRolesAsync();
         Task<KmsRole?> GetRoleByIdAsync(int roleId);
         Task<KmsRole?> GetRoleByNameAsync(string roleName);
-
-        Task<IEnumerable<KmsUserRole>> GetUserRolesAsync(int userId);
-        Task<IEnumerable<string>> GetUserRoleNamesAsync(int userId);
+        Task<KmsUserRole?> GetUserRoleAsync(int userId);
+        Task<string?> GetUserRoleNameAsync(int userId);
         Task<bool> AssignRoleToUserAsync(int userId, int roleId, int? assignedBy = null);
-        Task<bool> RemoveRoleFromUserAsync(int userId, int roleId);
+        Task<bool> UpdateUserRoleAsync(int userId, int newRoleId, int? updatedBy = null);
+        Task<bool> RemoveRoleFromUserAsync(int userId);
         Task<bool> UserHasRoleAsync(int userId, int roleId);
-
+        Task<bool> UserHasAnyRoleAsync(int userId);
         Task<IEnumerable<KmsUser>> GetUsersByRoleAsync(int roleId);
         Task<IEnumerable<KmsUser>> GetUsersByRoleNameAsync(string roleName);
+        Task<IEnumerable<KmsUser>> GetUsersWithoutRoleAsync();
+        Task<IEnumerable<KmsUser>> GetActiveUsersWithoutRoleAsync();
+        Task<int> CountUsersByRoleAsync(int roleId);
+        Task<int> CountUsersWithoutRoleAsync();
+        Task<bool> ActivateUserAsync(int userId, int activatedBy);
+        Task<bool> DeactivateUserAsync(int userId, int deactivatedBy);
+        Task<IEnumerable<KmsUser>> GetPendingUsersAsync();
+        Task<IEnumerable<KmsUser>> GetActiveUsersAsync();
+        Task<IEnumerable<KmsUser>> GetInactiveUsersAsync();
+        Task<int> CountPendingUsersAsync();
     }
 }

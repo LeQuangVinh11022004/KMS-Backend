@@ -1,8 +1,4 @@
-﻿using KMS.Service.DTOs;
-using KMS.Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -137,7 +133,7 @@ namespace KMS.Service.Services
                     FullName = request.FullName,
                     Email = request.Email,
                     Phone = request.Phone,
-                    IsActive = true,
+                    IsActive = false,  // ← PENDING - Chờ Admin duyệt
                     IsEmailVerified = false,
                     IsPhoneVerified = false,
                     CreatedAt = DateTime.Now,
@@ -149,7 +145,7 @@ namespace KMS.Service.Services
                 return new LoginResponseDTO
                 {
                     Success = true,
-                    Message = "Registration successful"
+                    Message = "Registration successful. Your account is pending approval by administrator."
                 };
             }
             catch (Exception ex)

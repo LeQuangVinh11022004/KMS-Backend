@@ -12,5 +12,6 @@ namespace KMS.Service.Interfaces
         Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request);
         Task<LoginResponseDTO> RegisterAsync(RegisterRequestDTO request);
         Task<UserDTO?> GetUserByIdAsync(int userId);
+
     }
 }
