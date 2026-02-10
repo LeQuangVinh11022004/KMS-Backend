@@ -129,6 +129,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddScoped<IClassService, ClassService>();
 
 // Logging
 builder.Logging.ClearProviders();
