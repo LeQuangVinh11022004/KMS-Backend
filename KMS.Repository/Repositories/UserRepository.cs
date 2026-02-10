@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using KMS.Repository.Data;
 using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
 
