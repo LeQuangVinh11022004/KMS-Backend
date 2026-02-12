@@ -152,6 +152,8 @@ builder.Services.AddScoped<ICampusService, CampusService>();
 builder.Services.AddScoped<ICampusRepository, CampusRepository>();
 builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
 builder.Services.AddScoped<ISemesterService, SemesterService>();
+builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
+builder.Services.AddScoped<IClassActivityService, ClassActivityService>();
 
 // Logging
 builder.Logging.ClearProviders();
