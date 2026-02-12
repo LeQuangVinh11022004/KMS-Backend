@@ -144,6 +144,8 @@ builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IParentService, ParentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+
 // Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();

@@ -132,58 +132,5 @@ namespace KMS.API.Controllers
                 data = user
             });
         }
-
-        /// <summary>
-        /// Test endpoint - Only Admin can access
-        /// </summary>
-        [HttpGet("admin-only")]
-        [Authorize(Roles = "Admin")]
-        public IActionResult AdminOnly()
-        {
-            return Ok(new
-            {
-                success = true,
-                message = "Welcome Admin!",
-                user = User.FindFirst(ClaimTypes.Name)?.Value,
-                roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList()
-            });
-        }
-
-        /// <summary>
-        /// Test endpoint - Admin or Teacher can access
-        /// </summary>
-        [HttpGet("teacher-access")]
-        [Authorize(Roles = "Admin,Teacher")]
-        public IActionResult TeacherAccess()
-        {
-            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
-
-            return Ok(new
-            {
-                success = true,
-                message = "Welcome!",
-                user = User.FindFirst(ClaimTypes.Name)?.Value,
-                roles = roles
-            });
-        }
-
-        /// <summary>
-        /// Test endpoint - Any authenticated user
-        /// </summary>
-        [HttpGet("authenticated")]
-        [Authorize]
-        public IActionResult Authenticated()
-        {
-            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
-
-            return Ok(new
-            {
-                success = true,
-                message = "You are authenticated",
-                user = User.FindFirst(ClaimTypes.Name)?.Value,
-                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-                roles = roles
-            });
-        }
     }
 }
