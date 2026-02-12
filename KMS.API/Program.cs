@@ -150,6 +150,8 @@ builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
 builder.Services.AddScoped<ICampusService, CampusService>();
 builder.Services.AddScoped<ICampusRepository, CampusRepository>();
+builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
+builder.Services.AddScoped<ISemesterService, SemesterService>();
 
 // Logging
 builder.Logging.ClearProviders();
