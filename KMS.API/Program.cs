@@ -148,6 +148,8 @@ builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+builder.Services.AddScoped<ICampusService, CampusService>();
+builder.Services.AddScoped<ICampusRepository, CampusRepository>();
 
 // Logging
 builder.Logging.ClearProviders();
