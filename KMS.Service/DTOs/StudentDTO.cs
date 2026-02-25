@@ -32,7 +32,8 @@ namespace KMS.Service.DTOs
         public string? Allergies { get; set; }
         public string? MedicalNotes { get; set; }
         public bool? IsActive { get; set; }
-        public int? UpdatedBy { get; set; }
+        public string? CurrentClass { get; set; }
+
     }
 
     public class StudentDTO
