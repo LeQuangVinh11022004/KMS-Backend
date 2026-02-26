@@ -155,6 +155,13 @@ builder.Services.AddScoped<ISemesterService, SemesterService>();
 
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
+builder.Services.AddScoped<ITuitionTemplateRepository, TuitionTemplateRepository>();
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<ITuitionTemplateService, TuitionTemplateService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
 // Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
