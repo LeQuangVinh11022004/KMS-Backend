@@ -1,11 +1,12 @@
-﻿using System;
+﻿using KMS.Service.DTOs.Parent;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KMS.Service.DTOs
+namespace KMS.Service.DTOs.Student
 {
     public class CreateStudentDTO
     {
@@ -32,7 +33,8 @@ namespace KMS.Service.DTOs
         public string? Allergies { get; set; }
         public string? MedicalNotes { get; set; }
         public bool? IsActive { get; set; }
-        public int? UpdatedBy { get; set; }
+        public string? CurrentClass { get; set; }
+
     }
 
     public class StudentDTO

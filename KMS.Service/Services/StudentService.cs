@@ -1,7 +1,8 @@
 ﻿
 using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
-using KMS.Service.DTOs;
+using KMS.Service.DTOs.Role;
+using KMS.Service.DTOs.Student;
 using KMS.Service.Interfaces;
 
 namespace KMS.Service.Services
@@ -117,7 +118,6 @@ namespace KMS.Service.Services
                 if (dto.Allergies != null) student.Allergies = dto.Allergies;
                 if (dto.MedicalNotes != null) student.MedicalNotes = dto.MedicalNotes;
                 if (dto.IsActive.HasValue) student.IsActive = dto.IsActive.Value;
-                student.UpdatedBy = dto.UpdatedBy;
 
                 await _studentRepository.UpdateAsync(student);
 

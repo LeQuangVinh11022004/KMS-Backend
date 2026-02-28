@@ -1,4 +1,5 @@
-﻿using KMS.Service.DTOs;
+﻿using KMS.Service.DTOs.Role;
+using KMS.Service.DTOs.Teacher;
 using KMS.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

@@ -129,6 +129,7 @@ builder.Services.AddCors(options =>
 });
 
 // Dependency Injection
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -152,8 +153,17 @@ builder.Services.AddScoped<ICampusService, CampusService>();
 builder.Services.AddScoped<ICampusRepository, CampusRepository>();
 builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
 builder.Services.AddScoped<ISemesterService, SemesterService>();
-builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
-builder.Services.AddScoped<IClassActivityService, ClassActivityService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<ITuitionTemplateRepository, TuitionTemplateRepository>();
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<ITuitionTemplateService, TuitionTemplateService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddScoped<IParentRegistrationRepository, ParentRegistrationRepository>();
+builder.Services.AddScoped<IParentRegistrationService, ParentRegistrationService>();
+
 
 // Logging
 builder.Logging.ClearProviders();

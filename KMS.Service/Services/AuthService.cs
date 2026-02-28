@@ -5,8 +5,10 @@ using System.Security.Claims;
 using System.Text;
 using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
-using KMS.Service.DTOs;
 using KMS.Service.Interfaces;
+using KMS.Service.DTOs.Login;
+using KMS.Service.DTOs.Register;
+using KMS.Service.DTOs.User;
 
 namespace KMS.Service.Services
 {
