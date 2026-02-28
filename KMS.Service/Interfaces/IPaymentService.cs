@@ -1,5 +1,5 @@
-﻿using KMS.Service.DTOs;
-using KMS.Service.DTOs.Payment;
+﻿using KMS.Service.DTOs.Payment;
+using KMS.Service.DTOs.Role;
 using System;
 using System.Collections.Generic;
 using System.Linq;

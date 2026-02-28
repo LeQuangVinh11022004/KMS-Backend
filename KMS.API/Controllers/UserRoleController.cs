@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using KMS.Service.DTOs;
 using KMS.Service.Interfaces;
 using System.Security.Claims;
+using KMS.Service.DTOs.Role;
 
 namespace KMS.API.Controllers
 {

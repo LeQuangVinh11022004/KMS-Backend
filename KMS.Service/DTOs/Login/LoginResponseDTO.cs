@@ -1,10 +1,11 @@
-﻿using System;
+﻿using KMS.Service.DTOs.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KMS.Service.DTOs
+namespace KMS.Service.DTOs.Login
 {
     public class LoginResponseDTO
     {

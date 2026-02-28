@@ -1,5 +1,4 @@
-﻿
-using KMS.Service.DTOs;
+﻿using KMS.Service.DTOs.Role;
 
 namespace KMS.Service.Interfaces
 {

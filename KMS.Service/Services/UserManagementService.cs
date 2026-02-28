@@ -3,8 +3,9 @@ using KMS.Service.DTOs;
 using KMS.Service.Interfaces;
 using KMS.Service.Services;
 using KMS.Repository.Interfaces;
-using KMS.Service.DTOs;
 using KMS.Service.Interfaces;
+using KMS.Service.DTOs.Role;
+using KMS.Service.DTOs.User;
 
 namespace KMS.Service.Services
 {

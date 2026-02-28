@@ -1,4 +1,6 @@
-﻿using KMS.Service.DTOs;
+﻿using KMS.Service.DTOs.Login;
+using KMS.Service.DTOs.Register;
+using KMS.Service.DTOs.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;

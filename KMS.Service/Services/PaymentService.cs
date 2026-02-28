@@ -1,7 +1,7 @@
 ﻿using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
-using KMS.Service.DTOs;
 using KMS.Service.DTOs.Payment;
+using KMS.Service.DTOs.Role;
 using KMS.Service.Interfaces;
 using System;
 using System.Collections.Generic;

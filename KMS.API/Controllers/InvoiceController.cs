@@ -1,5 +1,6 @@
 ﻿using KMS.Service.DTOs;
 using KMS.Service.DTOs.Invoice;
+using KMS.Service.DTOs.Role;
 using KMS.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

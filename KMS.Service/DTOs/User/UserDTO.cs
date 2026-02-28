@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KMS.Service.DTOs
+namespace KMS.Service.DTOs.User
 {
     public class UserDTO
     {

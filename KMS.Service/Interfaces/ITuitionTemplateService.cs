@@ -1,4 +1,4 @@
-﻿using KMS.Service.DTOs;
+﻿using KMS.Service.DTOs.Role;
 using KMS.Service.DTOs.TuitionTemplate;
 using System;
 using System.Collections.Generic;
