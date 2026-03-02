@@ -1,0 +1,313 @@
+﻿using KMS.Repository.Entities;
+using KMS.Repository.Interfaces;
+using KMS.Service.DTOs.ClassStudent;
+using KMS.Service.DTOs.Role;
+using KMS.Service.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace KMS.Service.Services
+{
+    public class ClassStudentService : IClassStudentService
+    {
+        private readonly IClassStudentRepository _classStudentRepository;
+        private readonly IClassRepository _classRepository;
+        private readonly IStudentRepository _studentRepository;
+
+        public ClassStudentService(
+            IClassStudentRepository classStudentRepository,
+            IClassRepository classRepository,
+            IStudentRepository studentRepository)
+        {
+            _classStudentRepository = classStudentRepository;
+            _classRepository = classRepository;
+            _studentRepository = studentRepository;
+        }
+
+        public async Task<BaseResponseDTO> GetStudentsByClassAsync(int classId)
+        {
+            try
+            {
+                var kmsClass = await _classRepository.GetByIdAsync(classId);
+                if (kmsClass == null)
+                    return new BaseResponseDTO { Success = false, Message = "Class not found" };
+
+                var records = await _classStudentRepository.GetStudentsByClassAsync(classId);
+                var dtos = records.Select(MapToStudentDTO).ToList();
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"Found {dtos.Count} students in class",
+                    Data = dtos
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+            }
+        }
+
+        public async Task<BaseResponseDTO> GetClassesByStudentAsync(int studentId)
+        {
+            try
+            {
+                var student = await _studentRepository.GetByIdAsync(studentId);
+                if (student == null)
+                    return new BaseResponseDTO { Success = false, Message = "Student not found" };
+
+                var records = await _classStudentRepository.GetClassesByStudentAsync(studentId);
+                var dtos = records.Select(MapToStudentDTO).ToList();
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"Found {dtos.Count} classes for student",
+                    Data = dtos
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+            }
+        }
+
+        public async Task<BaseResponseDTO> EnrollStudentAsync(int classId, EnrollStudentDTO dto, int enrolledBy)
+        {
+            try
+            {
+                var kmsClass = await _classRepository.GetByIdAsync(classId);
+                if (kmsClass == null)
+                    return new BaseResponseDTO { Success = false, Message = "Class not found" };
+
+                if (kmsClass.IsActive != true)
+                    return new BaseResponseDTO { Success = false, Message = "Class is inactive" };
+
+                var student = await _studentRepository.GetByIdAsync(dto.StudentId);
+                if (student == null)
+                    return new BaseResponseDTO { Success = false, Message = "Student not found" };
+
+                if (student.IsActive != true)
+                    return new BaseResponseDTO { Success = false, Message = "Student is inactive" };
+
+                // Kiểm tra học sinh đã có trong lớp chưa
+                if (await _classStudentRepository.IsStudentInClassAsync(classId, dto.StudentId))
+                    return new BaseResponseDTO { Success = false, Message = "Student is already enrolled in this class" };
+
+                // Kiểm tra sĩ số lớp
+                var currentCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
+                if (kmsClass.MaxCapacity.HasValue && currentCount >= kmsClass.MaxCapacity.Value)
+                    return new BaseResponseDTO
+                    {
+                        Success = false,
+                        Message = $"Class is full (max {kmsClass.MaxCapacity} students)"
+                    };
+
+                var record = new KmsClassStudent
+                {
+                    ClassId = classId,
+                    StudentId = dto.StudentId,
+                    EnrolledAt = DateTime.Now,
+                    EnrolledBy = enrolledBy
+                };
+
+                var created = await _classStudentRepository.EnrollAsync(record);
+
+                // Cập nhật CurrentEnrollment trên Class
+                kmsClass.CurrentEnrollment = currentCount + 1;
+                _classRepository.Update(kmsClass);
+                await _classRepository.SaveChangesAsync();
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"Student '{student.FullName}' enrolled successfully",
+                    Data = MapToStudentDTO(created)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+            }
+        }
+
+        public async Task<BaseResponseDTO> EnrollMultipleStudentsAsync(
+            int classId, EnrollMultipleStudentsDTO dto, int enrolledBy)
+        {
+            try
+            {
+                var kmsClass = await _classRepository.GetByIdAsync(classId);
+                if (kmsClass == null)
+                    return new BaseResponseDTO { Success = false, Message = "Class not found" };
+
+                if (kmsClass.IsActive != true)
+                    return new BaseResponseDTO { Success = false, Message = "Class is inactive" };
+
+                var currentCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
+                var remaining = (kmsClass.MaxCapacity ?? 20) - currentCount;
+
+                if (dto.StudentIds.Count > remaining)
+                    return new BaseResponseDTO
+                    {
+                        Success = false,
+                        Message = $"Cannot enroll {dto.StudentIds.Count} students - only {remaining} slots available"
+                    };
+
+                var enrolled = new List<string>();
+                var skipped = new List<string>();
+
+                foreach (var studentId in dto.StudentIds)
+                {
+                    var student = await _studentRepository.GetByIdAsync(studentId);
+                    if (student == null || student.IsActive != true)
+                    {
+                        skipped.Add($"StudentId {studentId} (not found or inactive)");
+                        continue;
+                    }
+
+                    if (await _classStudentRepository.IsStudentInClassAsync(classId, studentId))
+                    {
+                        skipped.Add($"{student.FullName} (already enrolled)");
+                        continue;
+                    }
+
+                    await _classStudentRepository.EnrollAsync(new KmsClassStudent
+                    {
+                        ClassId = classId,
+                        StudentId = studentId,
+                        EnrolledAt = DateTime.Now,
+                        EnrolledBy = enrolledBy
+                    });
+                    enrolled.Add(student.FullName);
+                }
+
+                // Cập nhật CurrentEnrollment
+                var newCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
+                kmsClass.CurrentEnrollment = newCount;
+                _classRepository.Update(kmsClass);
+                await _classRepository.SaveChangesAsync();
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"Enrolled {enrolled.Count} students. Skipped {skipped.Count}.",
+                    Data = new { Enrolled = enrolled, Skipped = skipped }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+            }
+        }
+
+        public async Task<BaseResponseDTO> RemoveStudentFromClassAsync(int classId, int studentId)
+        {
+            try
+            {
+                var record = await _classStudentRepository.GetAsync(classId, studentId);
+                if (record == null)
+                    return new BaseResponseDTO { Success = false, Message = "Student is not enrolled in this class" };
+
+                await _classStudentRepository.RemoveAsync(classId, studentId);
+
+                // Cập nhật CurrentEnrollment
+                var kmsClass = await _classRepository.GetByIdAsync(classId);
+                if (kmsClass != null)
+                {
+                    var newCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
+                    kmsClass.CurrentEnrollment = newCount;
+                    _classRepository.Update(kmsClass);
+                    await _classRepository.SaveChangesAsync();
+                }
+
+                return new BaseResponseDTO { Success = true, Message = "Student removed from class successfully" };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+            }
+        }
+
+        public async Task<BaseResponseDTO> TransferStudentAsync(
+            int studentId, int fromClassId, int toClassId, int enrolledBy)
+        {
+            try
+            {
+                // Kiểm tra học sinh có trong lớp cũ không
+                if (!await _classStudentRepository.IsStudentInClassAsync(fromClassId, studentId))
+                    return new BaseResponseDTO { Success = false, Message = "Student is not in the source class" };
+
+                var toClass = await _classRepository.GetByIdAsync(toClassId);
+                if (toClass == null)
+                    return new BaseResponseDTO { Success = false, Message = "Destination class not found" };
+
+                if (toClass.IsActive != true)
+                    return new BaseResponseDTO { Success = false, Message = "Destination class is inactive" };
+
+                // Kiểm tra sĩ số lớp mới
+                var toCount = await _classStudentRepository.CountStudentsInClassAsync(toClassId);
+                if (toClass.MaxCapacity.HasValue && toCount >= toClass.MaxCapacity.Value)
+                    return new BaseResponseDTO { Success = false, Message = "Destination class is full" };
+
+                // Kiểm tra học sinh đã có trong lớp mới chưa
+                if (await _classStudentRepository.IsStudentInClassAsync(toClassId, studentId))
+                    return new BaseResponseDTO { Success = false, Message = "Student is already in the destination class" };
+
+                // Xóa khỏi lớp cũ
+                await _classStudentRepository.RemoveAsync(fromClassId, studentId);
+
+                // Cập nhật sĩ số lớp cũ
+                var fromClass = await _classRepository.GetByIdAsync(fromClassId);
+                if (fromClass != null)
+                {
+                    fromClass.CurrentEnrollment = await _classStudentRepository.CountStudentsInClassAsync(fromClassId);
+                    _classRepository.Update(fromClass);
+                    await _classRepository.SaveChangesAsync();
+                }
+
+                // Thêm vào lớp mới
+                await _classStudentRepository.EnrollAsync(new KmsClassStudent
+                {
+                    ClassId = toClassId,
+                    StudentId = studentId,
+                    EnrolledAt = DateTime.Now,
+                    EnrolledBy = enrolledBy
+                });
+
+                // Cập nhật sĩ số lớp mới
+                toClass.CurrentEnrollment = await _classStudentRepository.CountStudentsInClassAsync(toClassId);
+                _classRepository.Update(toClass);
+                await _classRepository.SaveChangesAsync();
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"Student transferred from class {fromClassId} to class {toClassId} successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+            }
+        }
+
+        private ClassStudentDTO MapToStudentDTO(KmsClassStudent cs)
+        {
+            return new ClassStudentDTO
+            {
+                ClassId = cs.ClassId,
+                ClassName = cs.Class?.ClassName ?? "",
+                StudentId = cs.StudentId,
+                StudentCode = cs.Student?.StudentCode ?? "",
+                StudentName = cs.Student?.FullName ?? "",
+                DateOfBirth = cs.Student?.DateOfBirth.ToDateTime(TimeOnly.MinValue),
+                Gender = cs.Student?.Gender,
+                EnrolledAt = cs.EnrolledAt ?? DateTime.Now,
+                EnrolledByName = cs.EnrolledByNavigation?.FullName
+            };
+        }
+    }
+}

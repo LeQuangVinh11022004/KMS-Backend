@@ -164,6 +164,13 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IParentRegistrationRepository, ParentRegistrationRepository>();
 builder.Services.AddScoped<IParentRegistrationService, ParentRegistrationService>();
 
+builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
+builder.Services.AddScoped<IClassTeacherRepository, ClassTeacherRepository>();
+builder.Services.AddScoped<IClassStudentService, ClassStudentService>();
+builder.Services.AddScoped<IClassTeacherService, ClassTeacherService>();
+
+builder.Services.AddScoped<IStudentParentRepository, StudentParentRepository>();
+builder.Services.AddScoped<IStudentParentService, StudentParentService>();
 
 // Logging
 builder.Logging.ClearProviders();

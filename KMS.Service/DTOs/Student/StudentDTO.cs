@@ -53,6 +53,5 @@ namespace KMS.Service.DTOs.Student
         public DateOnly EnrollmentDate { get; set; }
         public bool IsActive { get; set; }
         public List<ParentDTO>? Parents { get; set; }
-        public string? CurrentClass { get; set; }
     }
 }
