@@ -160,9 +160,14 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ITuitionTemplateService, TuitionTemplateService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IHealthCheckRepository, HealthCheckRepository>();
+builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
+builder.Services.AddScoped<IMedicalIncidentRepository, MedicalIncidentRepository>();
+builder.Services.AddScoped<IMedicalIncidentService, MedicalIncidentService>();
 
 builder.Services.AddScoped<IParentRegistrationRepository, ParentRegistrationRepository>();
 builder.Services.AddScoped<IParentRegistrationService, ParentRegistrationService>();
+
 
 
 // Logging
