@@ -12,17 +12,20 @@ namespace KMS.Service.Services
         private readonly IUserRepository _userRepository;
         private readonly IParentRepository _parentRepository;
         private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IEmailService _emailService;
 
         public ParentRegistrationService(
             IParentRegistrationRepository registrationRepository,
             IUserRepository userRepository,
             IParentRepository parentRepository,
-            IUserRoleRepository userRoleRepository)
+            IUserRoleRepository userRoleRepository,
+            IEmailService emailService)
         {
             _registrationRepository = registrationRepository;
             _userRepository = userRepository;
             _parentRepository = parentRepository;
             _userRoleRepository = userRoleRepository;
+            _emailService = emailService;
         }
 
         // ============================================================
@@ -262,11 +265,26 @@ namespace KMS.Service.Services
 
                 await _registrationRepository.UpdateAsync(registration);
 
-                // ── Trả về thông tin tài khoản để Admin gửi cho phụ huynh ─
+                // ── Gửi email thông tin tài khoản cho phụ huynh ─────────
+                var emailSent = false;
+                try
+                {
+                    await _emailService.SendAccountCreatedEmailAsync(
+                        registration.Email, registration.FullName, username, tempPassword);
+                    emailSent = true;
+                }
+                catch
+                {
+                    // Không throw - tài khoản đã tạo thành công dù email fail
+                    emailSent = false;
+                }
+
                 return new BaseResponseDTO
                 {
                     Success = true,
-                    Message = "Đã duyệt đơn và tạo tài khoản thành công",
+                    Message = emailSent
+                        ? "Đã duyệt đơn, tạo tài khoản và gửi email thành công"
+                        : "Đã duyệt đơn và tạo tài khoản thành công (gửi email thất bại - vui lòng gửi thủ công)",
                     Data = new ApproveRegistrationResultDTO
                     {
                         Registration = MapToDTO(registration),
@@ -274,7 +292,8 @@ namespace KMS.Service.Services
                         TempPassword = tempPassword,
                         FullName = registration.FullName,
                         Email = registration.Email,
-                        Phone = registration.Phone
+                        Phone = registration.Phone,
+                        EmailSent = emailSent
                     }
                 };
             }

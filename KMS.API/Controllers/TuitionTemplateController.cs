@@ -20,7 +20,9 @@ namespace KMS.API.Controllers
             _templateService = templateService;
         }
 
-        /// <summary>Get all tuition templates</summary>
+        /// <summary>
+        /// Get all tuition templates
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -28,7 +30,9 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        /// <summary>Get active templates only</summary>
+        /// <summary>
+        /// Get active templates only
+        /// </summary>
         [HttpGet("active")]
         public async Task<IActionResult> GetActive()
         {
@@ -36,7 +40,9 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        /// <summary>Get template by ID (includes items)</summary>
+        /// <summary>
+        /// Get template by ID (includes items)
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -44,7 +50,9 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        /// <summary>Create new tuition template with items</summary>
+        /// <summary>
+        /// Create new tuition template with items
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTuitionTemplateDTO dto)
         {
@@ -56,7 +64,9 @@ namespace KMS.API.Controllers
                 : BadRequest(result);
         }
 
-        /// <summary>Update template (pass Items to replace all items)</summary>
+        /// <summary>
+        /// Update template (pass Items to replace all items)
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTuitionTemplateDTO dto)
         {
@@ -66,7 +76,9 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        /// <summary>Delete template (blocked if used by invoices)</summary>
+        /// <summary>
+        /// Delete template (blocked if used by invoices)
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -74,7 +86,9 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        /// <summary>Activate / Deactivate template</summary>
+        /// <summary>
+        /// Activate / Deactivate template
+        /// </summary>
         [HttpPatch("{id}/toggle-status")]
         public async Task<IActionResult> ToggleStatus(int id)
         {

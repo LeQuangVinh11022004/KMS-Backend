@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KMS.Service.Services
+namespace KMS.Service.Interfaces
 {
     public interface IParentRegistrationService
     {

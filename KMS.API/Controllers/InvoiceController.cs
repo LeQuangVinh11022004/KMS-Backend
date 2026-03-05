@@ -48,7 +48,7 @@ public class InvoiceController : ControllerBase
     }
 
     /// <summary>
-    /// Filter invoices. Query params: studentId, status, monthYear (YYYY-MM), isOverdue
+    /// Filter invoices
     /// </summary>
     [HttpGet("filter")]
     public async Task<IActionResult> Filter(

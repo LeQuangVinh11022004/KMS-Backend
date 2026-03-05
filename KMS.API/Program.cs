@@ -3,6 +3,7 @@ using KMS.Repository.Interfaces;
 using KMS.Repository.Repositories;
 using KMS.Service.Interfaces;
 using KMS.Service.Services;
+using KMS.Service.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -117,6 +118,9 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
 // CORS configuration
 builder.Services.AddCors(options =>
 {
@@ -176,7 +180,10 @@ builder.Services.AddScoped<IClassTeacherService, ClassTeacherService>();
 builder.Services.AddScoped<IStudentParentRepository, StudentParentRepository>();
 builder.Services.AddScoped<IStudentParentService, StudentParentService>();
 
+builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
 
+builder.Services.AddScoped<IEmailService, EmailService>();
 // Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();

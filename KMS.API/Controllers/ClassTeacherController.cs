@@ -22,7 +22,7 @@ namespace KMS.API.Controllers
             _classTeacherService = classTeacherService;
         }
 
-        /// <summary>Lấy danh sách giáo viên trong lớp</summary>
+        /// <summary>List class teacher by classID</summary>
         [HttpGet("class/{classId}")]
         public async Task<IActionResult> GetTeachersByClass(int classId)
         {
@@ -30,7 +30,7 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        /// <summary>Lấy danh sách lớp của giáo viên</summary>
+        /// <summary>List class teacher by teacherID</summary>
         [HttpGet("teacher/{teacherId}")]
         public async Task<IActionResult> GetClassesByTeacher(int teacherId)
         {
@@ -39,8 +39,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Phân công giáo viên vào lớp
-        /// Role: "Main" hoặc "Assistant" (mỗi lớp chỉ có 1 Main)
+        /// Assign teacher to class with specific role(each class just have 1 "Main" teacher)
         /// </summary>
         [HttpPost("class/{classId}/assign")]
         public async Task<IActionResult> AssignTeacher(int classId, [FromBody] AssignTeacherDTO dto)
@@ -53,7 +52,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Cập nhật vai trò giáo viên trong lớp (Main ↔ Assistant)
+        /// Update teacher role in class (Main/Support)
         /// </summary>
         [HttpPatch("class/{classId}/teacher/{teacherId}/role")]
         public async Task<IActionResult> UpdateRole(
@@ -65,7 +64,9 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        /// <summary>Xóa giáo viên khỏi lớp</summary>
+        /// <summary>
+        /// Delete teacher from class
+        /// </summary>
         [HttpDelete("class/{classId}/teacher/{teacherId}")]
         public async Task<IActionResult> RemoveTeacher(int classId, int teacherId)
         {

@@ -24,7 +24,7 @@ namespace KMS.API.Controllers
             _classStudentService = classStudentService;
         }
 
-        /// <summary>Lấy danh sách học sinh trong lớp</summary>
+        /// <summary>Get list student by classID</summary>
         [HttpGet("class/{classId}")]
         public async Task<IActionResult> GetStudentsByClass(int classId)
         {
@@ -32,7 +32,7 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        /// <summary>Lấy danh sách lớp của học sinh</summary>
+        /// <summary>Get list student by studentID</summary>
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetClassesByStudent(int studentId)
         {
@@ -40,7 +40,7 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        /// <summary>Xếp 1 học sinh vào lớp</summary>
+        /// <summary>Assign student to class</summary>
         [HttpPost("class/{classId}/enroll")]
         public async Task<IActionResult> EnrollStudent(int classId, [FromBody] EnrollStudentDTO dto)
         {
@@ -52,7 +52,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Xếp nhiều học sinh vào lớp cùng lúc
+        /// Assign mutilple students to class
         /// Body: { "studentIds": [1, 2, 3] }
         /// </summary>
         [HttpPost("class/{classId}/enroll-multiple")]
@@ -65,7 +65,7 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        /// <summary>Xóa học sinh khỏi lớp</summary>
+        /// <summary>Delete student from class</summary>
         [HttpDelete("class/{classId}/student/{studentId}")]
         public async Task<IActionResult> RemoveStudent(int classId, int studentId)
         {
@@ -74,8 +74,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Chuyển học sinh từ lớp này sang lớp khác
-        /// Query: fromClassId, toClassId
+        /// Switch student to another class
         /// </summary>
         [HttpPost("student/{studentId}/transfer")]
         public async Task<IActionResult> Transfer(

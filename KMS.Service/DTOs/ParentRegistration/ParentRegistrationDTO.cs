@@ -39,6 +39,7 @@
         public string FullName { get; set; } = null!;
         public string? Email { get; set; }
         public string? Phone { get; set; }
-        public string Note { get; set; } = "Vui lòng gửi thông tin đăng nhập này cho phụ huynh và yêu cầu đổi mật khẩu sau lần đăng nhập đầu tiên.";
+        public bool EmailSent { get; set; }
+        public string Note { get; set; } = "Thông tin đăng nhập đã được gửi qua email cho phụ huynh.";
     }
 }

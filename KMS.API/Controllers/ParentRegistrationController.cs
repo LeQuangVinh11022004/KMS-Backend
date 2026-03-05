@@ -1,7 +1,6 @@
 ﻿using KMS.Service.DTOs;
 using KMS.Service.DTOs.Role;
 using KMS.Service.Interfaces;
-using KMS.Service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -24,7 +23,7 @@ namespace KMS.API.Controllers
         // ============================================================
 
         /// <summary>
-        /// Phụ huynh nộp đơn đăng ký tài khoản
+        /// Parent submit registeration request
         /// </summary>
         [HttpPost("submit")]
         [AllowAnonymous]
@@ -41,7 +40,7 @@ namespace KMS.API.Controllers
         // ============================================================
 
         /// <summary>
-        /// Lấy tất cả đơn đăng ký (Admin)
+        /// Get all registration requests (Admin)
         /// </summary>
         [HttpGet]
         [Authorize(Roles = "Admin,Principal")]
@@ -52,7 +51,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Lấy đơn đăng ký đang chờ duyệt (Admin)
+        /// Get pending registration requests (Admin)
         /// </summary>
         [HttpGet("pending")]
         [Authorize(Roles = "Admin,Principal")]
@@ -63,7 +62,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Lấy chi tiết 1 đơn đăng ký (Admin)
+        /// Get registration request by ID (Admin)
         /// </summary>
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,Principal")]
@@ -78,8 +77,7 @@ namespace KMS.API.Controllers
         // ============================================================
 
         /// <summary>
-        /// Duyệt đơn → Tự động tạo User + Parent + gán Role "Parent"
-        /// Response trả về username và mật khẩu tạm để Admin gửi cho phụ huynh
+        /// Approve registration request (Admin)
         /// </summary>
         [HttpPost("{id}/approve")]
         [Authorize(Roles = "Admin,Principal")]
@@ -94,7 +92,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Từ chối đơn đăng ký (Admin)
+        /// Reject registration request (Admin)
         /// </summary>
         [HttpPost("{id}/reject")]
         [Authorize(Roles = "Admin,Principal")]

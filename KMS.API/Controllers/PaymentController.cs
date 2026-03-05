@@ -40,7 +40,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Filter payments. Query params: invoiceId, paymentMethod, fromDate, toDate (YYYY-MM-DD)
+        /// Filter payments
         /// </summary>
         [HttpGet("filter")]
         public async Task<IActionResult> Filter(
@@ -63,7 +63,6 @@ namespace KMS.API.Controllers
 
         /// <summary>
         /// Record a payment for an invoice. Auto-updates invoice status (Partial / Paid).
-        /// PaymentMethod: Cash | Bank Transfer | E-Wallet | Credit Card | Debit Card
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePaymentDTO dto)
@@ -76,7 +75,9 @@ namespace KMS.API.Controllers
                 : BadRequest(result);
         }
 
-        /// <summary>Delete payment and recalculate invoice status</summary>
+        /// <summary>
+        /// Delete payment and recalculate invoice status
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -86,7 +87,6 @@ namespace KMS.API.Controllers
 
         /// <summary>
         /// Revenue summary by date range.
-        /// Query params: fromDate, toDate (YYYY-MM-DD). Defaults to current month.
         /// </summary>
         [HttpGet("revenue-summary")]
         public async Task<IActionResult> GetRevenueSummary(

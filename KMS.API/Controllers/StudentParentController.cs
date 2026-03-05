@@ -18,7 +18,9 @@ namespace KMS.API.Controllers
             _studentParentService = studentParentService;
         }
 
-        /// <summary>Lấy danh sách phụ huynh của học sinh</summary>
+        /// <summary>
+        /// Get parent by studentID
+        /// </summary>
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetParentsByStudent(int studentId)
         {
@@ -26,7 +28,9 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        /// <summary>Lấy danh sách học sinh của phụ huynh</summary>
+        /// <summary>
+        /// Get student by parentID
+        /// </summary>
         [HttpGet("parent/{parentId}")]
         public async Task<IActionResult> GetStudentsByParent(int parentId)
         {
@@ -35,9 +39,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Gán phụ huynh cho học sinh
-        /// Relationship: Father | Mother | Guardian | Other
-        /// Người đầu tiên được gán tự động thành PrimaryContact
+        /// Assign relationship between student and parent
         /// </summary>
         [HttpPost("student/{studentId}/link")]
         public async Task<IActionResult> Link(int studentId, [FromBody] LinkStudentParentDTO dto)
@@ -49,7 +51,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Cập nhật quan hệ hoặc đổi PrimaryContact
+        /// Update relationship between student and parent (relationship type, primary contact)
         /// </summary>
         [HttpPatch("student/{studentId}/parent/{parentId}")]
         public async Task<IActionResult> UpdateLink(
@@ -62,8 +64,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Hủy liên kết phụ huynh - học sinh
-        /// Nếu xóa PrimaryContact thì tự động set người tiếp theo làm Primary
+        /// Delete relationship between student and parent
         /// </summary>
         [HttpDelete("student/{studentId}/parent/{parentId}")]
         public async Task<IActionResult> Unlink(int studentId, int parentId)
