@@ -168,6 +168,8 @@ builder.Services.AddScoped<IHealthCheckRepository, HealthCheckRepository>();
 builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
 builder.Services.AddScoped<IMedicalIncidentRepository, MedicalIncidentRepository>();
 builder.Services.AddScoped<IMedicalIncidentService, MedicalIncidentService>();
+builder.Services.AddScoped<IKitchenSampleRepository, KitchenSampleRepository>();
+builder.Services.AddScoped<IKitchenSampleService, KitchenSampleService>();
 
 builder.Services.AddScoped<IParentRegistrationRepository, ParentRegistrationRepository>();
 builder.Services.AddScoped<IParentRegistrationService, ParentRegistrationService>();
