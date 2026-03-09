@@ -135,57 +135,66 @@ builder.Services.AddCors(options =>
 // Dependency Injection
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Repositories
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-builder.Services.AddScoped<IUserRoleService, UserRoleService>();
-builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
-builder.Services.AddScoped<ISchoolYearService, SchoolYearService>();
 builder.Services.AddScoped<ISchoolYearRepository, SchoolYearRepository>();
-builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
-builder.Services.AddScoped<IParentService, ParentService>();
-builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
-builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
-builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
-builder.Services.AddScoped<ICampusService, CampusService>();
 builder.Services.AddScoped<ICampusRepository, CampusRepository>();
-builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
-builder.Services.AddScoped<ISemesterService, SemesterService>();
-builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<ITuitionTemplateRepository, TuitionTemplateRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IHealthCheckRepository, HealthCheckRepository>();
+builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
+builder.Services.AddScoped<IMedicalIncidentRepository, MedicalIncidentRepository>();
+builder.Services.AddScoped<IKitchenSampleRepository, KitchenSampleRepository>();
+builder.Services.AddScoped<IParentRegistrationRepository, ParentRegistrationRepository>();
+builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
+builder.Services.AddScoped<IClassTeacherRepository, ClassTeacherRepository>();
+builder.Services.AddScoped<IStudentParentRepository, StudentParentRepository>();
+builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
+builder.Services.AddScoped<IActivityPhotoRepository, ActivityPhotoRepository>();
+
+
+// Services
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+builder.Services.AddScoped<IClassService, ClassService>();
+builder.Services.AddScoped<ISchoolYearService, SchoolYearService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IParentService, ParentService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IMenuService, MenuService>();
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+builder.Services.AddScoped<ICampusService, CampusService>();
+builder.Services.AddScoped<ISemesterService, SemesterService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<ITuitionTemplateService, TuitionTemplateService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IHealthCheckRepository, HealthCheckRepository>();
 builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
-builder.Services.AddScoped<IMedicalIncidentRepository, MedicalIncidentRepository>();
 builder.Services.AddScoped<IMedicalIncidentService, MedicalIncidentService>();
-builder.Services.AddScoped<IKitchenSampleRepository, KitchenSampleRepository>();
 builder.Services.AddScoped<IKitchenSampleService, KitchenSampleService>();
-
-builder.Services.AddScoped<IParentRegistrationRepository, ParentRegistrationRepository>();
 builder.Services.AddScoped<IParentRegistrationService, ParentRegistrationService>();
-
-builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
-builder.Services.AddScoped<IClassTeacherRepository, ClassTeacherRepository>();
 builder.Services.AddScoped<IClassStudentService, ClassStudentService>();
 builder.Services.AddScoped<IClassTeacherService, ClassTeacherService>();
-
-builder.Services.AddScoped<IStudentParentRepository, StudentParentRepository>();
 builder.Services.AddScoped<IStudentParentService, StudentParentService>();
-
-builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
-
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISystemSettingService, SystemSettingService>();
+builder.Services.AddScoped<IClassActivityService, ClassActivityService>();
+builder.Services.AddScoped<IActivityPhotoService, ActivityPhotoService>();
+
 // Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
