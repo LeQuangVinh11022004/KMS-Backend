@@ -165,6 +165,7 @@ builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
 builder.Services.AddScoped<IActivityPhotoRepository, ActivityPhotoRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // Services
 
@@ -197,6 +198,7 @@ builder.Services.AddScoped<IClassActivityService, ClassActivityService>();
 builder.Services.AddScoped<IActivityPhotoService, ActivityPhotoService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Logging
 builder.Logging.ClearProviders();
