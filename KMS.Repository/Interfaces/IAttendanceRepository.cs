@@ -28,5 +28,7 @@ namespace KMS.Repository.Interfaces
         // ── Kiểm tra ──────────────────────────────────────────────
         Task<bool> ExistsAsync(int studentId, DateOnly date);
         Task<bool> IsClassAttendanceTakenAsync(int classId, DateOnly date);
+
+        Task<IEnumerable<KmsAttendance>> GetByClassAndDateForStudentsAsync(int classId, DateOnly date, IEnumerable<int> studentIds);
     }
 }

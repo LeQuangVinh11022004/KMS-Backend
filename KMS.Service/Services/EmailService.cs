@@ -1,9 +1,13 @@
 ﻿using KMS.Service.Interfaces;
 using KMS.Service.Settings;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
+using MimeKit;
 using System.Net;
-using System.Net.Mail;
-
+//using System.Net.Mail;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 namespace KMS.Service.Services
 {
     public class EmailService : IEmailService
@@ -21,22 +25,35 @@ namespace KMS.Service.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            using var client = new SmtpClient(_settings.SmtpHost, _settings.SmtpPort)
+            var message = new MimeMessage();
+
+            message.From.Add(new MailboxAddress(
+                _settings.SenderName,
+                _settings.SenderEmail));
+
+            message.To.Add(MailboxAddress.Parse(toEmail));
+
+            message.Subject = subject;
+
+            message.Body = new TextPart("html")
             {
-                Credentials = new NetworkCredential(_settings.SenderEmail, _settings.AppPassword),
-                EnableSsl = true
+                Text = htmlBody
             };
 
-            var mail = new MailMessage
-            {
-                From = new MailAddress(_settings.SenderEmail, _settings.SenderName),
-                Subject = subject,
-                Body = htmlBody,
-                IsBodyHtml = true
-            };
-            mail.To.Add(toEmail);
+            using var client = new SmtpClient();
 
-            await client.SendMailAsync(mail);
+            await client.ConnectAsync(
+                _settings.SmtpHost,
+                _settings.SmtpPort,
+                SecureSocketOptions.StartTls);
+
+            await client.AuthenticateAsync(
+                _settings.SenderEmail,
+                _settings.AppPassword);
+
+            await client.SendAsync(message);
+
+            await client.DisconnectAsync(true);
         }
 
         // ============================================================
@@ -150,6 +167,74 @@ namespace KMS.Service.Services
   </div>
 </body>
 </html>";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+        // ============================================================
+        // ATTENDANCE NOTIFICATION - Phụ huynh
+        // ============================================================
+
+        public async Task SendAttendanceAlertEmailAsync(
+            string toEmail,
+            string parentName,
+            string studentName,
+            string status,
+            DateTime date)
+        {
+            var subject = $"[{_settings.SenderName}] Thông báo điểm danh của {studentName}";
+
+            var statusText = status == "Absent"
+                ? "vắng mặt"
+                : "đến lớp trễ";
+
+                    var body = $@"
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset='utf-8'>
+        <style>
+        body {{ font-family: Arial; background:#f5f5f5; padding:20px; }}
+        .container {{ max-width:600px; margin:auto; background:white; border-radius:8px; overflow:hidden; }}
+        .header {{ background:#ff9800; padding:20px; text-align:center; color:white; }}
+        .content {{ padding:25px; }}
+        .info {{ background:#fff3cd; padding:15px; border-radius:6px; margin:15px 0; }}
+        .footer {{ background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#888; }}
+        </style>
+        </head>
+        <body>
+
+        <div class='container'>
+
+        <div class='header'>
+        <h2>📢 Thông báo điểm danh</h2>
+        </div>
+
+        <div class='content'>
+
+        <p>Xin chào <strong>{parentName}</strong>,</p>
+
+        <p>Nhà trường xin thông báo:</p>
+
+        <div class='info'>
+        👶 Học sinh: <strong>{studentName}</strong><br/>
+        📅 Ngày: <strong>{date:dd/MM/yyyy}</strong><br/>
+        ⚠️ Trạng thái: <strong>{statusText}</strong>
+        </div>
+
+        <p>Nếu có thắc mắc vui lòng liên hệ nhà trường.</p>
+
+        <p>Trân trọng,<br/><strong>{_settings.SenderName}</strong></p>
+
+        </div>
+
+        <div class='footer'>
+        Email được gửi tự động từ hệ thống quản lý trường học.
+        </div>
+
+        </div>
+
+        </body>
+        </html>";
 
             await SendEmailAsync(toEmail, subject, body);
         }

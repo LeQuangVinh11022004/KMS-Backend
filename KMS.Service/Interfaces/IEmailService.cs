@@ -16,5 +16,7 @@ namespace KMS.Service.Interfaces
 
         // Generic - gửi email bất kỳ
         Task SendEmailAsync(string toEmail, string subject, string htmlBody);
+
+        Task SendAttendanceAlertEmailAsync(string toEmail, string parentName, string studentName, string status, DateTime date);
     }
 }

@@ -13,8 +13,8 @@ namespace KMS.Repository.Interfaces
 
         Task<KmsNotification?> GetByIdAsync(int id);
 
-        Task<KmsNotification> CreateAsync(KmsNotification notification);
-
+        Task CreateAsync(KmsNotification notification);
+        Task CreateBulkAsync(IEnumerable<KmsNotification> notifications);
         Task UpdateAsync(KmsNotification notification);
 
         Task DeleteAsync(KmsNotification notification);

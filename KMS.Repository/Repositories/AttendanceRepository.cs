@@ -110,5 +110,15 @@ namespace KMS.Repository.Repositories
             return await _context.KmsAttendances
                 .AnyAsync(a => a.ClassId == classId && a.AttendanceDate == date);
         }
+
+        public async Task<IEnumerable<KmsAttendance>> GetByClassAndDateForStudentsAsync(int classId, DateOnly date, IEnumerable<int> studentIds)
+        {
+            return await _context.KmsAttendances
+                .Where(a =>
+                    a.ClassId == classId &&
+                    a.AttendanceDate == date &&
+                    studentIds.Contains(a.StudentId))
+                .ToListAsync();
+        }
     }
 }
