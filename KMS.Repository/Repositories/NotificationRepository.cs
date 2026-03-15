@@ -32,11 +32,15 @@ namespace KMS.Repository.Repositories
                 .FirstOrDefaultAsync(n => n.NotificationId == id);
         }
 
-        public async Task<KmsNotification> CreateAsync(KmsNotification notification)
+        public async Task CreateAsync(KmsNotification notification)
         {
-            _context.KmsNotifications.Add(notification);
+            await _context.KmsNotifications.AddAsync(notification);
+        }
+
+        public async Task CreateBulkAsync(IEnumerable<KmsNotification> notifications)
+        {
+            await _context.KmsNotifications.AddRangeAsync(notifications);
             await _context.SaveChangesAsync();
-            return notification;
         }
 
         public async Task UpdateAsync(KmsNotification notification)

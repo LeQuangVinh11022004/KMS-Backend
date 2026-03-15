@@ -66,11 +66,12 @@ using Microsoft.EntityFrameworkCore;
             public async Task<IEnumerable<KmsParent>> GetParentsByStudentIdAsync(int studentId)
             {
                 return await _context.KmsStudentParents
-                    .Where(sp => sp.StudentId == studentId)
-                    .Select(sp => sp.Parent)
-                    .Include(p => p.User)
-                    .ToListAsync();
-            }
+                .Where(ps => ps.StudentId == studentId)
+                .Include(ps => ps.Parent)
+                    .ThenInclude(p => p.User)
+                .Select(ps => ps.Parent)
+                .ToListAsync();
+        }
 
             public async Task<IEnumerable<KmsParent>> SearchParentsAsync(string keyword)
             {
@@ -87,5 +88,14 @@ using Microsoft.EntityFrameworkCore;
             {
                 return await _context.KmsParents.AnyAsync(p => p.UserId == userId);
             }
+        public async Task<IEnumerable<KmsStudentParent>> GetParentsByStudentIdsAsync(IEnumerable<int> studentIds)
+        {
+            return await _context.KmsStudentParents
+                .Where(sp => studentIds.Contains(sp.StudentId))
+                .Include(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                .Include(sp => sp.Student)
+                .ToListAsync();
         }
+    }
     }

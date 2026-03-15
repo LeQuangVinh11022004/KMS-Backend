@@ -11,16 +11,25 @@ namespace KMS.Service.Services
     {
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IClassRepository _classRepository;
+        private readonly IParentRepository _parentRepository;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly IEmailService _emailService;
 
         private static readonly HashSet<string> ValidStatuses =
             new() { "Present", "Absent", "Late", "Excused", "Sick" };
 
         public AttendanceService(
             IAttendanceRepository attendanceRepository,
-            IClassRepository classRepository)
+            IClassRepository classRepository,
+            IParentRepository parentRepository,
+            INotificationRepository notificationRepository,
+            IEmailService emailService)
         {
             _attendanceRepository = attendanceRepository;
             _classRepository = classRepository;
+            _parentRepository = parentRepository;
+            _notificationRepository = notificationRepository;
+            _emailService = emailService;
         }
 
         // ============================================================
@@ -123,9 +132,35 @@ namespace KMS.Service.Services
                 var toCreate = new List<KmsAttendance>();
                 var updated = 0;
 
+                // load tất cả studentId
+
+                var studentIds = dto.Records.Select(r => r.StudentId).ToList();
+
+                // load attendance của cả lớp trong 1 query
+
+                var existingAttendances =
+                    await _attendanceRepository.GetByClassAndDateForStudentsAsync(
+                        dto.ClassId,
+                        dateOnly,
+                        studentIds);
+
+                var attendanceMap = existingAttendances.ToDictionary(a => a.StudentId);
+
+                // load parents của tất cả học sinh
+
+                var parentLinks = await _parentRepository.GetParentsByStudentIdsAsync(studentIds);
+
+                var parentMap = parentLinks
+                    .GroupBy(p => p.StudentId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                var notifications = new List<KmsNotification>();
+
+                // process
+
                 foreach (var record in dto.Records)
                 {
-                    var existing = await _attendanceRepository.GetByStudentAndDateAsync(record.StudentId, dateOnly);
+                    attendanceMap.TryGetValue(record.StudentId, out var existing);
 
                     if (existing != null)
                     {
@@ -155,10 +190,38 @@ namespace KMS.Service.Services
                             TakenAt = DateTime.Now
                         });
                     }
-                }
+                    await SendAttendanceNotification(record.StudentId, record.Status);
+                    // notification
 
+                    if (record.Status == "Absent" || record.Status == "Late")
+                    {
+                        if (parentMap.TryGetValue(record.StudentId, out var parents))
+                        {
+                            foreach (var link in parents)
+                            {
+                                notifications.Add(new KmsNotification
+                                {
+                                    UserId = link.Parent.UserId,
+                                    Type = "Attendance",
+                                    Title = "Thông báo điểm danh",
+                                    Message = $"{link.Student.FullName} hôm nay {record.Status}",
+                                    RelatedEntityType = "Attendance",
+                                    RelatedEntityId = record.StudentId,
+                                    IsRead = false,
+                                    CreatedAt = DateTime.Now
+                                });
+                            }
+                        }
+                    }
+                }
+                // create attendance
                 if (toCreate.Any())
                     await _attendanceRepository.CreateBulkAsync(toCreate);
+
+                // create notification
+                if (notifications.Any())
+                    await _notificationRepository.CreateBulkAsync(notifications);
+
 
                 return new BaseResponseDTO
                 {
@@ -309,6 +372,51 @@ namespace KMS.Service.Services
             {
                 return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
             }
+        }
+        private async Task SendAttendanceNotification(int studentId, string status)
+        {
+            if (status != "Absent" && status != "Late")
+                return;
+
+            var parents = await _parentRepository.GetParentsByStudentIdAsync(studentId);
+
+            if (!parents.Any())
+                return;
+
+            var notifications = new List<KmsNotification>();
+
+            foreach (var parent in parents)
+            {
+                notifications.Add(new KmsNotification
+                {
+                    UserId = parent.UserId,
+                    Type = "Attendance",
+                    Title = "Thông báo điểm danh",
+                    Message = status == "Absent"
+                        ? "Con của bạn hôm nay vắng mặt."
+                        : "Con của bạn hôm nay đến lớp trễ.",
+                    RelatedEntityType = "Attendance",
+                    RelatedEntityId = studentId,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                });
+
+                if (!string.IsNullOrEmpty(parent.User?.Email))
+                {
+                    var studentName = parent.KmsStudentParents
+                    .FirstOrDefault()?.Student?.FullName ?? "Học sinh";
+
+                    await _emailService.SendAttendanceAlertEmailAsync(
+                        parent.User.Email,
+                        parent.User.FullName,
+                        studentName,
+                        status,
+                        DateTime.Now
+                    );
+                }
+            }
+
+            await _notificationRepository.CreateBulkAsync(notifications);
         }
 
         // ============================================================

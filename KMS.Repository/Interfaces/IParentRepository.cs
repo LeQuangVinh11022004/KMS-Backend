@@ -19,6 +19,7 @@ namespace KMS.Repository.Interfaces
 
         // Get parents by student
         Task<IEnumerable<KmsParent>> GetParentsByStudentIdAsync(int studentId);
+        Task<IEnumerable<KmsStudentParent>> GetParentsByStudentIdsAsync(IEnumerable<int> studentIds);
 
         // Search
         Task<IEnumerable<KmsParent>> SearchParentsAsync(string keyword);
