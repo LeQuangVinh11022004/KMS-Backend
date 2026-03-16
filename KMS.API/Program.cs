@@ -121,6 +121,9 @@ builder.Services.AddAuthorization();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 
+builder.Services.Configure<VNPaySettings>(
+    builder.Configuration.GetSection("VNPaySettings"));
+
 // CORS configuration
 builder.Services.AddCors(options =>
 {
@@ -199,6 +202,7 @@ builder.Services.AddScoped<IActivityPhotoService, ActivityPhotoService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IVNPayService, VNPayService>();
 
 // Logging
 builder.Logging.ClearProviders();
