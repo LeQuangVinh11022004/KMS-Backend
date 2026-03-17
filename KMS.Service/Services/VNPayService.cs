@@ -18,15 +18,18 @@ namespace KMS.Service.Services
         private readonly VNPaySettings _settings;
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly IPaymentRepository _paymentRepository;
+        private readonly IEmailService _emailService;
 
         public VNPayService(
             IOptions<VNPaySettings> settings,
             IInvoiceRepository invoiceRepository,
-            IPaymentRepository paymentRepository)
+            IPaymentRepository paymentRepository,
+            IEmailService emailService)
         {
             _settings = settings.Value;
             _invoiceRepository = invoiceRepository;
             _paymentRepository = paymentRepository;
+            _emailService = emailService;
         }
 
         // ============================================================
@@ -166,6 +169,43 @@ namespace KMS.Service.Services
                     invoice.Status = "Paid";
                     invoice.UpdatedAt = DateTime.Now;
                     await _invoiceRepository.UpdateAsync(invoice);
+
+                    // Lấy invoice kèm đầy đủ thông tin
+                    var invoiceDetail = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
+
+                    if (invoiceDetail != null)
+                    {
+                        // Lấy primary contact parent, fallback về contact đầu tiên
+                        var primaryParent = invoiceDetail.Student.KmsStudentParents
+                            .FirstOrDefault(sp => sp.IsPrimaryContact == true)
+                            ?? invoiceDetail.Student.KmsStudentParents.FirstOrDefault();
+
+                        var parentEmail = primaryParent?.Parent?.User?.Email;
+                        var parentName = primaryParent?.Parent?.User?.FullName ?? "Quý phụ huynh";
+
+                        if (!string.IsNullOrEmpty(parentEmail))
+                        {
+                            var invoiceItems = invoiceDetail.KmsInvoiceItems
+                                .Select(x => (x.ItemName, x.Amount))
+                                .ToList();
+
+                            await _emailService.SendInvoiceEmailAsync(
+                                toEmail: parentEmail,
+                                parentName: parentName,
+                                studentName: invoiceDetail.Student.FullName,
+                                invoiceNumber: invoiceDetail.InvoiceNumber,
+                                monthYear: invoiceDetail.MonthYear.ToDateTime(TimeOnly.MinValue),
+                                items: invoiceItems,
+                                totalAmount: invoiceDetail.TotalAmount,
+                                discountAmount: invoiceDetail.DiscountAmount ?? 0,
+                                finalAmount: invoiceDetail.FinalAmount,
+                                vnpTransactionNo: vnpTransactionNo,
+                                orderId: orderId,
+                                bankCode: bankCode,
+                                paymentDate: DateTime.Now
+                            );
+                        }
+                    }
 
                     return new BaseResponseDTO
                     {

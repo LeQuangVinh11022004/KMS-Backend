@@ -1,13 +1,14 @@
 ﻿using KMS.Service.Interfaces;
 using KMS.Service.Settings;
-using MailKit.Security;
-using Microsoft.Extensions.Options;
-using MimeKit;
-using System.Net;
 //using System.Net.Mail;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using MailKit.Security;
+using Microsoft.Extensions.Options;
 using MimeKit;
+using MimeKit;
+using System.Net;
+using System.Text;
 namespace KMS.Service.Services
 {
     public class EmailService : IEmailService
@@ -235,6 +236,138 @@ namespace KMS.Service.Services
 
         </body>
         </html>";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendInvoiceEmailAsync(
+    string toEmail,
+    string parentName,
+    string studentName,
+    string invoiceNumber,
+    DateTime monthYear,
+    List<(string ItemName, decimal Amount)> items,
+    decimal totalAmount,
+    decimal discountAmount,
+    decimal finalAmount,
+    string vnpTransactionNo,
+    string orderId,
+    string bankCode,
+    DateTime paymentDate)
+        {
+            var subject = $"[{_settings.SenderName}] Xác nhận thanh toán hóa đơn #{invoiceNumber}";
+
+            // Build các dòng khoản phí
+            var itemRows = new StringBuilder();
+            foreach (var item in items)
+            {
+                itemRows.Append($@"
+          <tr>
+            <td style='padding:10px 8px; border-bottom:1px solid #eee; font-size:14px;'>{item.ItemName}</td>
+            <td style='padding:10px 8px; border-bottom:1px solid #eee; font-size:14px; text-align:right;'>
+              {item.Amount:N0} VNĐ
+            </td>
+          </tr>");
+            }
+
+            var discountRow = discountAmount > 0 ? $@"
+          <tr>
+            <td style='padding:10px 8px; border-bottom:1px solid #eee; font-size:14px; color:#e53935;'>
+              🎁 Giảm giá
+            </td>
+            <td style='padding:10px 8px; border-bottom:1px solid #eee; font-size:14px; 
+                       text-align:right; color:#e53935;'>
+              - {discountAmount:N0} VNĐ
+            </td>
+          </tr>" : "";
+
+            var body = $@"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'></head>
+<body style='font-family:Arial,sans-serif; background:#f5f5f5; margin:0; padding:20px;'>
+  <div style='max-width:600px; margin:0 auto; background:white; border-radius:8px; 
+              overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);'>
+
+    <!-- HEADER -->
+    <div style='background:#4CAF50; padding:30px; text-align:center;'>
+      <h1 style='color:white; margin:0; font-size:22px;'>✅ Thanh toán thành công!</h1>
+    </div>
+
+    <!-- BODY -->
+    <div style='padding:30px;'>
+      <p>Xin chào <strong>{parentName}</strong>,</p>
+      <p>Hệ thống đã ghi nhận thanh toán học phí tháng 
+         <strong>{monthYear:MM/yyyy}</strong> cho học sinh 
+         <strong>{studentName}</strong>.</p>
+
+      <!-- CHI TIẾT KHOẢN PHÍ -->
+      <p style='font-weight:bold; color:#333; margin-bottom:8px;'>📋 Chi tiết hóa đơn:</p>
+      <table style='width:100%; border-collapse:collapse; 
+                    border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;'>
+        <thead>
+          <tr style='background:#f5f5f5;'>
+            <th style='padding:10px 8px; text-align:left; font-size:14px; color:#666;'>Khoản phí</th>
+            <th style='padding:10px 8px; text-align:right; font-size:14px; color:#666;'>Số tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          {itemRows}
+          {discountRow}
+          <tr style='background:#e8f5e9;'>
+            <td style='padding:12px 8px; font-weight:bold; font-size:15px; color:#2e7d32;'>
+              💰 Tổng thanh toán
+            </td>
+            <td style='padding:12px 8px; font-weight:bold; font-size:15px; 
+                       text-align:right; color:#2e7d32;'>
+              {finalAmount:N0} VNĐ
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- THÔNG TIN GIAO DỊCH -->
+      <p style='font-weight:bold; color:#333; margin:20px 0 8px;'>🏦 Thông tin giao dịch:</p>
+      <table style='width:100%; border-collapse:collapse; 
+                    background:#f9f9f9; border-radius:8px; border:1px solid #e0e0e0;'>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666; width:45%;'>📅 Ngày thanh toán</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{paymentDate:dd/MM/yyyy HH:mm}</td>
+        </tr>
+        <tr style='background:#f0f0f0;'>
+          <td style='padding:10px 12px; font-size:14px; color:#666;'>🏦 Ngân hàng</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{bankCode}</td>
+        </tr>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666;'>🔖 Mã đơn hàng</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{orderId}</td>
+        </tr>
+        <tr style='background:#f0f0f0;'>
+          <td style='padding:10px 12px; font-size:14px; color:#666;'>🔗 Mã giao dịch VNPay</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{vnpTransactionNo}</td>
+        </tr>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666;'>📊 Trạng thái</td>
+          <td style='padding:10px 12px;'>
+            <span style='background:#4CAF50; color:white; padding:3px 12px; 
+                         border-radius:20px; font-size:13px;'>Đã thanh toán</span>
+          </td>
+        </tr>
+      </table>
+
+      <p style='margin-top:24px;'>Vui lòng lưu email này làm biên lai. 
+         Nếu có thắc mắc, hãy liên hệ nhà trường.</p>
+      <p>Trân trọng,<br><strong>{_settings.SenderName}</strong></p>
+    </div>
+
+    <!-- FOOTER -->
+    <div style='background:#f5f5f5; padding:15px 30px; text-align:center; 
+                font-size:13px; color:#888;'>
+      Email này được gửi tự động, vui lòng không reply.
+    </div>
+  </div>
+</body>
+</html>";
 
             await SendEmailAsync(toEmail, subject, body);
         }
