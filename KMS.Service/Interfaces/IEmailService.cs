@@ -18,5 +18,9 @@ namespace KMS.Service.Interfaces
         Task SendEmailAsync(string toEmail, string subject, string htmlBody);
 
         Task SendAttendanceAlertEmailAsync(string toEmail, string parentName, string studentName, string status, DateTime date);
+
+        Task SendInvoiceEmailAsync(string toEmail, string parentName,string studentName,string invoiceNumber,DateTime monthYear,
+            List<(string ItemName, decimal Amount)> items,decimal totalAmount,decimal discountAmount,decimal finalAmount,
+                    string vnpTransactionNo,string orderId,string bankCode,DateTime paymentDate);
     }
 }

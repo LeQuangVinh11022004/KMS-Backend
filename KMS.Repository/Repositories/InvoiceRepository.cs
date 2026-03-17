@@ -29,7 +29,12 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsInvoices
                 .Include(i => i.Student)
+                 .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.Template)
+                .Include(i => i.CreatedByNavigation)
                 .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.KmsPayments)
                     .ThenInclude(p => p.ReceivedByNavigation)
