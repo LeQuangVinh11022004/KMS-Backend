@@ -157,7 +157,6 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IHealthCheckRepository, HealthCheckRepository>();
 builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
 builder.Services.AddScoped<IMedicalIncidentRepository, MedicalIncidentRepository>();
-builder.Services.AddScoped<IKitchenSampleRepository, KitchenSampleRepository>();
 builder.Services.AddScoped<IParentRegistrationRepository, ParentRegistrationRepository>();
 builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
 builder.Services.AddScoped<IClassTeacherRepository, ClassTeacherRepository>();
@@ -166,9 +165,9 @@ builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepo
 builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
 builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
-builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
 
 // Services
 
@@ -189,7 +188,6 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
 builder.Services.AddScoped<IMedicalIncidentService, MedicalIncidentService>();
-builder.Services.AddScoped<IKitchenSampleService, KitchenSampleService>();
 builder.Services.AddScoped<IParentRegistrationService, ParentRegistrationService>();
 builder.Services.AddScoped<IClassStudentService, ClassStudentService>();
 builder.Services.AddScoped<IClassTeacherService, ClassTeacherService>();
@@ -199,10 +197,10 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISystemSettingService, SystemSettingService>();
 builder.Services.AddScoped<IClassActivityService, ClassActivityService>();
 builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
-builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
+builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
 
 // Logging
 builder.Logging.ClearProviders();
