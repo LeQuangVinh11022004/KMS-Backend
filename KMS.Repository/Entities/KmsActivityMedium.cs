@@ -5,13 +5,15 @@ using System.Collections.Generic;
 
 namespace KMS.Repository.Entities;
 
-public partial class KmsActivityPhoto
+public partial class KmsActivityMedium
 {
-    public int PhotoId { get; set; }
+    public int MediaId { get; set; }
 
     public int ActivityId { get; set; }
 
-    public string PhotoUrl { get; set; }
+    public string MediaUrl { get; set; }
+
+    public string MediaType { get; set; }
 
     public string Caption { get; set; }
 

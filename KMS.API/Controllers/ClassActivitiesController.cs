@@ -1,4 +1,4 @@
-﻿using KMS.Service.DTOs.ActivityPhoto;
+﻿using KMS.Service.DTOs.ActivityMedia;
 using KMS.Service.DTOs.ClassActivity;
 using KMS.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +10,9 @@ namespace KMS.API.Controllers
     public class ClassActivitiesController : ControllerBase
     {
         private readonly IClassActivityService _service;
-        private readonly IActivityPhotoService _photoService;
+        private readonly IActivityMediaService _photoService;
 
-        public ClassActivitiesController(IClassActivityService service, IActivityPhotoService photoService)
+        public ClassActivitiesController(IClassActivityService service, IActivityMediaService photoService)
         {
             _service = service;
             _photoService = photoService;
@@ -67,7 +67,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPost("{activityId}/photos")]
-        public async Task<IActionResult> AddPhoto(int activityId, ActivityPhotoDTO dto)
+        public async Task<IActionResult> AddPhoto(int activityId, ActivityMediaDTO dto)
         {
             await _photoService.AddAsync(activityId, dto);
             return Ok("Photo added successfully");

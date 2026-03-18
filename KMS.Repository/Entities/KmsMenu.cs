@@ -39,7 +39,5 @@ public partial class KmsMenu
 
     public virtual KmsUser CreatedByNavigation { get; set; }
 
-    public virtual ICollection<KmsKitchenSample> KmsKitchenSamples { get; set; } = new List<KmsKitchenSample>();
-
     public virtual KmsUser UpdatedByNavigation { get; set; }
 }

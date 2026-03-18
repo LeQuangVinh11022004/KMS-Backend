@@ -27,7 +27,7 @@ public partial class KmsClassActivity
 
     public virtual KmsClass Class { get; set; }
 
-    public virtual ICollection<KmsActivityPhoto> KmsActivityPhotos { get; set; } = new List<KmsActivityPhoto>();
+    public virtual ICollection<KmsActivityMedium> KmsActivityMedia { get; set; } = new List<KmsActivityMedium>();
 
     public virtual KmsTeacher PostedByNavigation { get; set; }
 
