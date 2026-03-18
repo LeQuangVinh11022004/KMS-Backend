@@ -21,7 +21,7 @@ namespace KMS.Repository.Repositories
         public async Task<List<KmsClassActivity>> GetAllAsync()
         {
             return await _context.KmsClassActivities
-                .Include(x => x.KmsActivityPhotos)
+                .Include(x => x.KmsActivityMedia)
                 .ToListAsync();
         }
 
@@ -29,14 +29,14 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsClassActivities
                 .Where(x => x.ClassId == classId)
-                .Include(x => x.KmsActivityPhotos)
+                .Include(x => x.KmsActivityMedia)
                 .ToListAsync();
         }
 
         public async Task<KmsClassActivity?> GetByIdAsync(int id)
         {
             return await _context.KmsClassActivities
-                .Include(x => x.KmsActivityPhotos)
+                .Include(x => x.KmsActivityMedia)
                 .FirstOrDefaultAsync(x => x.ActivityId == id);
         }
 

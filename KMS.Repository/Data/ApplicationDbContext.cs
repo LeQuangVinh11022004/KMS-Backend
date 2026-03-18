@@ -13,13 +13,11 @@ public partial class ApplicationDbContext : DbContext
     {
     }
 
-    public virtual DbSet<KmsActivityPhoto> KmsActivityPhotos { get; set; }
+    public virtual DbSet<KmsActivityMedium> KmsActivityMedia { get; set; }
 
     public virtual DbSet<KmsAnnouncement> KmsAnnouncements { get; set; }
 
     public virtual DbSet<KmsAttendance> KmsAttendances { get; set; }
-
-    public virtual DbSet<KmsAuditLog> KmsAuditLogs { get; set; }
 
     public virtual DbSet<KmsCampus> KmsCampuses { get; set; }
 
@@ -31,13 +29,13 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<KmsClassTeacher> KmsClassTeachers { get; set; }
 
+    public virtual DbSet<KmsDailyReport> KmsDailyReports { get; set; }
+
     public virtual DbSet<KmsHealthCheck> KmsHealthChecks { get; set; }
 
     public virtual DbSet<KmsInvoice> KmsInvoices { get; set; }
 
     public virtual DbSet<KmsInvoiceItem> KmsInvoiceItems { get; set; }
-
-    public virtual DbSet<KmsKitchenSample> KmsKitchenSamples { get; set; }
 
     public virtual DbSet<KmsMedicalIncident> KmsMedicalIncidents { get; set; }
 
@@ -79,28 +77,31 @@ public partial class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<KmsActivityPhoto>(entity =>
+        modelBuilder.Entity<KmsActivityMedium>(entity =>
         {
-            entity.HasKey(e => e.PhotoId).HasName("PK__KMS_Acti__21B7B5E281F8DFE7");
+            entity.HasKey(e => e.MediaId).HasName("PK__KMS_Acti__B2C2B5CFF47E6433");
 
-            entity.ToTable("KMS_ActivityPhotos");
+            entity.ToTable("KMS_ActivityMedia");
 
             entity.Property(e => e.Caption).HasMaxLength(255);
-            entity.Property(e => e.PhotoUrl)
+            entity.Property(e => e.MediaType)
+                .HasMaxLength(20)
+                .HasDefaultValue("Photo");
+            entity.Property(e => e.MediaUrl)
                 .IsRequired()
                 .HasMaxLength(500);
             entity.Property(e => e.UploadedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.Activity).WithMany(p => p.KmsActivityPhotos)
+            entity.HasOne(d => d.Activity).WithMany(p => p.KmsActivityMedia)
                 .HasForeignKey(d => d.ActivityId)
-                .HasConstraintName("FK__KMS_Activ__Activ__32AB8735");
+                .HasConstraintName("FK__KMS_Activ__Activ__7755B73D");
         });
 
         modelBuilder.Entity<KmsAnnouncement>(entity =>
         {
-            entity.HasKey(e => e.AnnouncementId).HasName("PK__KMS_Anno__9DE44574ECDC7FEA");
+            entity.HasKey(e => e.AnnouncementId).HasName("PK__KMS_Anno__9DE4457485C4816E");
 
             entity.ToTable("KMS_Announcements");
 
@@ -125,21 +126,21 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsAnnouncementCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Annou__Creat__59C55456");
+                .HasConstraintName("FK__KMS_Annou__Creat__46B27FE2");
 
             entity.HasOne(d => d.TargetClass).WithMany(p => p.KmsAnnouncements)
                 .HasForeignKey(d => d.TargetClassId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__KMS_Annou__Targe__58D1301D");
+                .HasConstraintName("FK__KMS_Annou__Targe__45BE5BA9");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsAnnouncementUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__KMS_Annou__Updat__5AB9788F");
+                .HasConstraintName("FK__KMS_Annou__Updat__47A6A41B");
         });
 
         modelBuilder.Entity<KmsAttendance>(entity =>
         {
-            entity.HasKey(e => e.AttendanceId).HasName("PK__KMS_Atte__8B69261CFE50F6AD");
+            entity.HasKey(e => e.AttendanceId).HasName("PK__KMS_Atte__8B69261C36F38E6E");
 
             entity.ToTable("KMS_Attendance");
 
@@ -163,48 +164,25 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Class).WithMany(p => p.KmsAttendances)
                 .HasForeignKey(d => d.ClassId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Atten__Class__160F4887");
+                .HasConstraintName("FK__KMS_Atten__Class__02FC7413");
 
             entity.HasOne(d => d.Student).WithMany(p => p.KmsAttendances)
                 .HasForeignKey(d => d.StudentId)
-                .HasConstraintName("FK__KMS_Atten__Stude__151B244E");
+                .HasConstraintName("FK__KMS_Atten__Stude__02084FDA");
 
             entity.HasOne(d => d.TakenByNavigation).WithMany(p => p.KmsAttendanceTakenByNavigations)
                 .HasForeignKey(d => d.TakenBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Atten__Taken__17036CC0");
+                .HasConstraintName("FK__KMS_Atten__Taken__03F0984C");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsAttendanceUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__KMS_Atten__Updat__17F790F9");
-        });
-
-        modelBuilder.Entity<KmsAuditLog>(entity =>
-        {
-            entity.HasKey(e => e.LogId).HasName("PK__KMS_Audi__5E548648AB50351A");
-
-            entity.ToTable("KMS_AuditLogs");
-
-            entity.Property(e => e.Action)
-                .IsRequired()
-                .HasMaxLength(50);
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Ipaddress)
-                .HasMaxLength(50)
-                .HasColumnName("IPAddress");
-            entity.Property(e => e.TableName).HasMaxLength(50);
-            entity.Property(e => e.UserAgent).HasMaxLength(255);
-
-            entity.HasOne(d => d.User).WithMany(p => p.KmsAuditLogs)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__KMS_Audit__UserI__662B2B3B");
+                .HasConstraintName("FK__KMS_Atten__Updat__04E4BC85");
         });
 
         modelBuilder.Entity<KmsCampus>(entity =>
         {
-            entity.HasKey(e => e.CampusId).HasName("PK__KMS_Camp__FD598DD6CF951909");
+            entity.HasKey(e => e.CampusId).HasName("PK__KMS_Camp__FD598DD6507322D1");
 
             entity.ToTable("KMS_Campuses");
 
@@ -221,7 +199,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<KmsClass>(entity =>
         {
-            entity.HasKey(e => e.ClassId).HasName("PK__KMS_Clas__CB1927C01398404C");
+            entity.HasKey(e => e.ClassId).HasName("PK__KMS_Clas__CB1927C02DD732CB");
 
             entity.ToTable("KMS_Classes");
 
@@ -243,21 +221,21 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Campus).WithMany(p => p.KmsClasses)
                 .HasForeignKey(d => d.CampusId)
-                .HasConstraintName("FK__KMS_Class__Campu__0A688BB1");
+                .HasConstraintName("FK__KMS_Class__Campu__5CA1C101");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsClasses)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__KMS_Class__Creat__02084FDA");
+                .HasConstraintName("FK__KMS_Class__Creat__6EF57B66");
 
             entity.HasOne(d => d.SchoolYear).WithMany(p => p.KmsClasses)
                 .HasForeignKey(d => d.SchoolYearId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Class__Schoo__01142BA1");
+                .HasConstraintName("FK__KMS_Class__Schoo__6E01572D");
         });
 
         modelBuilder.Entity<KmsClassActivity>(entity =>
         {
-            entity.HasKey(e => e.ActivityId).HasName("PK__KMS_Clas__45F4A791513B8698");
+            entity.HasKey(e => e.ActivityId).HasName("PK__KMS_Clas__45F4A79195D4BA14");
 
             entity.ToTable("KMS_ClassActivities");
 
@@ -274,21 +252,21 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Class).WithMany(p => p.KmsClassActivities)
                 .HasForeignKey(d => d.ClassId)
-                .HasConstraintName("FK__KMS_Class__Class__2CF2ADDF");
+                .HasConstraintName("FK__KMS_Class__Class__19DFD96B");
 
             entity.HasOne(d => d.PostedByNavigation).WithMany(p => p.KmsClassActivityPostedByNavigations)
                 .HasForeignKey(d => d.PostedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Class__Poste__2DE6D218");
+                .HasConstraintName("FK__KMS_Class__Poste__1AD3FDA4");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsClassActivityUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__KMS_Class__Updat__2EDAF651");
+                .HasConstraintName("FK__KMS_Class__Updat__1BC821DD");
         });
 
         modelBuilder.Entity<KmsClassStudent>(entity =>
         {
-            entity.HasKey(e => new { e.ClassId, e.StudentId }).HasName("PK__KMS_Clas__48357579646941D3");
+            entity.HasKey(e => new { e.ClassId, e.StudentId }).HasName("PK__KMS_Clas__483575797B0B5F7D");
 
             entity.ToTable("KMS_ClassStudents");
 
@@ -298,20 +276,20 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Class).WithMany(p => p.KmsClassStudents)
                 .HasForeignKey(d => d.ClassId)
-                .HasConstraintName("FK__KMS_Class__Class__06CD04F7");
+                .HasConstraintName("FK__KMS_Class__Class__73BA3083");
 
             entity.HasOne(d => d.EnrolledByNavigation).WithMany(p => p.KmsClassStudents)
                 .HasForeignKey(d => d.EnrolledBy)
-                .HasConstraintName("FK__KMS_Class__Enrol__08B54D69");
+                .HasConstraintName("FK__KMS_Class__Enrol__75A278F5");
 
             entity.HasOne(d => d.Student).WithMany(p => p.KmsClassStudents)
                 .HasForeignKey(d => d.StudentId)
-                .HasConstraintName("FK__KMS_Class__Stude__07C12930");
+                .HasConstraintName("FK__KMS_Class__Stude__74AE54BC");
         });
 
         modelBuilder.Entity<KmsClassTeacher>(entity =>
         {
-            entity.HasKey(e => new { e.ClassId, e.TeacherId }).HasName("PK__KMS_Clas__95C602562E9BB923");
+            entity.HasKey(e => new { e.ClassId, e.TeacherId }).HasName("PK__KMS_Clas__95C602566DFDB495");
 
             entity.ToTable("KMS_ClassTeachers");
 
@@ -324,20 +302,54 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.AssignedByNavigation).WithMany(p => p.KmsClassTeachers)
                 .HasForeignKey(d => d.AssignedBy)
-                .HasConstraintName("FK__KMS_Class__Assig__0F624AF8");
+                .HasConstraintName("FK__KMS_Class__Assig__7C4F7684");
 
             entity.HasOne(d => d.Class).WithMany(p => p.KmsClassTeachers)
                 .HasForeignKey(d => d.ClassId)
-                .HasConstraintName("FK__KMS_Class__Class__0D7A0286");
+                .HasConstraintName("FK__KMS_Class__Class__7A672E12");
 
             entity.HasOne(d => d.Teacher).WithMany(p => p.KmsClassTeachers)
                 .HasForeignKey(d => d.TeacherId)
-                .HasConstraintName("FK__KMS_Class__Teach__0E6E26BF");
+                .HasConstraintName("FK__KMS_Class__Teach__7B5B524B");
+        });
+
+        modelBuilder.Entity<KmsDailyReport>(entity =>
+        {
+            entity.HasKey(e => e.ReportId).HasName("PK__KMS_Dail__D5BD4805C55F0C0B");
+
+            entity.ToTable("KMS_DailyReports");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ReportDate).HasDefaultValueSql("(CONVERT([date],getdate()))");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Draft");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsDailyReports)
+                .HasForeignKey(d => d.ClassId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Daily__Class__7EF6D905");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsDailyReportCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Daily__Creat__7FEAFD3E");
+
+            entity.HasOne(d => d.ReviewedByNavigation).WithMany(p => p.KmsDailyReportReviewedByNavigations)
+                .HasForeignKey(d => d.ReviewedBy)
+                .HasConstraintName("FK__KMS_Daily__Revie__00DF2177");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.KmsDailyReports)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__KMS_Daily__Stude__7E02B4CC");
         });
 
         modelBuilder.Entity<KmsHealthCheck>(entity =>
         {
-            entity.HasKey(e => e.CheckId).HasName("PK__KMS_Heal__868157662B061C60");
+            entity.HasKey(e => e.CheckId).HasName("PK__KMS_Heal__86815766FCDDC013");
 
             entity.ToTable("KMS_HealthChecks");
 
@@ -351,12 +363,12 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Student).WithMany(p => p.KmsHealthChecks)
                 .HasForeignKey(d => d.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Healt__Stude__11158940");
+                .HasConstraintName("FK__KMS_Healt__Stude__634EBE90");
         });
 
         modelBuilder.Entity<KmsInvoice>(entity =>
         {
-            entity.HasKey(e => e.InvoiceId).HasName("PK__KMS_Invo__D796AAB5B0D6993D");
+            entity.HasKey(e => e.InvoiceId).HasName("PK__KMS_Invo__D796AAB598E2786D");
 
             entity.ToTable("KMS_Invoices");
 
@@ -368,7 +380,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.StudentId, "IX_Invoices_StudentId");
 
-            entity.HasIndex(e => e.InvoiceNumber, "UQ__KMS_Invo__D776E9813BD504E3").IsUnique();
+            entity.HasIndex(e => e.InvoiceNumber, "UQ__KMS_Invo__D776E981BECC61B1").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -389,24 +401,24 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsInvoiceCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__KMS_Invoi__Creat__45BE5BA9");
+                .HasConstraintName("FK__KMS_Invoi__Creat__32AB8735");
 
             entity.HasOne(d => d.Student).WithMany(p => p.KmsInvoices)
                 .HasForeignKey(d => d.StudentId)
-                .HasConstraintName("FK__KMS_Invoi__Stude__43D61337");
+                .HasConstraintName("FK__KMS_Invoi__Stude__30C33EC3");
 
             entity.HasOne(d => d.Template).WithMany(p => p.KmsInvoices)
                 .HasForeignKey(d => d.TemplateId)
-                .HasConstraintName("FK__KMS_Invoi__Templ__44CA3770");
+                .HasConstraintName("FK__KMS_Invoi__Templ__31B762FC");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsInvoiceUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__KMS_Invoi__Updat__46B27FE2");
+                .HasConstraintName("FK__KMS_Invoi__Updat__339FAB6E");
         });
 
         modelBuilder.Entity<KmsInvoiceItem>(entity =>
         {
-            entity.HasKey(e => e.InvoiceItemId).HasName("PK__KMS_Invo__478FE09CA89613D4");
+            entity.HasKey(e => e.InvoiceItemId).HasName("PK__KMS_Invo__478FE09C1A8E2C30");
 
             entity.ToTable("KMS_InvoiceItems");
 
@@ -417,26 +429,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Invoice).WithMany(p => p.KmsInvoiceItems)
                 .HasForeignKey(d => d.InvoiceId)
-                .HasConstraintName("FK__KMS_Invoi__Invoi__4B7734FF");
-        });
-
-        modelBuilder.Entity<KmsKitchenSample>(entity =>
-        {
-            entity.HasKey(e => e.SampleId).HasName("PK__KMS_Kitc__8B99EC6AB9018A63");
-
-            entity.ToTable("KMS_KitchenSamples");
-
-            entity.Property(e => e.DisposalTime).HasColumnType("datetime");
-            entity.Property(e => e.Note).HasMaxLength(200);
-
-            entity.HasOne(d => d.Menu).WithMany(p => p.KmsKitchenSamples)
-                .HasForeignKey(d => d.MenuId)
-                .HasConstraintName("FK__KMS_Kitch__MenuI__19AACF41");
+                .HasConstraintName("FK__KMS_Invoi__Invoi__3864608B");
         });
 
         modelBuilder.Entity<KmsMedicalIncident>(entity =>
         {
-            entity.HasKey(e => e.IncidentId).HasName("PK__KMS_Medi__3D8053B20E82E62F");
+            entity.HasKey(e => e.IncidentId).HasName("PK__KMS_Medi__3D8053B2D324F7B0");
 
             entity.ToTable("KMS_MedicalIncidents");
 
@@ -449,12 +447,12 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Student).WithMany(p => p.KmsMedicalIncidents)
                 .HasForeignKey(d => d.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Medic__Stude__14E61A24");
+                .HasConstraintName("FK__KMS_Medic__Stude__671F4F74");
         });
 
         modelBuilder.Entity<KmsMenu>(entity =>
         {
-            entity.HasKey(e => e.MenuId).HasName("PK__KMS_Menu__C99ED230B8A24143");
+            entity.HasKey(e => e.MenuId).HasName("PK__KMS_Menu__C99ED2307C246F82");
 
             entity.ToTable("KMS_Menus");
 
@@ -477,20 +475,20 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Class).WithMany(p => p.KmsMenus)
                 .HasForeignKey(d => d.ClassId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK__KMS_Menus__Class__25518C17");
+                .HasConstraintName("FK__KMS_Menus__Class__123EB7A3");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsMenuCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__KMS_Menus__Creat__2645B050");
+                .HasConstraintName("FK__KMS_Menus__Creat__1332DBDC");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsMenuUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__KMS_Menus__Updat__2739D489");
+                .HasConstraintName("FK__KMS_Menus__Updat__14270015");
         });
 
         modelBuilder.Entity<KmsNotification>(entity =>
         {
-            entity.HasKey(e => e.NotificationId).HasName("PK__KMS_Noti__20CF2E123D11272E");
+            entity.HasKey(e => e.NotificationId).HasName("PK__KMS_Noti__20CF2E12FBB5E45F");
 
             entity.ToTable("KMS_Notifications");
 
@@ -514,16 +512,16 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.KmsNotifications)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__KMS_Notif__UserI__6166761E");
+                .HasConstraintName("FK__KMS_Notif__UserI__4E53A1AA");
         });
 
         modelBuilder.Entity<KmsParent>(entity =>
         {
-            entity.HasKey(e => e.ParentId).HasName("PK__KMS_Pare__D339516F1BCA9927");
+            entity.HasKey(e => e.ParentId).HasName("PK__KMS_Pare__D339516F8EE6BEBB");
 
             entity.ToTable("KMS_Parents");
 
-            entity.HasIndex(e => e.UserId, "UQ__KMS_Pare__1788CC4D1D3A231F").IsUnique();
+            entity.HasIndex(e => e.UserId, "UQ__KMS_Pare__1788CC4D8F2FE79A").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -534,12 +532,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.User).WithOne(p => p.KmsParent)
                 .HasForeignKey<KmsParent>(d => d.UserId)
-                .HasConstraintName("FK__KMS_Paren__UserI__6D0D32F4");
+                .HasConstraintName("FK__KMS_Paren__UserI__59FA5E80");
         });
 
         modelBuilder.Entity<KmsParentRegistration>(entity =>
         {
-            entity.HasKey(e => e.RegistrationId).HasName("PK__KMS_Pare__6EF5881075497442");
+            entity.HasKey(e => e.RegistrationId).HasName("PK__KMS_Pare__6EF588101216F0C3");
 
             entity.ToTable("KMS_ParentRegistrations");
 
@@ -563,16 +561,16 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.ReviewedByNavigation).WithMany(p => p.KmsParentRegistrations)
                 .HasForeignKey(d => d.ReviewedBy)
-                .HasConstraintName("FK__KMS_Paren__Revie__5DCAEF64");
+                .HasConstraintName("FK__KMS_Paren__Revie__4AB81AF0");
         });
 
         modelBuilder.Entity<KmsPasswordResetToken>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__KMS_Pass__658FEEEAED7F3545");
+            entity.HasKey(e => e.TokenId).HasName("PK__KMS_Pass__658FEEEA4AF18B15");
 
             entity.ToTable("KMS_PasswordResetTokens");
 
-            entity.HasIndex(e => e.Token, "UQ__KMS_Pass__1EB4F81773B60CD6").IsUnique();
+            entity.HasIndex(e => e.Token, "UQ__KMS_Pass__1EB4F817314615C3").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -585,12 +583,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.KmsPasswordResetTokens)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__KMS_Passw__UserI__59063A47");
+                .HasConstraintName("FK__KMS_Passw__UserI__45F365D3");
         });
 
         modelBuilder.Entity<KmsPayment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__KMS_Paym__9B556A38AC9BD8F6");
+            entity.HasKey(e => e.PaymentId).HasName("PK__KMS_Paym__9B556A38C479369C");
 
             entity.ToTable("KMS_Payments");
 
@@ -598,7 +596,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.PaymentDate, "IX_Payments_PaymentDate");
 
-            entity.HasIndex(e => e.PaymentNumber, "UQ__KMS_Paym__E2C1723B80BD1D7D").IsUnique();
+            entity.HasIndex(e => e.PaymentNumber, "UQ__KMS_Paym__E2C1723BC38BCAC6").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -613,21 +611,21 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Invoice).WithMany(p => p.KmsPayments)
                 .HasForeignKey(d => d.InvoiceId)
-                .HasConstraintName("FK__KMS_Payme__Invoi__503BEA1C");
+                .HasConstraintName("FK__KMS_Payme__Invoi__3D2915A8");
 
             entity.HasOne(d => d.ReceivedByNavigation).WithMany(p => p.KmsPayments)
                 .HasForeignKey(d => d.ReceivedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Payme__Recei__51300E55");
+                .HasConstraintName("FK__KMS_Payme__Recei__3E1D39E1");
         });
 
         modelBuilder.Entity<KmsRole>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__KMS_Role__8AFACE1A43F655F4");
+            entity.HasKey(e => e.RoleId).HasName("PK__KMS_Role__8AFACE1A0A4AA1F5");
 
             entity.ToTable("KMS_Roles");
 
-            entity.HasIndex(e => e.RoleName, "UQ__KMS_Role__8A2B6160F1E24A8D").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__KMS_Role__8A2B61605571C66E").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -640,11 +638,11 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<KmsSchoolYear>(entity =>
         {
-            entity.HasKey(e => e.SchoolYearId).HasName("PK__KMS_Scho__9BAABCE05B92293D");
+            entity.HasKey(e => e.SchoolYearId).HasName("PK__KMS_Scho__9BAABCE0C55E5898");
 
             entity.ToTable("KMS_SchoolYears");
 
-            entity.HasIndex(e => e.YearName, "UQ__KMS_Scho__294C4DA9B489BF14").IsUnique();
+            entity.HasIndex(e => e.YearName, "UQ__KMS_Scho__294C4DA91A99DFA6").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -657,7 +655,7 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<KmsSemester>(entity =>
         {
-            entity.HasKey(e => e.SemesterId).HasName("PK__KMS_Seme__043301DDD1EF2750");
+            entity.HasKey(e => e.SemesterId).HasName("PK__KMS_Seme__043301DD4DFBA7D1");
 
             entity.ToTable("KMS_Semesters");
 
@@ -669,12 +667,12 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.SchoolYear).WithMany(p => p.KmsSemesters)
                 .HasForeignKey(d => d.SchoolYearId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_Semes__Schoo__3E52440B");
+                .HasConstraintName("FK__KMS_Semes__Schoo__2B3F6F97");
         });
 
         modelBuilder.Entity<KmsStudent>(entity =>
         {
-            entity.HasKey(e => e.StudentId).HasName("PK__KMS_Stud__32C52B9992AC213F");
+            entity.HasKey(e => e.StudentId).HasName("PK__KMS_Stud__32C52B990201E131");
 
             entity.ToTable("KMS_Students");
 
@@ -684,7 +682,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.StudentCode, "IX_Students_StudentCode");
 
-            entity.HasIndex(e => e.StudentCode, "UQ__KMS_Stud__1FC886041491367A").IsUnique();
+            entity.HasIndex(e => e.StudentCode, "UQ__KMS_Stud__1FC886048D1FED82").IsUnique();
 
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.Allergies).HasMaxLength(500);
@@ -709,20 +707,20 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Campus).WithMany(p => p.KmsStudents)
                 .HasForeignKey(d => d.CampusId)
-                .HasConstraintName("FK__KMS_Stude__Campu__0B5CAFEA");
+                .HasConstraintName("FK__KMS_Stude__Campu__5D95E53A");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsStudentCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__KMS_Stude__Creat__66603565");
+                .HasConstraintName("FK__KMS_Stude__Creat__534D60F1");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsStudentUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__KMS_Stude__Updat__6754599E");
+                .HasConstraintName("FK__KMS_Stude__Updat__5441852A");
         });
 
         modelBuilder.Entity<KmsStudentParent>(entity =>
         {
-            entity.HasKey(e => new { e.StudentId, e.ParentId }).HasName("PK__KMS_Stud__DFF6BE8F8A57F675");
+            entity.HasKey(e => new { e.StudentId, e.ParentId }).HasName("PK__KMS_Stud__DFF6BE8F0311BD6B");
 
             entity.ToTable("KMS_StudentParents");
 
@@ -736,20 +734,20 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Parent).WithMany(p => p.KmsStudentParents)
                 .HasForeignKey(d => d.ParentId)
-                .HasConstraintName("FK__KMS_Stude__Paren__72C60C4A");
+                .HasConstraintName("FK__KMS_Stude__Paren__5FB337D6");
 
             entity.HasOne(d => d.Student).WithMany(p => p.KmsStudentParents)
                 .HasForeignKey(d => d.StudentId)
-                .HasConstraintName("FK__KMS_Stude__Stude__71D1E811");
+                .HasConstraintName("FK__KMS_Stude__Stude__5EBF139D");
         });
 
         modelBuilder.Entity<KmsSystemSetting>(entity =>
         {
-            entity.HasKey(e => e.SettingId).HasName("PK__KMS_Syst__54372B1D6DB2F15A");
+            entity.HasKey(e => e.SettingId).HasName("PK__KMS_Syst__54372B1D8F77DC3C");
 
             entity.ToTable("KMS_SystemSettings");
 
-            entity.HasIndex(e => e.SettingKey, "UQ__KMS_Syst__01E719AD812AFC6A").IsUnique();
+            entity.HasIndex(e => e.SettingKey, "UQ__KMS_Syst__01E719ADD98C8470").IsUnique();
 
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.SettingKey)
@@ -761,18 +759,18 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsSystemSettings)
                 .HasForeignKey(d => d.UpdatedBy)
-                .HasConstraintName("FK__KMS_Syste__Updat__6AEFE058");
+                .HasConstraintName("FK__KMS_Syste__Updat__57DD0BE4");
         });
 
         modelBuilder.Entity<KmsTeacher>(entity =>
         {
-            entity.HasKey(e => e.TeacherId).HasName("PK__KMS_Teac__EDF25964C1FE86C7");
+            entity.HasKey(e => e.TeacherId).HasName("PK__KMS_Teac__EDF25964F7716345");
 
             entity.ToTable("KMS_Teachers");
 
-            entity.HasIndex(e => e.UserId, "UQ__KMS_Teac__1788CC4D4AB63943").IsUnique();
+            entity.HasIndex(e => e.UserId, "UQ__KMS_Teac__1788CC4D3823672E").IsUnique();
 
-            entity.HasIndex(e => e.TeacherCode, "UQ__KMS_Teac__9B8A194E99E44B57").IsUnique();
+            entity.HasIndex(e => e.TeacherCode, "UQ__KMS_Teac__9B8A194EA3F47B70").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -787,16 +785,16 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Campus).WithMany(p => p.KmsTeachers)
                 .HasForeignKey(d => d.CampusId)
-                .HasConstraintName("FK__KMS_Teach__Campu__0C50D423");
+                .HasConstraintName("FK__KMS_Teach__Campu__5E8A0973");
 
             entity.HasOne(d => d.User).WithOne(p => p.KmsTeacher)
                 .HasForeignKey<KmsTeacher>(d => d.UserId)
-                .HasConstraintName("FK__KMS_Teach__UserI__7A672E12");
+                .HasConstraintName("FK__KMS_Teach__UserI__6754599E");
         });
 
         modelBuilder.Entity<KmsTimetable>(entity =>
         {
-            entity.HasKey(e => e.TimetableId).HasName("PK__KMS_Time__68413F602020BDAB");
+            entity.HasKey(e => e.TimetableId).HasName("PK__KMS_Time__68413F606A5FCBEC");
 
             entity.ToTable("KMS_Timetables");
 
@@ -811,20 +809,20 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Class).WithMany(p => p.KmsTimetables)
                 .HasForeignKey(d => d.ClassId)
-                .HasConstraintName("FK__KMS_Timet__Class__1DB06A4F");
+                .HasConstraintName("FK__KMS_Timet__Class__0A9D95DB");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsTimetables)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__KMS_Timet__Creat__1F98B2C1");
+                .HasConstraintName("FK__KMS_Timet__Creat__0C85DE4D");
 
             entity.HasOne(d => d.Teacher).WithMany(p => p.KmsTimetables)
                 .HasForeignKey(d => d.TeacherId)
-                .HasConstraintName("FK__KMS_Timet__Teach__1EA48E88");
+                .HasConstraintName("FK__KMS_Timet__Teach__0B91BA14");
         });
 
         modelBuilder.Entity<KmsTuitionItem>(entity =>
         {
-            entity.HasKey(e => e.ItemId).HasName("PK__KMS_Tuit__727E838BF80F77B1");
+            entity.HasKey(e => e.ItemId).HasName("PK__KMS_Tuit__727E838BC22AFC4C");
 
             entity.ToTable("KMS_TuitionItems");
 
@@ -836,12 +834,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Template).WithMany(p => p.KmsTuitionItems)
                 .HasForeignKey(d => d.TemplateId)
-                .HasConstraintName("FK__KMS_Tuiti__Templ__3C34F16F");
+                .HasConstraintName("FK__KMS_Tuiti__Templ__29221CFB");
         });
 
         modelBuilder.Entity<KmsTuitionTemplate>(entity =>
         {
-            entity.HasKey(e => e.TemplateId).HasName("PK__KMS_Tuit__F87ADD2763F3022F");
+            entity.HasKey(e => e.TemplateId).HasName("PK__KMS_Tuit__F87ADD2785F54F16");
 
             entity.ToTable("KMS_TuitionTemplates");
 
@@ -857,12 +855,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsTuitionTemplates)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__KMS_Tuiti__Creat__37703C52");
+                .HasConstraintName("FK__KMS_Tuiti__Creat__245D67DE");
         });
 
         modelBuilder.Entity<KmsUser>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__KMS_User__1788CC4CB27F8459");
+            entity.HasKey(e => e.UserId).HasName("PK__KMS_User__1788CC4C11DAEF1E");
 
             entity.ToTable("KMS_Users");
 
@@ -872,9 +870,9 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.Username, "IX_Users_Username");
 
-            entity.HasIndex(e => e.Username, "UQ__KMS_User__536C85E48F8B3924").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__KMS_User__536C85E4802D3EB7").IsUnique();
 
-            entity.HasIndex(e => e.Email, "UQ__KMS_User__A9D105340604369E").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__KMS_User__A9D10534C96ABFB5").IsUnique();
 
             entity.Property(e => e.Avatar).HasMaxLength(255);
             entity.Property(e => e.CreatedAt)
@@ -902,12 +900,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.Campus).WithMany(p => p.KmsUsers)
                 .HasForeignKey(d => d.CampusId)
-                .HasConstraintName("FK__KMS_Users__Campu__0D44F85C");
+                .HasConstraintName("FK__KMS_Users__Campu__5F7E2DAC");
         });
 
         modelBuilder.Entity<KmsUserRole>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__KMS_User__AF2760AD630D7518");
+            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__KMS_User__AF2760AD25F393C5");
 
             entity.ToTable("KMS_UserRoles");
 
@@ -917,16 +915,16 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.AssignedByNavigation).WithMany(p => p.KmsUserRoleAssignedByNavigations)
                 .HasForeignKey(d => d.AssignedBy)
-                .HasConstraintName("FK__KMS_UserR__Assig__534D60F1");
+                .HasConstraintName("FK__KMS_UserR__Assig__403A8C7D");
 
             entity.HasOne(d => d.Role).WithMany(p => p.KmsUserRoles)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__KMS_UserR__RoleI__52593CB8");
+                .HasConstraintName("FK__KMS_UserR__RoleI__3F466844");
 
             entity.HasOne(d => d.User).WithMany(p => p.KmsUserRoleUsers)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__KMS_UserR__UserI__5165187F");
+                .HasConstraintName("FK__KMS_UserR__UserI__3E52440B");
         });
 
         OnModelCreatingPartial(modelBuilder);

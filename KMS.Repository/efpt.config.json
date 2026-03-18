@@ -1,10 +1,9 @@
 ﻿{
    "CodeGenerationMode": 4,
-   "ContextClassName": "KMS_SP26SE095Context",
+   "ContextClassName": "ApplicationDbContext",
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
-   "MinimumProductVersion": "2.6.1186",
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Entities",
@@ -16,7 +15,7 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "[dbo].[KMS_ActivityPhotos]",
+         "Name": "[dbo].[KMS_ActivityMedia]",
          "ObjectType": 0
       },
       {
@@ -25,10 +24,6 @@
       },
       {
          "Name": "[dbo].[KMS_Attendance]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[KMS_AuditLogs]",
          "ObjectType": 0
       },
       {
@@ -52,6 +47,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[KMS_DailyReports]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[KMS_HealthChecks]",
          "ObjectType": 0
       },
@@ -61,10 +60,6 @@
       },
       {
          "Name": "[dbo].[KMS_Invoices]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[KMS_KitchenSamples]",
          "ObjectType": 0
       },
       {
