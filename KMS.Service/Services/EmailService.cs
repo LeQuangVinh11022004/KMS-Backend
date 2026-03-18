@@ -371,5 +371,97 @@ namespace KMS.Service.Services
 
             await SendEmailAsync(toEmail, subject, body);
         }
+
+        public async Task SendStudentEnrolledEmailAsync(
+    string toEmail,
+    string parentName,
+    string studentName,
+    DateTime dateOfBirth,
+    string className,
+    string schoolYear,
+    DateTime enrolledAt)
+        {
+            var subject = $"[{_settings.SenderName}] Thông báo xếp lớp cho học sinh {studentName}";
+
+            var body = $@"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'></head>
+<body style='font-family:Arial,sans-serif; background:#f5f5f5; margin:0; padding:20px;'>
+  <div style='max-width:600px; margin:0 auto; background:white; border-radius:8px;
+              overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);'>
+
+    <!-- HEADER -->
+    <div style='background:#1976D2; padding:30px; text-align:center;'>
+      <h1 style='color:white; margin:0; font-size:22px;'>🏫 Thông báo xếp lớp</h1>
+    </div>
+
+    <!-- BODY -->
+    <div style='padding:30px;'>
+      <p>Xin chào <strong>{parentName}</strong>,</p>
+      <p>Nhà trường xin thông báo học sinh <strong>{studentName}</strong> 
+         đã được xếp vào lớp học. Dưới đây là thông tin chi tiết:</p>
+
+      <!-- THÔNG TIN HỌC SINH -->
+      <p style='font-weight:bold; color:#333; margin:20px 0 8px;'>👶 Thông tin học sinh:</p>
+      <table style='width:100%; border-collapse:collapse;
+                    border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;'>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666; 
+                     width:45%; background:#f9f9f9;'>Họ và tên</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{studentName}</td>
+        </tr>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666; background:#f9f9f9;'>Ngày sinh</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{dateOfBirth:dd/MM/yyyy}</td>
+        </tr>
+      </table>
+
+      <!-- THÔNG TIN LỚP -->
+      <p style='font-weight:bold; color:#333; margin:20px 0 8px;'>📚 Thông tin lớp học:</p>
+      <table style='width:100%; border-collapse:collapse;
+                    border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;'>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666;
+                     width:45%; background:#f9f9f9;'>Tên lớp</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold; color:#1976D2;'>
+            {className}
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666; background:#f9f9f9;'>Năm học</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{schoolYear}</td>
+        </tr>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666; background:#f9f9f9;'>Ngày vào lớp</td>
+          <td style='padding:10px 12px; font-size:14px; font-weight:bold;'>{enrolledAt:dd/MM/yyyy}</td>
+        </tr>
+        <tr>
+          <td style='padding:10px 12px; font-size:14px; color:#666; background:#f9f9f9;'>Trạng thái</td>
+          <td style='padding:10px 12px;'>
+            <span style='background:#4CAF50; color:white; padding:3px 12px;
+                         border-radius:20px; font-size:13px;'>Đã xếp lớp</span>
+          </td>
+        </tr>
+      </table>
+
+      <p style='margin-top:24px; color:#555;'>
+        Nếu có thắc mắc, vui lòng liên hệ nhà trường để được hỗ trợ.
+      </p>
+      <p>Trân trọng,<br><strong>{_settings.SenderName}</strong></p>
+    </div>
+
+    <!-- FOOTER -->
+    <div style='background:#f5f5f5; padding:15px 30px; text-align:center;
+                font-size:13px; color:#888;'>
+      Email này được gửi tự động, vui lòng không reply.
+    </div>
+  </div>
+</body>
+</html>";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
     }
 }

@@ -1,0 +1,25 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace KMS.API.Entities;
+
+public partial class KmsMedicalIncident
+{
+    public int IncidentId { get; set; }
+
+    public int StudentId { get; set; }
+
+    public DateTime? IncidentDate { get; set; }
+
+    public string? Type { get; set; }
+
+    public string? Description { get; set; }
+
+    public string? ActionTaken { get; set; }
+
+    public string? Status { get; set; }
+
+    public int? ReportedBy { get; set; }
+
+    public virtual KmsStudent Student { get; set; } = null!;
+}

@@ -16,7 +16,7 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "[dbo].[KMS_ActivityPhotos]",
+         "Name": "[dbo].[KMS_ActivityMedia]",
          "ObjectType": 0
       },
       {
@@ -25,10 +25,6 @@
       },
       {
          "Name": "[dbo].[KMS_Attendance]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[KMS_AuditLogs]",
          "ObjectType": 0
       },
       {
@@ -52,6 +48,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[KMS_DailyReports]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[KMS_HealthChecks]",
          "ObjectType": 0
       },
@@ -61,10 +61,6 @@
       },
       {
          "Name": "[dbo].[KMS_Invoices]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[KMS_KitchenSamples]",
          "ObjectType": 0
       },
       {

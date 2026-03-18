@@ -13,13 +13,11 @@ public partial class ApplicationDbContext : DbContext
     {
     }
 
-    public virtual DbSet<KmsActivityPhoto> KmsActivityPhotos { get; set; }
+    public virtual DbSet<KmsActivityMedium> KmsActivityMedia { get; set; }
 
     public virtual DbSet<KmsAnnouncement> KmsAnnouncements { get; set; }
 
     public virtual DbSet<KmsAttendance> KmsAttendances { get; set; }
-
-    public virtual DbSet<KmsAuditLog> KmsAuditLogs { get; set; }
 
     public virtual DbSet<KmsCampus> KmsCampuses { get; set; }
 
@@ -31,13 +29,13 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<KmsClassTeacher> KmsClassTeachers { get; set; }
 
+    public virtual DbSet<KmsDailyReport> KmsDailyReports { get; set; }
+
     public virtual DbSet<KmsHealthCheck> KmsHealthChecks { get; set; }
 
     public virtual DbSet<KmsInvoice> KmsInvoices { get; set; }
 
     public virtual DbSet<KmsInvoiceItem> KmsInvoiceItems { get; set; }
-
-    public virtual DbSet<KmsKitchenSample> KmsKitchenSamples { get; set; }
 
     public virtual DbSet<KmsMedicalIncident> KmsMedicalIncidents { get; set; }
 
@@ -79,23 +77,26 @@ public partial class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<KmsActivityPhoto>(entity =>
+        modelBuilder.Entity<KmsActivityMedium>(entity =>
         {
-            entity.HasKey(e => e.PhotoId).HasName("PK__KMS_Acti__21B7B5E281F8DFE7");
+            entity.HasKey(e => e.MediaId).HasName("PK__KMS_Acti__B2C2B5CF0C4FF887");
 
-            entity.ToTable("KMS_ActivityPhotos");
+            entity.ToTable("KMS_ActivityMedia");
 
             entity.Property(e => e.Caption).HasMaxLength(255);
-            entity.Property(e => e.PhotoUrl)
+            entity.Property(e => e.MediaType)
+                .HasMaxLength(20)
+                .HasDefaultValue("Photo");
+            entity.Property(e => e.MediaUrl)
                 .IsRequired()
                 .HasMaxLength(500);
             entity.Property(e => e.UploadedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.Activity).WithMany(p => p.KmsActivityPhotos)
+            entity.HasOne(d => d.Activity).WithMany(p => p.KmsActivityMedia)
                 .HasForeignKey(d => d.ActivityId)
-                .HasConstraintName("FK__KMS_Activ__Activ__32AB8735");
+                .HasConstraintName("FK__KMS_Activ__Activ__56B3DD81");
         });
 
         modelBuilder.Entity<KmsAnnouncement>(entity =>
@@ -177,29 +178,6 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.KmsAttendanceUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
                 .HasConstraintName("FK__KMS_Atten__Updat__17F790F9");
-        });
-
-        modelBuilder.Entity<KmsAuditLog>(entity =>
-        {
-            entity.HasKey(e => e.LogId).HasName("PK__KMS_Audi__5E548648AB50351A");
-
-            entity.ToTable("KMS_AuditLogs");
-
-            entity.Property(e => e.Action)
-                .IsRequired()
-                .HasMaxLength(50);
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Ipaddress)
-                .HasMaxLength(50)
-                .HasColumnName("IPAddress");
-            entity.Property(e => e.TableName).HasMaxLength(50);
-            entity.Property(e => e.UserAgent).HasMaxLength(255);
-
-            entity.HasOne(d => d.User).WithMany(p => p.KmsAuditLogs)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__KMS_Audit__UserI__662B2B3B");
         });
 
         modelBuilder.Entity<KmsCampus>(entity =>
@@ -335,6 +313,40 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("FK__KMS_Class__Teach__0E6E26BF");
         });
 
+        modelBuilder.Entity<KmsDailyReport>(entity =>
+        {
+            entity.HasKey(e => e.ReportId).HasName("PK__KMS_Dail__D5BD4805C828FC60");
+
+            entity.ToTable("KMS_DailyReports");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ReportDate).HasDefaultValueSql("(CONVERT([date],getdate()))");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Draft");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.KmsDailyReports)
+                .HasForeignKey(d => d.ClassId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Daily__Class__5E54FF49");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsDailyReportCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__KMS_Daily__Creat__5F492382");
+
+            entity.HasOne(d => d.ReviewedByNavigation).WithMany(p => p.KmsDailyReportReviewedByNavigations)
+                .HasForeignKey(d => d.ReviewedBy)
+                .HasConstraintName("FK__KMS_Daily__Revie__603D47BB");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.KmsDailyReports)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__KMS_Daily__Stude__5D60DB10");
+        });
+
         modelBuilder.Entity<KmsHealthCheck>(entity =>
         {
             entity.HasKey(e => e.CheckId).HasName("PK__KMS_Heal__868157662B061C60");
@@ -418,20 +430,6 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Invoice).WithMany(p => p.KmsInvoiceItems)
                 .HasForeignKey(d => d.InvoiceId)
                 .HasConstraintName("FK__KMS_Invoi__Invoi__4B7734FF");
-        });
-
-        modelBuilder.Entity<KmsKitchenSample>(entity =>
-        {
-            entity.HasKey(e => e.SampleId).HasName("PK__KMS_Kitc__8B99EC6AB9018A63");
-
-            entity.ToTable("KMS_KitchenSamples");
-
-            entity.Property(e => e.DisposalTime).HasColumnType("datetime");
-            entity.Property(e => e.Note).HasMaxLength(200);
-
-            entity.HasOne(d => d.Menu).WithMany(p => p.KmsKitchenSamples)
-                .HasForeignKey(d => d.MenuId)
-                .HasConstraintName("FK__KMS_Kitch__MenuI__19AACF41");
         });
 
         modelBuilder.Entity<KmsMedicalIncident>(entity =>

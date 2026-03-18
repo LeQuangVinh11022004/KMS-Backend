@@ -16,15 +16,18 @@ namespace KMS.Service.Services
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IClassRepository _classRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly IEmailService _emailService;
 
         public ClassStudentService(
             IClassStudentRepository classStudentRepository,
             IClassRepository classRepository,
-            IStudentRepository studentRepository)
+            IStudentRepository studentRepository,
+            IEmailService emailService)
         {
             _classStudentRepository = classStudentRepository;
             _classRepository = classRepository;
             _studentRepository = studentRepository;
+            _emailService = emailService;
         }
 
         public async Task<BaseResponseDTO> GetStudentsByClassAsync(int classId)
@@ -115,6 +118,28 @@ namespace KMS.Service.Services
                 };
 
                 var created = await _classStudentRepository.EnrollAsync(record);
+
+
+                // Gửi email thông báo xếp lớp cho phụ huynh
+                var primaryParent = created.Student.KmsStudentParents
+                    .FirstOrDefault(sp => sp.IsPrimaryContact == true)
+                    ?? created.Student.KmsStudentParents.FirstOrDefault();
+
+                var parentEmail = primaryParent?.Parent?.User?.Email;
+                var parentName = primaryParent?.Parent?.User?.FullName ?? "Quý phụ huynh";
+
+                if (!string.IsNullOrEmpty(parentEmail))
+                {
+                    await _emailService.SendStudentEnrolledEmailAsync(
+                        toEmail: parentEmail,
+                        parentName: parentName,
+                        studentName: student.FullName,
+                        dateOfBirth: student.DateOfBirth.ToDateTime(TimeOnly.MinValue),
+                        className: created.Class.ClassName,
+                        schoolYear: created.Class.SchoolYear?.YearName ?? "",
+                        enrolledAt: DateTime.Now
+                    );
+                }
 
                 // Cập nhật CurrentEnrollment trên Class
                 kmsClass.CurrentEnrollment = currentCount + 1;

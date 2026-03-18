@@ -22,7 +22,7 @@ namespace KMS.Repository.Repositories
             => await _context.KmsClasses.ToListAsync();
 
         public async Task<KmsClass?> GetByIdAsync(int id)
-            => await _context.KmsClasses.FirstOrDefaultAsync(x => x.ClassId == id);
+            => await _context.KmsClasses.Include(c => c.SchoolYear).FirstOrDefaultAsync(x => x.ClassId == id);
 
         public async Task AddAsync(KmsClass entity)
             => await _context.KmsClasses.AddAsync(entity);
