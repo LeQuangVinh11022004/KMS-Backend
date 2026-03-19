@@ -1,4 +1,5 @@
-using KMS.Repository.Entities;
+using KMS.API;
+using KMS.Repository;
 using KMS.Repository.Interfaces;
 using KMS.Repository.Repositories;
 using KMS.Service.Interfaces;
