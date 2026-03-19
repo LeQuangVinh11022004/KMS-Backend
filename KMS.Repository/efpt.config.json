@@ -1,10 +1,9 @@
 ﻿{
    "CodeGenerationMode": 4,
-   "ContextClassName": "KMS_SP26SE095Context",
+   "ContextClassName": "ApplicationDbContext",
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
-   "MinimumProductVersion": "2.6.1186",
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Entities",
