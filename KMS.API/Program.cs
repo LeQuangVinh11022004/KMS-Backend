@@ -1,4 +1,5 @@
-using KMS.Repository.Entities;
+using KMS.API;
+using KMS.Repository;
 using KMS.Repository.Interfaces;
 using KMS.Repository.Repositories;
 using KMS.Service.Interfaces;
@@ -164,10 +165,7 @@ builder.Services.AddScoped<IStudentParentRepository, StudentParentRepository>();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
-<<<<<<< HEAD
-=======
 builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
->>>>>>> origin/main
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
@@ -199,10 +197,7 @@ builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISystemSettingService, SystemSettingService>();
 builder.Services.AddScoped<IClassActivityService, ClassActivityService>();
-<<<<<<< HEAD
-=======
 builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
->>>>>>> origin/main
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
