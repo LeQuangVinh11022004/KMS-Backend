@@ -47,6 +47,8 @@ public partial class KmsStudent
 
     public virtual ICollection<KmsAttendance> KmsAttendances { get; set; } = new List<KmsAttendance>();
 
+    public virtual ICollection<KmsChatHistory> KmsChatHistories { get; set; } = new List<KmsChatHistory>();
+
     public virtual ICollection<KmsClassStudent> KmsClassStudents { get; set; } = new List<KmsClassStudent>();
 
     public virtual ICollection<KmsDailyReport> KmsDailyReports { get; set; } = new List<KmsDailyReport>();

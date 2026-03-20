@@ -43,6 +43,8 @@ public partial class KmsUser
 
     public virtual ICollection<KmsAnnouncement> KmsAnnouncementUpdatedByNavigations { get; set; } = new List<KmsAnnouncement>();
 
+    public virtual ICollection<KmsChatHistory> KmsChatHistories { get; set; } = new List<KmsChatHistory>();
+
     public virtual ICollection<KmsClassStudent> KmsClassStudents { get; set; } = new List<KmsClassStudent>();
 
     public virtual ICollection<KmsClassTeacher> KmsClassTeachers { get; set; } = new List<KmsClassTeacher>();

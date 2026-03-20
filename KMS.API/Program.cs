@@ -1,5 +1,6 @@
 using KMS.API;
 using KMS.Repository;
+using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
 using KMS.Repository.Repositories;
 using KMS.Service.Interfaces;
@@ -207,6 +208,7 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
+builder.Services.AddScoped<IChatAiService, ChatAiService>();
 
 // Logging
 builder.Logging.ClearProviders();
