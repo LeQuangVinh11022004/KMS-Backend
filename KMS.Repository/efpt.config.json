@@ -31,6 +31,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[KMS_ChatHistories]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[KMS_ClassActivities]",
          "ObjectType": 0
       },
