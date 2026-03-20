@@ -32,11 +32,6 @@ namespace KMS.Service.Services
             _emailService = emailService;
         }
 
-        // ============================================================
-        // Teacher mở danh sách lớp theo ngày
-        // Trả về toàn bộ học sinh + trạng thái đã điểm danh (nếu có)
-        // ============================================================
-
         public async Task<BaseResponseDTO> GetClassAttendanceSheetAsync(int classId, DateTime date)
         {
             try
@@ -102,11 +97,6 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // Lưu điểm danh cả lớp 1 lần (bulk)
-        // Nếu học sinh đã có record → update, chưa có → create
-        // ============================================================
-
         public async Task<BaseResponseDTO> SubmitBulkAttendanceAsync(
             BulkAttendanceDTO dto, int takenByTeacherId)
         {
@@ -132,11 +122,8 @@ namespace KMS.Service.Services
                 var toCreate = new List<KmsAttendance>();
                 var updated = 0;
 
-                // load tất cả studentId
-
                 var studentIds = dto.Records.Select(r => r.StudentId).ToList();
 
-                // load attendance của cả lớp trong 1 query
 
                 var existingAttendances =
                     await _attendanceRepository.GetByClassAndDateForStudentsAsync(
@@ -146,7 +133,6 @@ namespace KMS.Service.Services
 
                 var attendanceMap = existingAttendances.ToDictionary(a => a.StudentId);
 
-                // load parents của tất cả học sinh
 
                 var parentLinks = await _parentRepository.GetParentsByStudentIdsAsync(studentIds);
 
@@ -156,7 +142,6 @@ namespace KMS.Service.Services
 
                 var notifications = new List<KmsNotification>();
 
-                // process
 
                 foreach (var record in dto.Records)
                 {
@@ -164,10 +149,7 @@ namespace KMS.Service.Services
 
                     if (existing != null)
                     {
-                        // Update record đã có
                         existing.Status = record.Status;
-                        // Giữ CheckInTime gốc, không ghi đè
-                        // CheckOutTime không thay đổi ở đây
                         existing.Notes = record.Notes;
                         existing.UpdatedBy = takenByTeacherId;
                         existing.UpdatedAt = DateTime.Now;
@@ -183,8 +165,8 @@ namespace KMS.Service.Services
                             ClassId = dto.ClassId,
                             AttendanceDate = dateOnly,
                             Status = record.Status,
-                            CheckInTime = TimeOnly.FromDateTime(DateTime.Now), // tự set giờ hiện tại
-                            CheckOutTime = null, // chưa có lúc điểm danh, cập nhật sau
+                            CheckInTime = TimeOnly.FromDateTime(DateTime.Now), 
+                            CheckOutTime = null, 
                             Notes = record.Notes,
                             TakenBy = takenByTeacherId,
                             TakenAt = DateTime.Now
@@ -214,11 +196,9 @@ namespace KMS.Service.Services
                         }
                     }
                 }
-                // create attendance
                 if (toCreate.Any())
                     await _attendanceRepository.CreateBulkAsync(toCreate);
 
-                // create notification
                 if (notifications.Any())
                     await _notificationRepository.CreateBulkAsync(notifications);
 
@@ -242,9 +222,6 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // Sửa điểm danh 1 học sinh
-        // ============================================================
 
         public async Task<BaseResponseDTO> UpdateAttendanceAsync(
             int attendanceId, UpdateAttendanceDTO dto, int updatedByTeacherId)
@@ -264,7 +241,6 @@ namespace KMS.Service.Services
 
                 attendance.Status = dto.Status;
                 attendance.Notes = dto.Notes;
-                // CheckInTime và CheckOutTime không thay đổi ở đây
                 attendance.UpdatedBy = updatedByTeacherId;
                 attendance.UpdatedAt = DateTime.Now;
 
@@ -283,9 +259,6 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // Lịch sử điểm danh của 1 học sinh
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetStudentHistoryAsync(
             int studentId, DateTime? fromDate, DateTime? toDate)
@@ -337,10 +310,6 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // CHECKOUT - Cập nhật giờ ra về khi bé được đón
-        // ============================================================
-
         public async Task<BaseResponseDTO> CheckOutAsync(
             int attendanceId, CheckOutDTO dto, int updatedByTeacherId)
         {
@@ -350,7 +319,6 @@ namespace KMS.Service.Services
                 if (attendance == null)
                     return new BaseResponseDTO { Success = false, Message = "Attendance record not found" };
 
-                // Luôn set giờ thực tế lúc checkout
                 attendance.CheckOutTime = TimeOnly.FromDateTime(DateTime.Now);
 
                 if (!string.IsNullOrEmpty(dto.Notes))
@@ -419,20 +387,12 @@ namespace KMS.Service.Services
             await _notificationRepository.CreateBulkAsync(notifications);
         }
 
-        // ============================================================
-        // HELPERS
-        // ============================================================
-
         private static TimeOnly? ParseTime(string? timeStr)
         {
             if (string.IsNullOrWhiteSpace(timeStr)) return null;
             if (TimeOnly.TryParse(timeStr, out var result)) return result;
             return null;
         }
-
-        // ============================================================
-        // MAPPER
-        // ============================================================
 
         private AttendanceDTO MapToDTO(KmsAttendance a) => new()
         {

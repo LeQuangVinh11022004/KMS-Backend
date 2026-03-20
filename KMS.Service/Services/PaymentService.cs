@@ -22,9 +22,7 @@ namespace KMS.Service.Services
             _invoiceRepository = invoiceRepository;
         }
 
-        // ============================================================
         // READ
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetAllPaymentsAsync()
         {
@@ -112,9 +110,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // CREATE
-        // ============================================================
 
         public async Task<BaseResponseDTO> CreatePaymentAsync(CreatePaymentDTO dto)
         {
@@ -133,7 +129,6 @@ namespace KMS.Service.Services
                 if (dto.PaidAmount <= 0)
                     return new BaseResponseDTO { Success = false, Message = "Payment amount must be greater than 0" };
 
-                // Check if overpaying
                 var alreadyPaid = await _paymentRepository.GetTotalPaidForInvoiceAsync(dto.InvoiceId);
                 var remaining = invoice.FinalAmount - alreadyPaid;
 
@@ -161,7 +156,6 @@ namespace KMS.Service.Services
 
                 var created = await _paymentRepository.CreateAsync(payment);
 
-                // Auto-update invoice status based on total paid
                 var newTotalPaid = alreadyPaid + dto.PaidAmount;
                 invoice.Status = newTotalPaid >= invoice.FinalAmount ? "Paid" : "Partial";
                 invoice.UpdatedAt = DateTime.Now;
@@ -180,9 +174,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // DELETE
-        // ============================================================
 
         public async Task<BaseResponseDTO> DeletePaymentAsync(int paymentId)
         {
@@ -195,7 +187,6 @@ namespace KMS.Service.Services
                 var invoiceId = payment.InvoiceId;
                 await _paymentRepository.DeleteAsync(paymentId);
 
-                // Recalculate invoice status after removing payment
                 var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
                 if (invoice != null)
                 {
@@ -223,9 +214,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // REVENUE SUMMARY
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetRevenueSummaryAsync(DateTime? fromDate, DateTime? toDate)
         {
@@ -266,9 +255,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // MAPPER
-        // ============================================================
 
         private PaymentDTO MapToDTO(KmsPayment p)
         {

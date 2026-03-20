@@ -13,7 +13,6 @@ namespace KMS.Service.Services
         private readonly IPasswordResetTokenRepository _tokenRepository;
         private readonly IEmailService _emailService;
 
-        // Token hết hạn sau 30 phút
         private const int TokenExpiryMinutes = 30;
 
         public PasswordService(
@@ -26,9 +25,7 @@ namespace KMS.Service.Services
             _emailService = emailService;
         }
 
-        // ============================================================
         // ADMIN - Reset password → trả về mật khẩu tạm
-        // ============================================================
 
         public async Task<BaseResponseDTO> AdminResetPasswordAsync(int targetUserId, int adminId)
         {
@@ -38,15 +35,13 @@ namespace KMS.Service.Services
                 if (user == null)
                     return new BaseResponseDTO { Success = false, Message = "User not found" };
 
-                // Tạo mật khẩu tạm: Temp@ + 6 số random
                 var tempPassword = $"Temp@{new Random().Next(100000, 999999)}";
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword);
-                user.PasswordChangedAt = null; // null = chưa đổi mật khẩu lần nào → frontend có thể force đổi
+                user.PasswordChangedAt = null;
                 user.UpdatedAt = DateTime.Now;
 
                 await _userRepository.UpdateAsync(user);
 
-                // Hủy tất cả forgot-password token cũ của user này
                 await _tokenRepository.InvalidateAllUserTokensAsync(targetUserId);
 
                 return new BaseResponseDTO
@@ -68,9 +63,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // USER - Tự đổi mật khẩu (cần đăng nhập)
-        // ============================================================
 
         public async Task<BaseResponseDTO> ChangePasswordAsync(int userId, ChangePasswordDTO dto)
         {
@@ -106,9 +99,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // FORGOT PASSWORD - Tạo token (AllowAnonymous)
-        // ============================================================
 
         public async Task<BaseResponseDTO> ForgotPasswordAsync(ForgotPasswordDTO dto)
         {
@@ -116,8 +107,6 @@ namespace KMS.Service.Services
             {
                 var user = await _userRepository.GetByEmailAsync(dto.Email);
 
-                // Không tiết lộ email có tồn tại hay không (bảo mật)
-                // Nhưng vẫn trả về token nếu có để Admin copy gửi qua Zalo/SMS
                 if (user == null || user.IsActive != true)
                     return new BaseResponseDTO
                     {
@@ -125,10 +114,8 @@ namespace KMS.Service.Services
                         Message = "If this email exists, a reset token has been generated."
                     };
 
-                // Hủy tất cả token cũ chưa dùng của user
                 await _tokenRepository.InvalidateAllUserTokensAsync(user.UserId);
 
-                // Tạo OTP 6 chữ số
                 var rawToken = new Random().Next(100000, 999999).ToString();
                 var expiresAt = DateTime.Now.AddMinutes(TokenExpiryMinutes);
 
@@ -143,7 +130,6 @@ namespace KMS.Service.Services
 
                 await _tokenRepository.CreateAsync(tokenEntity);
 
-                // Gửi email reset password
                 var emailSent = false;
                 try
                 {
@@ -165,7 +151,6 @@ namespace KMS.Service.Services
                     Data = new ForgotPasswordResultDTO
                     {
                         Message = emailSent ? "Kiểm tra hộp thư email của bạn" : "Gửi email thất bại - liên hệ Admin",
-                        // Chỉ trả token nếu email fail (để Admin hỗ trợ thủ công)
                         ResetToken = emailSent ? "[Đã gửi qua email]" : rawToken,
                         ExpiresAt = expiresAt
                     }
@@ -177,9 +162,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // RESET PASSWORD WITH TOKEN (AllowAnonymous)
-        // ============================================================
 
         public async Task<BaseResponseDTO> ResetPasswordWithTokenAsync(ResetPasswordDTO dto)
         {
@@ -193,7 +176,6 @@ namespace KMS.Service.Services
 
                 var tokenEntity = await _tokenRepository.GetByTokenAsync(dto.Token);
 
-                // Validate token
                 if (tokenEntity == null)
                     return new BaseResponseDTO { Success = false, Message = "Invalid or expired token" };
 
@@ -207,14 +189,12 @@ namespace KMS.Service.Services
                 if (user == null || user.IsActive != true)
                     return new BaseResponseDTO { Success = false, Message = "User not found or inactive" };
 
-                // Đặt mật khẩu mới
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
                 user.PasswordChangedAt = DateTime.Now;
                 user.UpdatedAt = DateTime.Now;
 
                 await _userRepository.UpdateAsync(user);
 
-                // Đánh dấu token đã dùng
                 await _tokenRepository.MarkAsUsedAsync(tokenEntity.TokenId);
 
                 return new BaseResponseDTO { Success = true, Message = "Password reset successfully. You can now login with your new password." };

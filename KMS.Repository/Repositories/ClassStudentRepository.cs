@@ -73,7 +73,6 @@ namespace KMS.Repository.Repositories
             await _context.Entry(classStudent).Reference(cs => cs.Student).LoadAsync();
             await _context.Entry(classStudent).Reference(cs => cs.Class).LoadAsync();
 
-            // Load parents → Parent → User để lấy email
             await _context.Entry(classStudent.Student)
                 .Collection(s => s.KmsStudentParents)
                 .Query()

@@ -17,9 +17,7 @@ namespace KMS.Service.Services
             _userRoleRepository = userRoleRepository;
         }
 
-        // ============================================================
         // ROLES
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetAllRolesAsync()
         {
@@ -88,9 +86,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // GET USER ROLE (SINGULAR)
-        // ============================================================
+        // GET USER ROLE
 
         public async Task<BaseResponseDTO> GetUserRoleAsync(int userId)
         {
@@ -145,9 +141,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // ASSIGN ROLE
-        // ============================================================
 
         public async Task<BaseResponseDTO> AssignRoleToUserAsync(int userId, AssignRoleRequestDTO request, int assignedBy)
         {
@@ -229,9 +223,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // UPDATE ROLE
-        // ============================================================
 
         public async Task<BaseResponseDTO> UpdateUserRoleAsync(int userId, AssignRoleRequestDTO request, int updatedBy)
         {
@@ -268,9 +260,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // REMOVE ROLE
-        // ============================================================
 
         public async Task<BaseResponseDTO> RemoveRoleFromUserAsync(int userId)
         {
@@ -302,9 +292,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // GET USERS BY ROLE
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetUsersByRoleAsync(int roleId)
         {
@@ -370,9 +358,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // FILTER USERS
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetUsersWithoutRoleAsync()
         {
@@ -440,9 +426,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // STATISTICS
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetRoleStatisticsAsync()
         {

@@ -5,9 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
 {
-    // ============================================================
-    // TUITION TEMPLATE CONTROLLER
-    // ============================================================
 
     [ApiController]
     [Route("api/[controller]")]

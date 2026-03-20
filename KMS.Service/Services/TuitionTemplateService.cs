@@ -20,9 +20,7 @@ namespace KMS.Service.Services
             _templateRepository = templateRepository;
         }
 
-        // ============================================================
         // READ
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetAllTemplatesAsync()
         {
@@ -85,9 +83,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // CREATE
-        // ============================================================
 
         public async Task<BaseResponseDTO> CreateTemplateAsync(CreateTuitionTemplateDTO dto)
         {
@@ -110,7 +106,6 @@ namespace KMS.Service.Services
 
                 var created = await _templateRepository.CreateAsync(template);
 
-                // Create items
                 foreach (var itemDto in dto.Items)
                 {
                     var item = new KmsTuitionItem
@@ -123,7 +118,6 @@ namespace KMS.Service.Services
                     await _templateRepository.CreateItemAsync(item);
                 }
 
-                // Reload with items
                 var result = await _templateRepository.GetByIdWithItemsAsync(created.TemplateId);
 
                 return new BaseResponseDTO
@@ -139,9 +133,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // UPDATE
-        // ============================================================
 
         public async Task<BaseResponseDTO> UpdateTemplateAsync(int templateId, UpdateTuitionTemplateDTO dto)
         {
@@ -169,7 +161,6 @@ namespace KMS.Service.Services
 
                 await _templateRepository.UpdateAsync(template);
 
-                // Replace items if provided
                 if (dto.Items != null)
                 {
                     await _templateRepository.DeleteItemsByTemplateIdAsync(templateId);
@@ -200,9 +191,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // DELETE
-        // ============================================================
 
         public async Task<BaseResponseDTO> DeleteTemplateAsync(int templateId)
         {
@@ -212,7 +201,6 @@ namespace KMS.Service.Services
                 if (template == null)
                     return new BaseResponseDTO { Success = false, Message = "Tuition template not found" };
 
-                // Prevent deletion if used by invoices
                 if (await _templateRepository.IsUsedByInvoicesAsync(templateId))
                     return new BaseResponseDTO
                     {
@@ -230,9 +218,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // TOGGLE STATUS
-        // ============================================================
 
         public async Task<BaseResponseDTO> ToggleTemplateStatusAsync(int templateId)
         {
@@ -259,9 +245,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // MAPPER
-        // ============================================================
 
         private TuitionTemplateDTO MapToDTO(KmsTuitionTemplate t)
         {

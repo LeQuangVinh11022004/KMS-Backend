@@ -6,9 +6,6 @@ using System.Security.Claims;
 
 namespace KMS.API.Controllers
 {
-    // ============================================================
-    // CLASS TEACHER CONTROLLER
-    // ============================================================
 
     [ApiController]
     [Route("api/[controller]")]

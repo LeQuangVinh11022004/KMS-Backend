@@ -32,9 +32,7 @@ namespace KMS.Service.Services
             _emailService = emailService;
         }
 
-        // ============================================================
         // TẠO URL THANH TOÁN
-        // ============================================================
 
         public async Task<BaseResponseDTO> CreatePaymentUrlAsync(
             CreateVNPayPaymentDTO dto, int userId, string ipAddress)
@@ -51,12 +49,10 @@ namespace KMS.Service.Services
                 if (invoice.Status == "Cancelled")
                     return new BaseResponseDTO { Success = false, Message = "Hóa đơn đã bị hủy" };
 
-                // OrderId = INV{invoiceId}_{timestamp} → lưu vào TransactionReference sau
                 var orderId = $"INV{dto.InvoiceId}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
-                var amount = (long)(invoice.FinalAmount * 100); // VNPay nhân 100
+                var amount = (long)(invoice.FinalAmount * 100);
                 var payDate = DateTime.Now.ToString("yyyyMMddHHmmss");
 
-                // Build params theo đúng thứ tự alphabet (yêu cầu của VNPay)
                 var vnpParams = new SortedDictionary<string, string>
                 {
                     { "vnp_Amount",     amount.ToString() },
@@ -76,7 +72,6 @@ namespace KMS.Service.Services
                 if (!string.IsNullOrEmpty(dto.BankCode))
                     vnpParams.Add("vnp_BankCode", dto.BankCode);
 
-                // Tạo chữ ký HMAC-SHA512
                 var queryString = BuildQueryString(vnpParams);
                 var secureHash = HmacSHA512(_settings.HashSecret, queryString);
                 var paymentUrl = $"{_settings.BaseUrl}?{queryString}&vnp_SecureHash={secureHash}";
@@ -99,17 +94,12 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // XỬ LÝ CALLBACK TỪ VNPAY
-        // Sau khi thanh toán xong → VNPay gọi ReturnUrl với các params
-        // → Verify chữ ký → Tạo record trong KMS_Payments → Update Invoice
-        // ============================================================
 
         public async Task<BaseResponseDTO> ProcessCallbackAsync(IQueryCollection queryParams)
         {
             try
             {
-                // Tách secureHash ra khỏi params
                 var vnpParams = new SortedDictionary<string, string>();
                 foreach (var (key, value) in queryParams)
                 {
@@ -119,21 +109,18 @@ namespace KMS.Service.Services
 
                 var secureHash = queryParams["vnp_SecureHash"].ToString();
 
-                // Verify chữ ký
                 var queryString = BuildQueryString(vnpParams);
                 var checkHash = HmacSHA512(_settings.HashSecret, queryString);
 
                 if (!checkHash.Equals(secureHash, StringComparison.OrdinalIgnoreCase))
                     return new BaseResponseDTO { Success = false, Message = "Chữ ký không hợp lệ" };
 
-                // Lấy thông tin từ callback
-                var orderId = queryParams["vnp_TxnRef"].ToString();           // INV{invoiceId}_{timestamp}
-                var responseCode = queryParams["vnp_ResponseCode"].ToString(); // "00" = thành công
+                var orderId = queryParams["vnp_TxnRef"].ToString();          
+                var responseCode = queryParams["vnp_ResponseCode"].ToString(); 
                 var vnpTransactionNo = queryParams["vnp_TransactionNo"].ToString();
                 var bankCode = queryParams["vnp_BankCode"].ToString();
                 var amountStr = queryParams["vnp_Amount"].ToString();
 
-                // Parse invoiceId từ orderId: INV1_1234567890 → 1
                 var invoiceId = ParseInvoiceId(orderId);
                 if (invoiceId == 0)
                     return new BaseResponseDTO { Success = false, Message = "OrderId không hợp lệ" };
@@ -146,9 +133,8 @@ namespace KMS.Service.Services
 
                 if (isSuccess && invoice.Status != "Paid")
                 {
-                    // Tạo Payment record trong KMS_Payments
                     var paymentNumber = $"VNPAY-{DateTime.Now:yyyyMMdd}-{vnpTransactionNo}";
-                    var paidAmount = decimal.Parse(amountStr) / 100; // VNPay gửi x100
+                    var paidAmount = decimal.Parse(amountStr) / 100; 
 
                     var payment = new KmsPayment
                     {
@@ -157,7 +143,7 @@ namespace KMS.Service.Services
                         PaidAmount = paidAmount,
                         PaymentDate = DateOnly.FromDateTime(DateTime.Now),
                         PaymentMethod = "VNPay",
-                        TransactionReference = vnpTransactionNo, // Mã GD từ VNPay
+                        TransactionReference = vnpTransactionNo, 
                         Notes = $"VNPay | OrderId: {orderId} | Bank: {bankCode}",
                         ReceivedBy = invoice.CreatedBy ?? 1,
                         CreatedAt = DateTime.Now
@@ -165,17 +151,14 @@ namespace KMS.Service.Services
 
                     var createdPayment = await _paymentRepository.CreateAsync(payment);
 
-                    // Cập nhật Invoice → Paid
                     invoice.Status = "Paid";
                     invoice.UpdatedAt = DateTime.Now;
                     await _invoiceRepository.UpdateAsync(invoice);
 
-                    // Lấy invoice kèm đầy đủ thông tin
                     var invoiceDetail = await _invoiceRepository.GetByIdWithDetailsAsync(invoiceId);
 
                     if (invoiceDetail != null)
                     {
-                        // Lấy primary contact parent, fallback về contact đầu tiên
                         var primaryParent = invoiceDetail.Student.KmsStudentParents
                             .FirstOrDefault(sp => sp.IsPrimaryContact == true)
                             ?? invoiceDetail.Student.KmsStudentParents.FirstOrDefault();
@@ -226,7 +209,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // Thanh toán thất bại
                 return new BaseResponseDTO
                 {
                     Success = false,
@@ -248,13 +230,10 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // HELPERS
-        // ============================================================
 
         private static int ParseInvoiceId(string orderId)
         {
-            // Format: INV{invoiceId}_{timestamp} → lấy phần giữa INV và _
             try
             {
                 var withoutPrefix = orderId.Replace("INV", "");

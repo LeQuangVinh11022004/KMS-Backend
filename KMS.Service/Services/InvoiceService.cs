@@ -23,9 +23,7 @@ namespace KMS.Service.Services
             _studentRepository = studentRepository;
         }
 
-        // ============================================================
         // READ
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetAllInvoicesAsync()
         {
@@ -94,7 +92,6 @@ namespace KMS.Service.Services
         {
             try
             {
-                // Convert DateTime? → DateOnly? để truyền vào repository
                 DateOnly? monthFilter = filter.MonthYear.HasValue
                     ? new DateOnly(filter.MonthYear.Value.Year, filter.MonthYear.Value.Month, 1)
                     : null;
@@ -135,9 +132,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // CREATE (manual)
-        // ============================================================
+        // CREATE
 
         public async Task<BaseResponseDTO> CreateInvoiceAsync(CreateInvoiceDTO dto, int createdBy)
         {
@@ -210,9 +205,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // CREATE FROM TEMPLATE
-        // ============================================================
 
         public async Task<BaseResponseDTO> CreateInvoiceFromTemplateAsync(
             int studentId, int templateId, DateTime monthYear, int createdBy)
@@ -283,9 +276,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // UPDATE
-        // ============================================================
 
         public async Task<BaseResponseDTO> UpdateInvoiceAsync(int invoiceId, UpdateInvoiceDTO dto, int updatedBy)
         {
@@ -344,9 +335,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // DELETE
-        // ============================================================
 
         public async Task<BaseResponseDTO> DeleteInvoiceAsync(int invoiceId)
         {
@@ -368,9 +357,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // BATCH - Mark Overdue
-        // ============================================================
 
         public async Task<BaseResponseDTO> MarkOverdueInvoicesAsync()
         {
@@ -398,9 +385,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // MAPPER
-        // ============================================================
 
         private InvoiceDTO MapToDTO(KmsInvoice i)
         {

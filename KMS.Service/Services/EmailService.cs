@@ -20,10 +20,6 @@ namespace KMS.Service.Services
             _settings = settings.Value;
         }
 
-        // ============================================================
-        // GENERIC SEND
-        // ============================================================
-
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
             var message = new MimeMessage();
@@ -57,9 +53,6 @@ namespace KMS.Service.Services
             await client.DisconnectAsync(true);
         }
 
-        // ============================================================
-        // TÀI KHOẢN MỚI - Sau khi Admin approve ParentRegistration
-        // ============================================================
 
         public async Task SendAccountCreatedEmailAsync(
             string toEmail, string fullName, string username, string tempPassword)
@@ -115,9 +108,6 @@ namespace KMS.Service.Services
             await SendEmailAsync(toEmail, subject, body);
         }
 
-        // ============================================================
-        // RESET PASSWORD - Gửi token khi quên mật khẩu
-        // ============================================================
 
         public async Task SendResetPasswordEmailAsync(
             string toEmail, string fullName, string resetToken, DateTime expiresAt)
@@ -171,9 +161,6 @@ namespace KMS.Service.Services
 
             await SendEmailAsync(toEmail, subject, body);
         }
-        // ============================================================
-        // ATTENDANCE NOTIFICATION - Phụ huynh
-        // ============================================================
 
         public async Task SendAttendanceAlertEmailAsync(
             string toEmail,
@@ -257,7 +244,6 @@ namespace KMS.Service.Services
         {
             var subject = $"[{_settings.SenderName}] Xác nhận thanh toán hóa đơn #{invoiceNumber}";
 
-            // Build các dòng khoản phí
             var itemRows = new StringBuilder();
             foreach (var item in items)
             {

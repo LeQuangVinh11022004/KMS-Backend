@@ -29,7 +29,6 @@ namespace KMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ClassCreateRequestDTO request)
         {
-            // Tạm hardcode createdBy = 1
             var result = await _service.CreateAsync(request, 1);
             return CreatedAtAction(nameof(GetById), new { id = result.ClassId }, result);
         }

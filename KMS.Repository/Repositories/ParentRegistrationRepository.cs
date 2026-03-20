@@ -13,9 +13,6 @@ namespace KMS.Repository.Repositories
             _context = context;
         }
 
-        // ============================================================
-        // READ
-        // ============================================================
 
         public async Task<KmsParentRegistration?> GetByIdAsync(int registrationId)
         {
@@ -55,9 +52,6 @@ namespace KMS.Repository.Repositories
                 .AnyAsync(r => r.Email == email && r.Status == "Pending");
         }
 
-        // ============================================================
-        // CREATE
-        // ============================================================
 
         public async Task<KmsParentRegistration> CreateAsync(KmsParentRegistration registration)
         {
@@ -66,19 +60,12 @@ namespace KMS.Repository.Repositories
             return registration;
         }
 
-        // ============================================================
-        // UPDATE
-        // ============================================================
 
         public async Task UpdateAsync(KmsParentRegistration registration)
         {
             _context.KmsParentRegistrations.Update(registration);
             await _context.SaveChangesAsync();
         }
-
-        // ============================================================
-        // STATS
-        // ============================================================
 
         public async Task<int> CountByStatusAsync(string status)
         {

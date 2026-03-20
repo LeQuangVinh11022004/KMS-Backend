@@ -79,7 +79,7 @@ namespace KMS.Service.Services
                 EyeSight = dto.EyeSight,
                 DentalStatus = dto.DentalStatus,
                 Note = dto.Note,
-                CheckedBy = userId // 🔥 Lấy từ JWT
+                CheckedBy = userId 
             };
 
             await _repo.AddAsync(entity);
@@ -97,7 +97,7 @@ namespace KMS.Service.Services
             entity.EyeSight = dto.EyeSight;
             entity.DentalStatus = dto.DentalStatus;
             entity.Note = dto.Note;
-            entity.CheckedBy = userId; // update người sửa
+            entity.CheckedBy = userId; 
 
             await _repo.UpdateAsync(entity);
         }

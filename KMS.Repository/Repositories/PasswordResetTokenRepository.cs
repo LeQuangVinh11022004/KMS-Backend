@@ -44,7 +44,6 @@ namespace KMS.Repository.Repositories
 
         public async Task InvalidateAllUserTokensAsync(int userId)
         {
-            // Hủy tất cả token cũ chưa dùng của user → tránh nhiều token active cùng lúc
             var tokens = await _context.KmsPasswordResetTokens
                 .Where(t => t.UserId == userId && t.IsUsed != true)
                 .ToListAsync();

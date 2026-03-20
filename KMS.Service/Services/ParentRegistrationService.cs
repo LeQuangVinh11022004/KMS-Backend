@@ -28,15 +28,12 @@ namespace KMS.Service.Services
             _emailService = emailService;
         }
 
-        // ============================================================
         // PUBLIC - Phụ huynh tự submit
-        // ============================================================
 
         public async Task<BaseResponseDTO> SubmitRegistrationAsync(CreateParentRegistrationDTO dto)
         {
             try
             {
-                // Validate email format
                 if (!IsValidEmailFormat(dto.Email))
                     return new BaseResponseDTO
                     {
@@ -44,7 +41,6 @@ namespace KMS.Service.Services
                         Message = "Email không đúng định dạng (ví dụ: example@gmail.com)"
                     };
 
-                // Validate phone format nếu có nhập
                 if (!string.IsNullOrEmpty(dto.Phone) && !IsValidPhoneFormat(dto.Phone))
                     return new BaseResponseDTO
                     {
@@ -52,7 +48,6 @@ namespace KMS.Service.Services
                         Message = "Số điện thoại không đúng định dạng (phải bắt đầu bằng số, ví dụ: 0901234567)"
                     };
 
-                // Kiểm tra email đã có tài khoản chưa
                 if (await _registrationRepository.EmailAlreadyRegisteredAsync(dto.Email))
                     return new BaseResponseDTO
                     {
@@ -60,7 +55,6 @@ namespace KMS.Service.Services
                         Message = "Email này đã được đăng ký tài khoản. Vui lòng liên hệ nhà trường nếu cần hỗ trợ."
                     };
 
-                // Kiểm tra đã có đơn Pending chưa (tránh spam)
                 if (await _registrationRepository.EmailAlreadyPendingAsync(dto.Email))
                     return new BaseResponseDTO
                     {
@@ -97,9 +91,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // ADMIN - Read
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetAllRegistrationsAsync()
         {
@@ -162,9 +154,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // ADMIN - Approve → Tự động tạo User + Parent + gán Role
-        // ============================================================
 
         public async Task<BaseResponseDTO> ApproveRegistrationAsync(
             int registrationId, int reviewedBy, ReviewRegistrationDTO dto)
@@ -182,7 +172,6 @@ namespace KMS.Service.Services
                         Message = $"Cannot approve - registration is already {registration.Status}"
                     };
 
-                // Kiểm tra lại email chưa có tài khoản (phòng race condition)
                 if (await _registrationRepository.EmailAlreadyRegisteredAsync(registration.Email))
                     return new BaseResponseDTO
                     {
@@ -190,7 +179,6 @@ namespace KMS.Service.Services
                         Message = "Email này đã có tài khoản trong hệ thống"
                     };
 
-                // Validate email format khớp với CHECK constraint DB: %_@__%.__%
                 if (!IsValidEmailFormat(registration.Email))
                     return new BaseResponseDTO
                     {
@@ -198,26 +186,22 @@ namespace KMS.Service.Services
                         Message = $"Email '{registration.Email}' không đúng định dạng. Vui lòng cập nhật đơn đăng ký."
                     };
 
-                // ── Tạo username từ email (phần trước @) ──────────────────
                 var baseUsername = registration.Email.Split('@')[0].ToLower();
                 var username = baseUsername;
                 var counter = 1;
 
-                // Nếu username đã tồn tại thì thêm số vào sau
                 while (await _userRepository.UsernameExistsAsync(username))
                 {
                     username = $"{baseUsername}{counter}";
                     counter++;
                 }
 
-                // ── Mật khẩu tạm = số điện thoại, fallback = "Parent@123" ─
                 var tempPassword = !string.IsNullOrEmpty(registration.Phone)
                     ? registration.Phone
                     : "Parent@123";
 
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword);
 
-                // Chỉ set Phone nếu hợp lệ, tránh CK_Phone_Format constraint
                 string? validPhone = !string.IsNullOrEmpty(registration.Phone)
                     && IsValidPhoneFormat(registration.Phone)
                     ? registration.Phone
@@ -240,7 +224,6 @@ namespace KMS.Service.Services
 
                 var createdUser = await _userRepository.CreateAsync(newUser);
 
-                // ── Tạo KmsParent liên kết với User ───────────────────────
                 var newParent = new KmsParent
                 {
                     UserId = createdUser.UserId,
@@ -249,7 +232,6 @@ namespace KMS.Service.Services
 
                 await _parentRepository.CreateAsync(newParent);
 
-                // ── Gán Role "Parent" ─────────────────────────────────────
                 var parentRole = await _userRoleRepository.GetRoleByNameAsync("Parent");
                 if (parentRole != null)
                 {
@@ -257,7 +239,6 @@ namespace KMS.Service.Services
                         createdUser.UserId, parentRole.RoleId, reviewedBy);
                 }
 
-                // ── Cập nhật trạng thái đơn đăng ký ──────────────────────
                 registration.Status = "Approved";
                 registration.ReviewedBy = reviewedBy;
                 registration.ReviewedAt = DateTime.Now;
@@ -265,7 +246,6 @@ namespace KMS.Service.Services
 
                 await _registrationRepository.UpdateAsync(registration);
 
-                // ── Gửi email thông tin tài khoản cho phụ huynh ─────────
                 var emailSent = false;
                 try
                 {
@@ -275,7 +255,6 @@ namespace KMS.Service.Services
                 }
                 catch
                 {
-                    // Không throw - tài khoản đã tạo thành công dù email fail
                     emailSent = false;
                 }
 
@@ -303,9 +282,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // ADMIN - Reject
-        // ============================================================
 
         public async Task<BaseResponseDTO> RejectRegistrationAsync(
             int registrationId, int reviewedBy, ReviewRegistrationDTO dto)
@@ -343,13 +320,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // MAPPER
-        // ============================================================
-
-        // ============================================================
         // HELPERS
-        // ============================================================
 
         private static bool IsValidPhoneFormat(string phone)
         {
@@ -371,6 +342,8 @@ namespace KMS.Service.Services
                 return false;
             }
         }
+
+        // MAPPER
 
         private ParentRegistrationDTO MapToDTO(KmsParentRegistration r)
         {

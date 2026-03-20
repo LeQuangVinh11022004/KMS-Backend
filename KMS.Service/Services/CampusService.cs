@@ -78,7 +78,6 @@ namespace KMS.Service.Services
             await _repo.SaveChangesAsync();
         }
 
-        // Soft delete
         public async Task DeleteAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);

@@ -88,7 +88,6 @@ namespace KMS.Repository.Repositories
 
             user.IsActive = true;
             user.UpdatedAt = DateTime.Now;
-            // Note: Có thể log vào AuditLogs với activatedBy
 
             await _context.SaveChangesAsync();
             return true;
@@ -101,7 +100,6 @@ namespace KMS.Repository.Repositories
 
             user.IsActive = false;
             user.UpdatedAt = DateTime.Now;
-            // Note: Có thể log vào AuditLogs với deactivatedBy
 
             await _context.SaveChangesAsync();
             return true;
@@ -109,7 +107,6 @@ namespace KMS.Repository.Repositories
 
         public async Task<IEnumerable<KmsUser>> GetPendingUsersAsync()
         {
-            // Users IsActive = false hoặc null
             return await _context.KmsUsers
                 .Where(u => u.IsActive != true)
                 .OrderByDescending(u => u.CreatedAt)
@@ -126,7 +123,6 @@ namespace KMS.Repository.Repositories
 
         public async Task<IEnumerable<KmsUser>> GetInactiveUsersAsync()
         {
-            // Tương đương GetPendingUsers, nhưng có thể filter thêm
             return await _context.KmsUsers
                 .Where(u => u.IsActive == false)
                 .OrderByDescending(u => u.CreatedAt)

@@ -43,7 +43,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // Activate user
                 var success = await _unitOfWork.Users.ActivateUserAsync(userId, approvedBy);
                 if (!success)
                 {
@@ -70,9 +69,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // REJECT USER (Giữ inactive hoặc xóa)
-        // ============================================================
+        // REJECT USER 
 
         public async Task<BaseResponseDTO> RejectUserAsync(int userId, int rejectedBy)
         {
@@ -88,11 +85,7 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // Option 1: Giữ inactive (để có thể review lại sau)
                 var success = await _unitOfWork.Users.DeactivateUserAsync(userId, rejectedBy);
-
-                // Option 2: Hoặc có thể xóa luôn (tùy requirement)
-                // await _context.Users.Remove(user);
 
                 if (!success)
                 {
@@ -119,9 +112,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
-        // DEACTIVATE USER (Cho users đang active)
-        // ============================================================
+        // DEACTIVATE USER
 
         public async Task<BaseResponseDTO> DeactivateUserAsync(int userId, int deactivatedBy)
         {
@@ -172,9 +163,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // GET USERS BY STATUS
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetPendingUsersAsync()
         {
@@ -280,9 +269,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // STATISTICS
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetUserStatusStatisticsAsync()
         {

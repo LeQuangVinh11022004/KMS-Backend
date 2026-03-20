@@ -26,7 +26,7 @@ namespace KMS.Repository.Repositories
                 .Include(ct => ct.Class)
                 .Include(ct => ct.AssignedByNavigation)
                 .Where(ct => ct.ClassId == classId)
-                .OrderBy(ct => ct.Role) // Main first
+                .OrderBy(ct => ct.Role)
                 .ToListAsync();
         }
 

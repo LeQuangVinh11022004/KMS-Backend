@@ -19,9 +19,6 @@ namespace KMS.API.Controllers
             _passwordService = passwordService;
         }
 
-        // ============================================================
-        // ADMIN
-        // ============================================================
 
         /// <summary>
         /// Admin reset password for user 
@@ -45,9 +42,6 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        // ============================================================
-        // USER (cần đăng nhập)
-        // ============================================================
 
         /// <summary>
         /// User change password
@@ -65,10 +59,6 @@ namespace KMS.API.Controllers
             var result = await _passwordService.ChangePasswordAsync(userId, dto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
-        // ============================================================
-        // FORGOT PASSWORD (không cần đăng nhập)
-        // ============================================================
 
         /// <summary>
         /// User forgot password
@@ -96,9 +86,6 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        // ============================================================
-        // HELPER
-        // ============================================================
 
         private int GetCurrentUserId()
         {

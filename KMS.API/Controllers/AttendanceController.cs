@@ -112,9 +112,7 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        // ============================================================
         // HELPER
-        // ============================================================
 
         private int GetCurrentUserId()
         {

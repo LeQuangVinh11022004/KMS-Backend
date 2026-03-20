@@ -1,5 +1,4 @@
-﻿// UserManagementController.cs
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using KMS.Service.Interfaces;
 using System.Security.Claims;
