@@ -77,7 +77,6 @@ namespace KMS.Service.Services
         {
             try
             {
-                // Validate user exists
                 var user = await _userRepository.GetByIdAsync(dto.UserId);
                 if (user == null)
                 {
@@ -88,7 +87,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // Check if teacher code exists
                 if (await _teacherRepository.TeacherCodeExistsAsync(dto.TeacherCode))
                 {
                     return new BaseResponseDTO
@@ -98,7 +96,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // Check if user is already a teacher
                 if (await _teacherRepository.UserIsTeacherAsync(dto.UserId))
                 {
                     return new BaseResponseDTO
@@ -152,7 +149,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // Update fields
                 if (dto.Specialization != null) teacher.Specialization = dto.Specialization;
                 if (dto.HireDate.HasValue) teacher.HireDate = dto.HireDate;
                 if (dto.Salary.HasValue) teacher.Salary = dto.Salary;

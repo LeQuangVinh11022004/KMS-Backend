@@ -96,11 +96,9 @@ namespace KMS.Service.Services
                 if (student.IsActive != true)
                     return new BaseResponseDTO { Success = false, Message = "Student is inactive" };
 
-                // Kiểm tra học sinh đã có trong lớp chưa
                 if (await _classStudentRepository.IsStudentInClassAsync(classId, dto.StudentId))
                     return new BaseResponseDTO { Success = false, Message = "Student is already enrolled in this class" };
 
-                // Kiểm tra sĩ số lớp
                 var currentCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
                 if (kmsClass.MaxCapacity.HasValue && currentCount >= kmsClass.MaxCapacity.Value)
                     return new BaseResponseDTO
@@ -141,7 +139,6 @@ namespace KMS.Service.Services
                     );
                 }
 
-                // Cập nhật CurrentEnrollment trên Class
                 kmsClass.CurrentEnrollment = currentCount + 1;
                 _classRepository.Update(kmsClass);
                 await _classRepository.SaveChangesAsync();
@@ -209,7 +206,6 @@ namespace KMS.Service.Services
                     enrolled.Add(student.FullName);
                 }
 
-                // Cập nhật CurrentEnrollment
                 var newCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
                 kmsClass.CurrentEnrollment = newCount;
                 _classRepository.Update(kmsClass);
@@ -238,7 +234,6 @@ namespace KMS.Service.Services
 
                 await _classStudentRepository.RemoveAsync(classId, studentId);
 
-                // Cập nhật CurrentEnrollment
                 var kmsClass = await _classRepository.GetByIdAsync(classId);
                 if (kmsClass != null)
                 {
@@ -261,7 +256,6 @@ namespace KMS.Service.Services
         {
             try
             {
-                // Kiểm tra học sinh có trong lớp cũ không
                 if (!await _classStudentRepository.IsStudentInClassAsync(fromClassId, studentId))
                     return new BaseResponseDTO { Success = false, Message = "Student is not in the source class" };
 
@@ -272,19 +266,15 @@ namespace KMS.Service.Services
                 if (toClass.IsActive != true)
                     return new BaseResponseDTO { Success = false, Message = "Destination class is inactive" };
 
-                // Kiểm tra sĩ số lớp mới
                 var toCount = await _classStudentRepository.CountStudentsInClassAsync(toClassId);
                 if (toClass.MaxCapacity.HasValue && toCount >= toClass.MaxCapacity.Value)
                     return new BaseResponseDTO { Success = false, Message = "Destination class is full" };
 
-                // Kiểm tra học sinh đã có trong lớp mới chưa
                 if (await _classStudentRepository.IsStudentInClassAsync(toClassId, studentId))
                     return new BaseResponseDTO { Success = false, Message = "Student is already in the destination class" };
 
-                // Xóa khỏi lớp cũ
                 await _classStudentRepository.RemoveAsync(fromClassId, studentId);
 
-                // Cập nhật sĩ số lớp cũ
                 var fromClass = await _classRepository.GetByIdAsync(fromClassId);
                 if (fromClass != null)
                 {
@@ -293,7 +283,6 @@ namespace KMS.Service.Services
                     await _classRepository.SaveChangesAsync();
                 }
 
-                // Thêm vào lớp mới
                 await _classStudentRepository.EnrollAsync(new KmsClassStudent
                 {
                     ClassId = toClassId,
@@ -302,7 +291,6 @@ namespace KMS.Service.Services
                     EnrolledBy = enrolledBy
                 });
 
-                // Cập nhật sĩ số lớp mới
                 toClass.CurrentEnrollment = await _classStudentRepository.CountStudentsInClassAsync(toClassId);
                 _classRepository.Update(toClass);
                 await _classRepository.SaveChangesAsync();

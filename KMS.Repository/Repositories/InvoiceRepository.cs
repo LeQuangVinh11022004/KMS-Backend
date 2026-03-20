@@ -13,10 +13,6 @@ namespace KMS.Repository.Repositories
             _context = context;
         }
 
-        // ============================================================
-        // READ
-        // ============================================================
-
         public async Task<KmsInvoice?> GetByIdAsync(int invoiceId)
         {
             return await _context.KmsInvoices
@@ -135,10 +131,6 @@ namespace KMS.Repository.Repositories
             return await query.OrderByDescending(i => i.CreatedAt).ToListAsync();
         }
 
-        // ============================================================
-        // CREATE
-        // ============================================================
-
         public async Task<KmsInvoice> CreateAsync(KmsInvoice invoice)
         {
             _context.KmsInvoices.Add(invoice);
@@ -155,19 +147,11 @@ namespace KMS.Repository.Repositories
             return item;
         }
 
-        // ============================================================
-        // UPDATE
-        // ============================================================
-
         public async Task UpdateAsync(KmsInvoice invoice)
         {
             _context.KmsInvoices.Update(invoice);
             await _context.SaveChangesAsync();
         }
-
-        // ============================================================
-        // DELETE
-        // ============================================================
 
         public async Task DeleteAsync(int invoiceId)
         {
@@ -179,9 +163,6 @@ namespace KMS.Repository.Repositories
             }
         }
 
-        // ============================================================
-        // CHECKS & HELPERS
-        // ============================================================
 
         public async Task<bool> InvoiceNumberExistsAsync(string invoiceNumber)
         {
@@ -215,9 +196,7 @@ namespace KMS.Repository.Repositories
             return $"{prefix}{nextSeq:D3}";
         }
 
-        // ============================================================
-        // STATS
-        // ============================================================
+
 
         public async Task<decimal> GetTotalPaidByStudentAsync(int studentId)
         {

@@ -93,16 +93,13 @@ namespace KMS.Service.Services
                 if (teacher.IsActive != true)
                     return new BaseResponseDTO { Success = false, Message = "Teacher is inactive" };
 
-                // Kiểm tra giáo viên đã có trong lớp chưa
                 if (await _classTeacherRepository.IsTeacherInClassAsync(classId, dto.TeacherId))
                     return new BaseResponseDTO { Success = false, Message = "Teacher is already assigned to this class" };
 
-                // Validate role
                 var validRoles = new[] { "Main", "Assistant" };
                 if (!validRoles.Contains(dto.Role))
                     return new BaseResponseDTO { Success = false, Message = "Invalid role. Must be 'Main' or 'Assistant'" };
 
-                // Mỗi lớp chỉ có 1 giáo viên Main
                 if (dto.Role == "Main" && await _classTeacherRepository.ClassHasMainTeacherAsync(classId))
                     return new BaseResponseDTO
                     {
@@ -147,7 +144,6 @@ namespace KMS.Service.Services
                 if (!validRoles.Contains(dto.Role))
                     return new BaseResponseDTO { Success = false, Message = "Invalid role. Must be 'Main' or 'Assistant'" };
 
-                // Nếu đổi sang Main thì kiểm tra đã có Main chưa
                 if (dto.Role == "Main" && record.Role != "Main")
                 {
                     if (await _classTeacherRepository.ClassHasMainTeacherAsync(classId))

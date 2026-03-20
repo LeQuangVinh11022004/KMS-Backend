@@ -13,8 +13,6 @@ namespace KMS.Repository.Repositories
             _context = context;
         }
 
-        // ── Lấy học sinh của lớp ──────────────────────────────────
-
         public async Task<IEnumerable<KmsStudent>> GetStudentsByClassAsync(int classId)
         {
             return await _context.KmsClassStudents
@@ -38,7 +36,6 @@ namespace KMS.Repository.Repositories
                 .ToListAsync();
         }
 
-        // ── CRUD ──────────────────────────────────────────────────
 
         public async Task<KmsAttendance?> GetByIdAsync(int attendanceId)
         {
@@ -75,7 +72,6 @@ namespace KMS.Repository.Repositories
             await _context.SaveChangesAsync();
         }
 
-        // ── Lịch sử ───────────────────────────────────────────────
 
         public async Task<IEnumerable<KmsAttendance>> GetByStudentAsync(
             int studentId, DateOnly? fromDate, DateOnly? toDate)
@@ -97,7 +93,6 @@ namespace KMS.Repository.Repositories
                 .ToListAsync();
         }
 
-        // ── Kiểm tra ──────────────────────────────────────────────
 
         public async Task<bool> ExistsAsync(int studentId, DateOnly date)
         {

@@ -25,9 +25,7 @@ namespace KMS.Service.Services
             _parentRepository = parentRepository;
         }
 
-        // ============================================================
         // READ
-        // ============================================================
 
         public async Task<BaseResponseDTO> GetParentsByStudentAsync(int studentId)
         {
@@ -77,9 +75,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // LINK
-        // ============================================================
 
         public async Task<BaseResponseDTO> LinkAsync(int studentId, LinkStudentParentDTO dto)
         {
@@ -93,7 +89,6 @@ namespace KMS.Service.Services
                 if (parent == null)
                     return new BaseResponseDTO { Success = false, Message = "Parent not found" };
 
-                // Validate relationship
                 if (!ValidRelationships.Contains(dto.Relationship))
                     return new BaseResponseDTO
                     {
@@ -101,7 +96,6 @@ namespace KMS.Service.Services
                         Message = $"Invalid relationship. Must be one of: {string.Join(", ", ValidRelationships)}"
                     };
 
-                // Kiểm tra đã link chưa
                 if (await _studentParentRepository.LinkExistsAsync(studentId, dto.ParentId))
                     return new BaseResponseDTO
                     {
@@ -109,11 +103,9 @@ namespace KMS.Service.Services
                         Message = "This parent is already linked to this student"
                     };
 
-                // Nếu set IsPrimaryContact = true thì bỏ primary của người cũ
                 if (dto.IsPrimaryContact)
                     await ClearPrimaryContactAsync(studentId);
 
-                // Nếu chưa có primary contact nào thì tự động set người đầu tiên làm primary
                 var hasPrimary = await _studentParentRepository.HasPrimaryContactAsync(studentId);
                 var isPrimary = dto.IsPrimaryContact || !hasPrimary;
 
@@ -141,9 +133,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // UPDATE
-        // ============================================================
 
         public async Task<BaseResponseDTO> UpdateLinkAsync(int studentId, int parentId, UpdateStudentParentDTO dto)
         {
@@ -168,7 +158,6 @@ namespace KMS.Service.Services
                 {
                     if (dto.IsPrimaryContact.Value)
                     {
-                        // Bỏ primary của người cũ trước
                         await ClearPrimaryContactAsync(studentId);
                         record.IsPrimaryContact = true;
                     }
@@ -193,9 +182,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // UNLINK
-        // ============================================================
 
         public async Task<BaseResponseDTO> UnlinkAsync(int studentId, int parentId)
         {
@@ -209,7 +196,6 @@ namespace KMS.Service.Services
 
                 await _studentParentRepository.UnlinkAsync(studentId, parentId);
 
-                // Nếu xóa primary contact thì tự động set người tiếp theo làm primary
                 if (wasPrimary)
                 {
                     var remaining = await _studentParentRepository.GetParentsByStudentAsync(studentId);
@@ -229,9 +215,7 @@ namespace KMS.Service.Services
             }
         }
 
-        // ============================================================
         // HELPERS
-        // ============================================================
 
         private async Task ClearPrimaryContactAsync(int studentId)
         {

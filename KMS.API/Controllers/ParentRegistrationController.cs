@@ -18,10 +18,6 @@ namespace KMS.API.Controllers
             _registrationService = registrationService;
         }
 
-        // ============================================================
-        // PUBLIC - Phụ huynh tự submit (không cần đăng nhập)
-        // ============================================================
-
         /// <summary>
         /// Parent submit registeration request
         /// </summary>
@@ -34,10 +30,6 @@ namespace KMS.API.Controllers
             var result = await _registrationService.SubmitRegistrationAsync(dto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
-        // ============================================================
-        // ADMIN - Xem danh sách
-        // ============================================================
 
         /// <summary>
         /// Get all registration requests (Admin)
@@ -72,10 +64,6 @@ namespace KMS.API.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        // ============================================================
-        // ADMIN - Duyệt / Từ chối
-        // ============================================================
-
         /// <summary>
         /// Approve registration request (Admin)
         /// </summary>
@@ -105,10 +93,6 @@ namespace KMS.API.Controllers
             var result = await _registrationService.RejectRegistrationAsync(id, reviewedBy, dto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
-        // ============================================================
-        // HELPER
-        // ============================================================
 
         private int GetCurrentUserId()
         {

@@ -18,10 +18,6 @@ namespace KMS.Repository.Repositories
             _context = context;
         }
 
-        // ============================================================
-        // READ
-        // ============================================================
-
         public async Task<KmsTuitionTemplate?> GetByIdAsync(int templateId)
         {
             return await _context.KmsTuitionTemplates
@@ -58,10 +54,6 @@ namespace KMS.Repository.Repositories
                 .AnyAsync(t => t.TemplateName == name && (excludeId == null || t.TemplateId != excludeId));
         }
 
-        // ============================================================
-        // CREATE
-        // ============================================================
-
         public async Task<KmsTuitionTemplate> CreateAsync(KmsTuitionTemplate template)
         {
             _context.KmsTuitionTemplates.Add(template);
@@ -72,20 +64,11 @@ namespace KMS.Repository.Repositories
             return template;
         }
 
-        // ============================================================
-        // UPDATE
-        // ============================================================
-
         public async Task UpdateAsync(KmsTuitionTemplate template)
         {
             _context.KmsTuitionTemplates.Update(template);
             await _context.SaveChangesAsync();
         }
-
-        // ============================================================
-        // DELETE
-        // ============================================================
-
         public async Task DeleteAsync(int templateId)
         {
             var template = await _context.KmsTuitionTemplates.FindAsync(templateId);
@@ -95,10 +78,6 @@ namespace KMS.Repository.Repositories
                 await _context.SaveChangesAsync();
             }
         }
-
-        // ============================================================
-        // ITEMS
-        // ============================================================
 
         public async Task<KmsTuitionItem?> GetItemByIdAsync(int itemId)
         {
@@ -120,10 +99,6 @@ namespace KMS.Repository.Repositories
             _context.KmsTuitionItems.RemoveRange(items);
             await _context.SaveChangesAsync();
         }
-
-        // ============================================================
-        // STATS
-        // ============================================================
 
         public async Task<int> CountTemplatesAsync()
         {

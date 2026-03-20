@@ -27,7 +27,6 @@ namespace KMS.Service.Services
         {
             try
             {
-                // 1. Find user by username
                 var user = await _unitOfWork.Users.GetByUsernameAsync(request.Username);
 
                 if (user == null)
@@ -39,7 +38,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // 2. Check if user is active
                 if (user.IsActive != true)
                 {
                     return new LoginResponseDTO
@@ -49,7 +47,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // 3. Verify password using BCrypt
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 {
                     return new LoginResponseDTO
@@ -59,16 +56,12 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // 4. Get user roles
                 var roles = await _unitOfWork.Users.GetUserRolesAsync(user.UserId);
 
-                // 5. Generate JWT token
                 var token = GenerateJwtToken(user, roles);
 
-                // 6. Update last login
                 await _unitOfWork.Users.UpdateLastLoginAsync(user.UserId);
 
-                // 7. Return success response
                 return new LoginResponseDTO
                 {
                     Success = true,
@@ -101,7 +94,6 @@ namespace KMS.Service.Services
         {
             try
             {
-                // 1. Check if username exists
                 if (await _unitOfWork.Users.UsernameExistsAsync(request.Username))
                 {
                     return new LoginResponseDTO
@@ -111,7 +103,6 @@ namespace KMS.Service.Services
                     };
                 }
 
-                // 2. Check if email exists
                 if (!string.IsNullOrEmpty(request.Email))
                 {
                     if (await _unitOfWork.Users.EmailExistsAsync(request.Email))
@@ -124,10 +115,8 @@ namespace KMS.Service.Services
                     }
                 }
 
-                // 3. Hash password using BCrypt
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-                // 4. Create new user
                 var newUser = new KmsUser
                 {
                     Username = request.Username,
@@ -135,7 +124,7 @@ namespace KMS.Service.Services
                     FullName = request.FullName,
                     Email = request.Email,
                     Phone = request.Phone,
-                    IsActive = false,  // ← PENDING - Chờ Admin duyệt
+                    IsActive = false, 
                     IsEmailVerified = false,
                     IsPhoneVerified = false,
                     CreatedAt = DateTime.Now,
@@ -199,7 +188,6 @@ namespace KMS.Service.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            // Add roles to claims
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));

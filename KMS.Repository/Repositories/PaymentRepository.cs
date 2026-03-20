@@ -18,9 +18,6 @@ namespace KMS.Repository.Repositories
             _context = context;
         }
 
-        // ============================================================
-        // READ
-        // ============================================================
 
         public async Task<KmsPayment?> GetByIdAsync(int paymentId)
         {
@@ -94,10 +91,6 @@ namespace KMS.Repository.Repositories
                 .ToListAsync();
         }
 
-        // ============================================================
-        // CREATE
-        // ============================================================
-
         public async Task<KmsPayment> CreateAsync(KmsPayment payment)
         {
             _context.KmsPayments.Add(payment);
@@ -106,10 +99,6 @@ namespace KMS.Repository.Repositories
             await _context.Entry(payment).Reference(p => p.ReceivedByNavigation).LoadAsync();
             return payment;
         }
-
-        // ============================================================
-        // DELETE
-        // ============================================================
 
         public async Task DeleteAsync(int paymentId)
         {
@@ -120,10 +109,6 @@ namespace KMS.Repository.Repositories
                 await _context.SaveChangesAsync();
             }
         }
-
-        // ============================================================
-        // CHECKS & HELPERS
-        // ============================================================
 
         public async Task<string> GeneratePaymentNumberAsync()
         {
@@ -151,10 +136,6 @@ namespace KMS.Repository.Repositories
                 .Where(p => p.InvoiceId == invoiceId)
                 .SumAsync(p => p.PaidAmount);
         }
-
-        // ============================================================
-        // STATS
-        // ============================================================
 
         public async Task<decimal> GetTotalRevenueAsync(DateTime? fromDate, DateTime? toDate)
         {

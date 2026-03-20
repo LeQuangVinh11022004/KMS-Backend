@@ -19,10 +19,6 @@ using System.Threading.Tasks;
                 _context = context;
             }
 
-            // ============================================================
-            // READ
-            // ============================================================
-
             public async Task<KmsTeacher?> GetByIdAsync(int teacherId)
             {
                 return await _context.KmsTeachers
@@ -52,10 +48,6 @@ using System.Threading.Tasks;
                     .ToListAsync();
             }
 
-            // ============================================================
-            // CREATE
-            // ============================================================
-
             public async Task<KmsTeacher> CreateAsync(KmsTeacher teacher)
             {
                 _context.KmsTeachers.Add(teacher);
@@ -66,20 +58,11 @@ using System.Threading.Tasks;
 
                 return teacher;
             }
-
-            // ============================================================
-            // UPDATE
-            // ============================================================
-
             public async Task UpdateAsync(KmsTeacher teacher)
             {
                 _context.KmsTeachers.Update(teacher);
                 await _context.SaveChangesAsync();
             }
-
-            // ============================================================
-            // DELETE
-            // ============================================================
 
             public async Task DeleteAsync(int teacherId)
             {
@@ -90,10 +73,6 @@ using System.Threading.Tasks;
                     await _context.SaveChangesAsync();
                 }
             }
-
-            // ============================================================
-            // FILTER
-            // ============================================================
 
             public async Task<IEnumerable<KmsTeacher>> GetActiveTeachersAsync()
             {
@@ -124,10 +103,6 @@ using System.Threading.Tasks;
                     .ToListAsync();
             }
 
-            // ============================================================
-            // CHECK
-            // ============================================================
-
             public async Task<bool> TeacherCodeExistsAsync(string teacherCode)
             {
                 return await _context.KmsTeachers
@@ -139,10 +114,6 @@ using System.Threading.Tasks;
                 return await _context.KmsTeachers
                     .AnyAsync(t => t.UserId == userId);
             }
-
-            // ============================================================
-            // STATISTICS
-            // ============================================================
 
             public async Task<int> CountActiveTeachersAsync()
             {
