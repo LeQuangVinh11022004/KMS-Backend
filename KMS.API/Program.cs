@@ -163,6 +163,7 @@ builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
+builder.Services.AddScoped<IDailyReportRepository, DailyReportRepository>();
 
 // Services
 
@@ -197,6 +198,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
 builder.Services.AddScoped<IChatAiService, ChatAiService>();
+builder.Services.AddScoped<IDailyReportService, DailyReportService>();
 
 // Logging
 builder.Logging.ClearProviders();
