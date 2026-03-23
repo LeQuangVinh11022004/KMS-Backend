@@ -9,98 +9,189 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    namespace KMS.Service.Services
+namespace KMS.Service.Services
+{
+    public class ChatAiService : IChatAiService
     {
-        public class ChatAiService : IChatAiService
+        private readonly ApplicationDbContext _context;
+        private readonly string _apiKey;
+
+
+        //promt template
+        private const string SystemInstructionTemplate =
+        "Bạn là trợ lý ảo trường mầm non KMS. Dựa trên dữ liệu: {0}. Hãy trả lời phụ huynh câu hỏi sau một cách thân thiện: {1}";
+
+        public ChatAiService(ApplicationDbContext context, IConfiguration config)
         {
-            private readonly ApplicationDbContext _context;
-            private readonly string _apiKey;
-            private readonly string _modelName;
+            _context = context;
+            _apiKey = config["Gemini:ApiKey"]?.Trim();
+        }
 
-            private const string SystemInstructionTemplate =
-            "Bạn là trợ lý ảo trường mầm non KMS. Dựa trên dữ liệu: {0}. Hãy trả lời phụ huynh câu hỏi sau một cách thân thiện: {1}";
-
-            public ChatAiService(ApplicationDbContext context, IConfiguration config)
+        // check xem cau hoi co nam trong domain cua he thong hay 0
+        private bool IsOutOfScope(string question)
+        {
+            string[] allowed =
             {
-                _context = context;
-                _apiKey = config["Gemini:ApiKey"]?.Trim();
-                _modelName = config["Gemini:Model"]?.Trim() ?? "gemini-1.5-flash";
+                "bé","con","điểm danh","lớp",
+                "thực đơn","ăn","ngủ","báo cáo",
+                "hoạt động","giáo viên"
+            };
+
+            return !allowed.Any(k => question.ToLower().Contains(k));
+        }
+
+        // tom tat bao cao sinh hoat
+        private async Task<string> SummarizeReport(string text)
+        {
+            var googleAi = new GoogleAI(_apiKey);
+            var model = googleAi.GenerativeModel(Model.Gemini25Flash);
+
+            var prompt = $"Tóm tắt báo cáo mầm non sau trong 1 câu ngắn: {text}";
+
+            var response = await model.GenerateContent(prompt);
+
+            return response.Text;
+        }
+
+        public async Task<ChatResponseDTO> GetAiResponseAsync(int userId, ChatRequestDTO request)
+        {
+
+            // kiem tra neu cau hoi ngoai domain thi tra loi san
+            if (IsOutOfScope(request.Prompt))
+            {
+                return new ChatResponseDTO
+                {
+                    Answer = "Dạ em chỉ hỗ trợ thông tin liên quan đến bé và hoạt động tại trường KMS thôi ạ.",
+                    SentAt = DateTime.Now
+                };
             }
 
-            public async Task<ChatResponseDTO> GetAiResponseAsync(int userId, ChatRequestDTO request)
-            {
+            // lay ds hs cua phu huynh
+            var students = await (from sp in _context.KmsStudentParents
+                                  join s in _context.KmsStudents on sp.StudentId equals s.StudentId
+                                  where sp.Parent.UserId == userId
+                                  select new
+                                  {
+                                      s.StudentId,
+                                      s.FullName
+                                  }).ToListAsync();
+
+            // lay lich su chat gan nhat de lam memory
+            var memory = await _context.KmsChatHistories
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.SentAt)
+                .Take(5)
+                .ToListAsync();
+
+            var historyContext = string.Join("\n",
+                memory.Select(x =>
+                    $"Parent: {x.UserMessage}\nAI: {x.AiResponse}"
+            ));
+
+            var studentIds = students.Select(x => x.StudentId).ToList();
+
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            //lay thong tin hoc sinh va lop cua phu huynh
-            var data = await (from sp in _context.KmsStudentParents
-                              join s in _context.KmsStudents on sp.StudentId equals s.StudentId
-                              join cs in _context.KmsClassStudents on s.StudentId equals cs.StudentId
-                              join c in _context.KmsClasses on cs.ClassId equals c.ClassId
-                              where sp.Parent.UserId == userId
-                              select new
-                              {
-                                  StudentId = s.StudentId,
-                                  FullName = s.FullName,
-                                  ClassName = c.ClassName,
-                                  ClassId = c.ClassId,
-                                  // lay diem danh hom nay 
-                                  Attendance = _context.KmsAttendances
-                                      .FirstOrDefault(a => a.StudentId == s.StudentId && a.AttendanceDate == today),
-                                  //lay bcao sinh hoat hom nay
-                                  Report = _context.KmsDailyReports
-                                      .FirstOrDefault(r => r.StudentId == s.StudentId && r.ReportDate == today && r.Status == "Published"),
-                                  //lay menu hom nay cua lop
-                                  Menu = _context.KmsMenus
-                                      .Where(m => (m.ClassId == c.ClassId || m.ClassId == null) && m.MenuDate == today)
-                                      .ToList()
-                              }).FirstOrDefaultAsync();
 
-            if (data == null)
-                return new ChatResponseDTO { Answer = "Dạ, hiện tại em chưa tìm thấy thông tin của bé nhà mình trên hệ thống ạ.", SentAt = DateTime.Now };
+            // lay tt diem danh
+            var attendances = await _context.KmsAttendances
+                .Where(x => studentIds.Contains(x.StudentId)
+                    && x.AttendanceDate == today)
+                .ToListAsync();
 
-            // xay dung context
-            var menuInfo = data.Menu.Any()
-                ? string.Join(", ", data.Menu.Select(m => $"{m.MealType}: {m.MenuContent}"))
-                : "Chưa cập nhật thực đơn";
+            // lay daily rp da publish
+            var reports = await _context.KmsDailyReports
+                .Where(x => studentIds.Contains(x.StudentId)
+                    && x.ReportDate == today
+                    && x.Status == "Published")
+                .ToListAsync();
 
-            var attendanceInfo = data.Attendance != null
-                ? (data.Attendance.Status == "Present" ? $"đã đến lớp lúc {data.Attendance.CheckInTime}" : $"vắng mặt ({data.Attendance.Status})")
-                : "chưa có dữ liệu điểm danh";
+            // lay menu
+            var menus = await _context.KmsMenus
+                .Where(x => x.MenuDate == today)
+                .ToListAsync();
 
-            string contextData = $"- Bé: {data.FullName}, Lớp: {data.ClassName}. " +
-                                 $"- Điểm danh hôm nay: {attendanceInfo}. " +
-                                 $"- Thực đơn hôm nay: {menuInfo}. " +
-                                 $"- Sinh hoạt: {data.Report?.LivingData ?? "Giáo viên chưa cập nhật cụ thể"}. " +
-                                 $"- Nhận xét: {data.Report?.EducationalData ?? "Đang đợi cô giáo ghi chú thêm"}.";
+            var contextData = "";
+
+
+            // build context cho AI
+            foreach (var student in students)
+            {
+                var attendance = attendances
+                    .FirstOrDefault(x => x.StudentId == student.StudentId);
+
+                var report = reports
+                    .FirstOrDefault(x => x.StudentId == student.StudentId);
+
+                var menuInfo = string.Join(", ",
+                    menus.Select(m => $"{m.MealType}: {m.MenuContent}"));
+
+                var attendanceInfo = attendance != null
+                    ? attendance.Status
+                    : "chưa điểm danh";
+
+                var reportInfo = report != null
+                    ? await SummarizeReport(report.LivingData)
+                    : "chưa có báo cáo";
+
+                contextData +=
+                    $"Bé {student.FullName}: " +
+                    $"Điểm danh: {attendanceInfo}. " +
+                    $"Thực đơn: {menuInfo}. " +
+                    $"Sinh hoạt: {reportInfo}. ";
+            }
 
             //system prompt
-            string systemInstruction = "Bạn là Cô Trợ Lý Ảo thân thiện của trường mầm non KMS. " +
-                "Cách xưng hô: Gọi phụ huynh là 'Ba/Mẹ', xưng là 'Dạ em' hoặc 'KMS'. " +
-                "Luôn dùng từ ngữ nhẹ nhàng, yêu thương vì đây là môi trường giáo dục mầm non. " +
-                $"Dữ liệu thực tế hôm nay: {contextData}. " +
-                $"Hãy trả lời câu hỏi này của Ba/Mẹ: {request.Prompt}";
+            string prompt = $@"
+            Bạn là trợ lý ảo trường mầm non KMS.
+
+            CHỈ trả lời các câu hỏi liên quan:
+            - bé
+            - điểm danh
+            - thực đơn
+            - sinh hoạt
+            - báo cáo
+
+            Nếu ngoài phạm vi hãy trả lời:
+            'Dạ em chỉ hỗ trợ thông tin của bé tại trường KMS thôi ạ.'
+
+            Dữ liệu hệ thống:
+
+            {contextData}
+
+            Lịch sử chat:
+
+            {historyContext}
+
+            Câu hỏi phụ huynh:
+
+            {request.Prompt}
+            ";
 
             //call gemini ai
             var googleAi = new GoogleAI(_apiKey);
             var model = googleAi.GenerativeModel(Model.Gemini25Flash);
-                string fullPrompt = string.Format(SystemInstructionTemplate, contextData, request.Prompt);
 
-                var response = await model.GenerateContent(fullPrompt);
-                string aiAnswer = response.Text;
+            var response = await model.GenerateContent(prompt);
 
-                //luu lich su chat
-                var history = new KmsChatHistory
-                {
-                    UserId = userId,
-                    StudentId = data?.StudentId,
-                    UserMessage = request.Prompt,
-                    AiResponse = aiAnswer,
-                    SentAt = DateTime.Now
-                };
-                _context.KmsChatHistories.Add(history);
-                await _context.SaveChangesAsync();
+            string aiAnswer = response.Text;
 
-                return new ChatResponseDTO { Answer = aiAnswer, SentAt = DateTime.Now };
-            }
+            //luu lich su chat
+            _context.KmsChatHistories.Add(new KmsChatHistory
+            {
+                UserId = userId,
+                UserMessage = request.Prompt,
+                AiResponse = aiAnswer,
+                SentAt = DateTime.Now
+            });
+
+            await _context.SaveChangesAsync();
+
+            return new ChatResponseDTO
+            {
+                Answer = aiAnswer,
+                SentAt = DateTime.Now
+            };
         }
     }
+}

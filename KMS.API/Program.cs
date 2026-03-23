@@ -131,17 +131,6 @@ builder.Services.Configure<EmailSettings>(
 builder.Services.Configure<VNPaySettings>(
     builder.Configuration.GetSection("VNPaySettings"));
 
-// CORS configuration
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
-
 // Dependency Injection
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -171,10 +160,10 @@ builder.Services.AddScoped<IStudentParentRepository, StudentParentRepository>();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 builder.Services.AddScoped<IClassActivityRepository, ClassActivityRepository>();
-builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
+builder.Services.AddScoped<IDailyReportRepository, DailyReportRepository>();
 
 // Services
 
@@ -209,6 +198,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
 builder.Services.AddScoped<IChatAiService, ChatAiService>();
+builder.Services.AddScoped<IDailyReportService, DailyReportService>();
 
 // Logging
 builder.Logging.ClearProviders();
@@ -218,15 +208,12 @@ builder.Logging.AddDebug();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "KMS API V1");
         c.RoutePrefix = string.Empty; // Set Swagger UI at app's root
-    });
-}
+});
 
 app.UseHttpsRedirection();
 
