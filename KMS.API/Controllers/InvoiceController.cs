@@ -129,10 +129,9 @@ public class InvoiceController : ControllerBase
     }
 
     [HttpGet("student/{studentId}/summary")]
-    public async Task<IActionResult> GetStudentFeeSummary(int studentId)
+    public async Task<IActionResult> GetStudentSummary(int studentId)
     {
         var result = await _invoiceService.GetStudentFeeSummaryAsync(studentId);
         return result.Success ? Ok(result) : NotFound(result);
     }
-
 }

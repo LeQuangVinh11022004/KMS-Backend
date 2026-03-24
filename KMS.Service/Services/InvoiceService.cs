@@ -389,40 +389,27 @@ namespace KMS.Service.Services
         {
             try
             {
-                var student = await _studentRepository.GetByIdAsync(studentId);
-                if (student == null)
-                    return new BaseResponseDTO { Success = false, Message = "Student not found" };
-
                 var totalPaid = await _invoiceRepository.GetTotalPaidByStudentAsync(studentId);
                 var totalUnpaid = await _invoiceRepository.GetTotalUnpaidByStudentAsync(studentId);
-                var totalInvoices = await _invoiceRepository.GetByStudentIdAsync(studentId);
-                var totalAmount = totalInvoices.Sum(i => i.FinalAmount);
+                var allInvoices = await _invoiceRepository.GetByStudentIdAsync(studentId);
 
                 var summary = new StudentFeeSummaryDTO
                 {
                     StudentId = studentId,
-                    StudentName = student.FullName,
-                    TotalInvoices = totalInvoices.Count(),
-                    TotalAmount = totalAmount,
                     TotalPaid = totalPaid,
                     TotalUnpaid = totalUnpaid,
-                    TotalOverDue = totalUnpaid, 
-                    PaidInvoicesCount = totalInvoices.Count(i => i.Status == "Paid"),
-                    UnpaidInvoicesCount = totalInvoices.Count(i => i.Status == "Unpaid" || i.Status == "Partial" || i.Status == "Overdue")
+                    PaidCount = allInvoices.Count(i => i.Status == "Paid"),
+                    UnpaidCount = allInvoices.Count(i => i.Status != "Paid")
                 };
 
-                return new BaseResponseDTO
-                {
-                    Success = true,
-                    Message = "Student fee summary retrieved successfully",
-                    Data = summary
-                };
+                return new BaseResponseDTO { Success = true, Data = summary };
             }
             catch (Exception ex)
             {
-                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+                return new BaseResponseDTO { Success = false, Message = ex.Message };
             }
         }
+
 
 
         // MAPPER

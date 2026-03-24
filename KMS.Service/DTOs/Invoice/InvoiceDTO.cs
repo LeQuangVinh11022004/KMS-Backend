@@ -76,14 +76,12 @@ namespace KMS.Service.DTOs.Invoice
     {
         public int StudentId { get; set; }
         public string StudentName { get; set; } = "";
-        public int TotalInvoices { get; set; }
-        public decimal TotalAmount { get; set; } 
-        public decimal TotalPaid { get; set; }       
-        public decimal TotalUnpaid { get; set; }    
-        public decimal TotalOverDue { get; set; }       
-        public int PaidInvoicesCount { get; set; }   
-        public int UnpaidInvoicesCount { get; set; }  
+        public decimal TotalPaid { get; set; }  
+        public decimal TotalUnpaid { get; set; }  
+        public int PaidCount { get; set; }     
+        public int UnpaidCount { get; set; } 
     }
+
 
 
 }
