@@ -20,5 +20,6 @@ namespace KMS.Service.Interfaces
         Task<BaseResponseDTO> UpdateInvoiceAsync(int invoiceId, UpdateInvoiceDTO dto, int updatedBy);
         Task<BaseResponseDTO> DeleteInvoiceAsync(int invoiceId);
         Task<BaseResponseDTO> MarkOverdueInvoicesAsync(); // Batch update expired unpaid invoices
+        Task<BaseResponseDTO> GetStudentFeeSummaryAsync(int studentId);
     }
 }

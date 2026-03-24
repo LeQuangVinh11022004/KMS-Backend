@@ -17,6 +17,10 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsInvoices
                 .Include(i => i.Student)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.Template)
                 .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
         }
@@ -41,6 +45,10 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsInvoices
                 .Include(i => i.Student)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .FirstOrDefaultAsync(i => i.InvoiceNumber == invoiceNumber);
         }
 
@@ -48,6 +56,10 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsInvoices
                 .Include(i => i.Student)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.Template)
                 .Include(i => i.KmsPayments)
                 .OrderByDescending(i => i.CreatedAt)
@@ -58,8 +70,12 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsInvoices
                 .Include(i => i.Student)
-                .Include(i => i.KmsInvoiceItems)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.KmsPayments)
+                .Include(i => i.Template)
                 .Where(i => i.StudentId == studentId)
                 .OrderByDescending(i => i.MonthYear)
                 .ToListAsync();
@@ -69,7 +85,12 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsInvoices
                 .Include(i => i.Student)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.KmsPayments)
+                .Include(i => i.Template)
                 .Where(i => i.Status == status)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
@@ -80,7 +101,12 @@ namespace KMS.Repository.Repositories
             var firstDay = new DateOnly(monthYear.Year, monthYear.Month, 1);
             return await _context.KmsInvoices
                 .Include(i => i.Student)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.KmsPayments)
+                .Include(i => i.Template)
                 .Where(i => i.MonthYear == firstDay)
                 .OrderBy(i => i.Student.FullName)
                 .ToListAsync();
@@ -91,8 +117,12 @@ namespace KMS.Repository.Repositories
             var today = DateOnly.FromDateTime(DateTime.Today);
             return await _context.KmsInvoices
                 .Include(i => i.Student)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.KmsPayments)
-                .Where(i => (i.Status == "Unpaid" || i.Status == "Partial")
+                .Where(i => (i.Status == "Unpaid" || i.Status == "Overdue")
                          && i.DueDate.HasValue
                          && i.DueDate.Value < today)
                 .OrderBy(i => i.DueDate)
@@ -104,6 +134,10 @@ namespace KMS.Repository.Repositories
         {
             var query = _context.KmsInvoices
                 .Include(i => i.Student)
+                      .ThenInclude(s => s.KmsStudentParents)
+                .ThenInclude(sp => sp.Parent)
+                    .ThenInclude(p => p.User)
+                    .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.Template)
                 .Include(i => i.KmsPayments)
                 .AsQueryable();

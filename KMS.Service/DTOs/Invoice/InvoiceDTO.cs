@@ -72,4 +72,16 @@ namespace KMS.Service.DTOs.Invoice
         public bool? IsOverdue { get; set; }
     }
 
+    public class StudentFeeSummaryDTO
+    {
+        public int StudentId { get; set; }
+        public string StudentName { get; set; } = "";
+        public decimal TotalPaid { get; set; }  
+        public decimal TotalUnpaid { get; set; }  
+        public int PaidCount { get; set; }     
+        public int UnpaidCount { get; set; } 
+    }
+
+
+
 }

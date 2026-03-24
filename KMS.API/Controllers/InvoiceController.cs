@@ -127,4 +127,11 @@ public class InvoiceController : ControllerBase
         var result = await _invoiceService.MarkOverdueInvoicesAsync();
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    [HttpGet("student/{studentId}/summary")]
+    public async Task<IActionResult> GetStudentSummary(int studentId)
+    {
+        var result = await _invoiceService.GetStudentFeeSummaryAsync(studentId);
+        return result.Success ? Ok(result) : NotFound(result);
+    }
 }
