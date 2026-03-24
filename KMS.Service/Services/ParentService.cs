@@ -3,6 +3,7 @@ using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
 using KMS.Service.DTOs.Parent;
 using KMS.Service.DTOs.Role;
+using KMS.Service.DTOs.Student;
 using KMS.Service.Interfaces;
 
 namespace KMS.Service.Services
@@ -205,8 +206,14 @@ namespace KMS.Service.Services
                 Occupation = parent.Occupation,
                 WorkAddress = parent.WorkAddress,
                 EmergencyContact = parent.EmergencyContact,
-                CreatedAt = parent.CreatedAt ?? DateTime.Now
-            };
+                CreatedAt = parent.CreatedAt ?? DateTime.Now,
+                Children = parent.KmsStudentParents? 
+                    .Select(sp => new StudentDTO
+                    {
+                        StudentId = sp.Student.StudentId,
+                        FullName = sp.Student.FullName,
+                    }).ToList()
+                    };
         }
     }
 }

@@ -69,9 +69,12 @@ using Microsoft.EntityFrameworkCore;
                 .Where(ps => ps.StudentId == studentId)
                 .Include(ps => ps.Parent)
                     .ThenInclude(p => p.User)
+                .Include(ps => ps.Parent)
+                    .ThenInclude(p => p.KmsStudentParents) 
+                        .ThenInclude(sp => sp.Student)
                 .Select(ps => ps.Parent)
                 .ToListAsync();
-        }
+            }
 
             public async Task<IEnumerable<KmsParent>> SearchParentsAsync(string keyword)
             {
