@@ -385,6 +385,46 @@ namespace KMS.Service.Services
             }
         }
 
+        public async Task<BaseResponseDTO> GetStudentFeeSummaryAsync(int studentId)
+        {
+            try
+            {
+                var student = await _studentRepository.GetByIdAsync(studentId);
+                if (student == null)
+                    return new BaseResponseDTO { Success = false, Message = "Student not found" };
+
+                var totalPaid = await _invoiceRepository.GetTotalPaidByStudentAsync(studentId);
+                var totalUnpaid = await _invoiceRepository.GetTotalUnpaidByStudentAsync(studentId);
+                var totalInvoices = await _invoiceRepository.GetByStudentIdAsync(studentId);
+                var totalAmount = totalInvoices.Sum(i => i.FinalAmount);
+
+                var summary = new StudentFeeSummaryDTO
+                {
+                    StudentId = studentId,
+                    StudentName = student.FullName,
+                    TotalInvoices = totalInvoices.Count(),
+                    TotalAmount = totalAmount,
+                    TotalPaid = totalPaid,
+                    TotalUnpaid = totalUnpaid,
+                    TotalOverDue = totalUnpaid, 
+                    PaidInvoicesCount = totalInvoices.Count(i => i.Status == "Paid"),
+                    UnpaidInvoicesCount = totalInvoices.Count(i => i.Status == "Unpaid" || i.Status == "Partial" || i.Status == "Overdue")
+                };
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = "Student fee summary retrieved successfully",
+                    Data = summary
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
+            }
+        }
+
+
         // MAPPER
 
         private InvoiceDTO MapToDTO(KmsInvoice i)
