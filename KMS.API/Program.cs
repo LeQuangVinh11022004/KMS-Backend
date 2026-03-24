@@ -131,6 +131,16 @@ builder.Services.Configure<EmailSettings>(
 builder.Services.Configure<VNPaySettings>(
     builder.Configuration.GetSection("VNPaySettings"));
 
+// CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 // Dependency Injection
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
