@@ -16,11 +16,6 @@ namespace KMS.Service.Services
         private readonly ApplicationDbContext _context;
         private readonly string _apiKey;
 
-
-        //promt template
-        private const string SystemInstructionTemplate =
-        "Bạn là trợ lý ảo trường mầm non KMS. Dựa trên dữ liệu: {0}. Hãy trả lời phụ huynh câu hỏi sau một cách thân thiện: {1}";
-
         public ChatAiService(ApplicationDbContext context, IConfiguration config)
         {
             _context = context;
@@ -43,13 +38,13 @@ namespace KMS.Service.Services
         // tom tat bao cao sinh hoat
         private async Task<string> SummarizeReport(string text)
         {
+            if (string.IsNullOrWhiteSpace(text)) return "Chưa có nội dung sinh hoạt chi tiết.";
+
             var googleAi = new GoogleAI(_apiKey);
+            if (string.IsNullOrEmpty(_apiKey)) throw new Exception("API Key is missing! Check Azure Environment Variables.");
             var model = googleAi.GenerativeModel(Model.Gemini25Flash);
-
             var prompt = $"Tóm tắt báo cáo mầm non sau trong 1 câu ngắn: {text}";
-
             var response = await model.GenerateContent(prompt);
-
             return response.Text;
         }
 
@@ -170,6 +165,7 @@ namespace KMS.Service.Services
 
             //call gemini ai
             var googleAi = new GoogleAI(_apiKey);
+            if (string.IsNullOrEmpty(_apiKey)) throw new Exception("API Key is missing! Check Azure Environment Variables.");
             var model = googleAi.GenerativeModel(Model.Gemini25Flash);
 
             var response = await model.GenerateContent(prompt);
