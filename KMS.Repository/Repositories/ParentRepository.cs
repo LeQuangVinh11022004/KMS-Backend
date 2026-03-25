@@ -36,6 +36,8 @@ using Microsoft.EntityFrameworkCore;
                 return await _context.KmsParents
                     .Include(p => p.User)
                     .OrderBy(p => p.User.FullName)
+                    .Include(p => p.KmsStudentParents)
+                        .ThenInclude(sp => sp.Student)
                     .ToListAsync();
             }
 

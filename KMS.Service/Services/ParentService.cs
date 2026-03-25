@@ -212,6 +212,7 @@ namespace KMS.Service.Services
                     {
                         StudentId = sp.Student.StudentId,
                         FullName = sp.Student.FullName,
+                        StudentCode = sp.Student.StudentCode
                     }).ToList()
                     };
         }
