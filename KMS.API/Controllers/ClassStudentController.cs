@@ -11,7 +11,7 @@ namespace KMS.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,Principal")]
+    //[Authorize(Roles = "Admin,Teacher,Parent")]
     public class ClassStudentController : ControllerBase
     {
         private readonly IClassStudentService _classStudentService;
