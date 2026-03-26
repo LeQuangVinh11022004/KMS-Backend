@@ -1,13 +1,13 @@
-﻿    using KMS.Repository.Entities;
-    using KMS.Service.DTOs.Chat;
-    using KMS.Service.Interfaces;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Mscc.GenerativeAI;
-    using Mscc.GenerativeAI.Types;
-    using System;
-    using System.Linq;
-    using System.Threading.Tasks;
+﻿using KMS.Repository.Entities;
+using KMS.Service.DTOs.Chat;
+using KMS.Service.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Mscc.GenerativeAI;
+using Mscc.GenerativeAI.Types;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace KMS.Service.Services
 {
@@ -40,17 +40,24 @@ namespace KMS.Service.Services
         {
             if (string.IsNullOrWhiteSpace(text)) return "Chưa có nội dung sinh hoạt chi tiết.";
 
-            var googleAi = new GoogleAI(_apiKey);
-            if (string.IsNullOrEmpty(_apiKey)) throw new Exception("API Key is missing! Check Azure Environment Variables.");
-            var model = googleAi.GenerativeModel(Model.Gemini25Flash);
-            var prompt = $"Tóm tắt báo cáo mầm non sau trong 1 câu ngắn: {text}";
-            var response = await model.GenerateContent(prompt);
-            return response.Text;
+            try
+            {
+                if (string.IsNullOrEmpty(_apiKey)) return "[Lỗi: Thiếu API Key]";
+
+                var googleAi = new GoogleAI(_apiKey);
+                var model = googleAi.GenerativeModel(Model.Gemini25Flash);
+                var prompt = $"Tóm tắt báo cáo mầm non sau trong 1 câu ngắn: {text}";
+                var response = await model.GenerateContent(prompt);
+                return response.Text;
+            }
+            catch (Exception ex)
+            {
+                return $"[Không thể tóm tắt do lỗi AI: {ex.Message}]";
+            }
         }
 
         public async Task<ChatResponseDTO> GetAiResponseAsync(int userId, ChatRequestDTO request)
         {
-
             // kiem tra neu cau hoi ngoai domain thi tra loi san
             if (IsOutOfScope(request.Prompt))
             {
@@ -61,83 +68,92 @@ namespace KMS.Service.Services
                 };
             }
 
-            // lay ds hs cua phu huynh
-            var students = await (from sp in _context.KmsStudentParents
-                                  join s in _context.KmsStudents on sp.StudentId equals s.StudentId
-                                  where sp.Parent.UserId == userId
-                                  select new
-                                  {
-                                      s.StudentId,
-                                      s.FullName
-                                  }).ToListAsync();
-
-            // lay lich su chat gan nhat de lam memory
-            var memory = await _context.KmsChatHistories
-                .Where(x => x.UserId == userId)
-                .OrderByDescending(x => x.SentAt)
-                .Take(5)
-                .ToListAsync();
-
-            var historyContext = string.Join("\n",
-                memory.Select(x =>
-                    $"Parent: {x.UserMessage}\nAI: {x.AiResponse}"
-            ));
-
-            var studentIds = students.Select(x => x.StudentId).ToList();
-
-            var today = DateOnly.FromDateTime(DateTime.Today);
-
-
-            // lay tt diem danh
-            var attendances = await _context.KmsAttendances
-                .Where(x => studentIds.Contains(x.StudentId)
-                    && x.AttendanceDate == today)
-                .ToListAsync();
-
-            // lay daily rp da publish
-            var reports = await _context.KmsDailyReports
-                .Where(x => studentIds.Contains(x.StudentId)
-                    && x.ReportDate == today
-                    && x.Status == "Published")
-                .ToListAsync();
-
-            // lay menu
-            var menus = await _context.KmsMenus
-                .Where(x => x.MenuDate == today)
-                .ToListAsync();
-
-            var contextData = "";
-
-
-            // build context cho AI
-            foreach (var student in students)
+            try
             {
-                var attendance = attendances
-                    .FirstOrDefault(x => x.StudentId == student.StudentId);
+                if (string.IsNullOrEmpty(_apiKey))
+                {
+                    return new ChatResponseDTO
+                    {
+                        Answer = "LỖI HỆ THỐNG: API Key trên Azure đang bị trống hoặc sai tên biến (Cần là Gemini__ApiKey).",
+                        SentAt = DateTime.Now
+                    };
+                }
 
-                var report = reports
-                    .FirstOrDefault(x => x.StudentId == student.StudentId);
+                // lay ds hs cua phu huynh
+                var students = await (from sp in _context.KmsStudentParents
+                                      join s in _context.KmsStudents on sp.StudentId equals s.StudentId
+                                      where sp.Parent.UserId == userId
+                                      select new
+                                      {
+                                          s.StudentId,
+                                          s.FullName
+                                      }).ToListAsync();
 
-                var menuInfo = string.Join(", ",
-                    menus.Select(m => $"{m.MealType}: {m.MenuContent}"));
+                // lay lich su chat gan nhat de lam memory
+                var memory = await _context.KmsChatHistories
+                    .Where(x => x.UserId == userId)
+                    .OrderByDescending(x => x.SentAt)
+                    .Take(5)
+                    .ToListAsync();
 
-                var attendanceInfo = attendance != null
-                    ? attendance.Status
-                    : "chưa điểm danh";
+                var historyContext = string.Join("\n",
+                    memory.Select(x =>
+                        $"Parent: {x.UserMessage}\nAI: {x.AiResponse}"
+                ));
 
-                var reportInfo = report != null
-                    ? await SummarizeReport(report.LivingData)
-                    : "chưa có báo cáo";
+                var studentIds = students.Select(x => x.StudentId).ToList();
 
-                contextData +=
-                    $"Bé {student.FullName}: " +
-                    $"Điểm danh: {attendanceInfo}. " +
-                    $"Thực đơn: {menuInfo}. " +
-                    $"Sinh hoạt: {reportInfo}. ";
-            }
+                var today = DateOnly.FromDateTime(DateTime.Today);
 
-            //system prompt
-            string prompt = $@"
+                // lay tt diem danh
+                var attendances = await _context.KmsAttendances
+                    .Where(x => studentIds.Contains(x.StudentId)
+                        && x.AttendanceDate == today)
+                    .ToListAsync();
+
+                // lay daily rp da publish
+                var reports = await _context.KmsDailyReports
+                    .Where(x => studentIds.Contains(x.StudentId)
+                        && x.ReportDate == today
+                        && x.Status == "Published")
+                    .ToListAsync();
+
+                // lay menu
+                var menus = await _context.KmsMenus
+                    .Where(x => x.MenuDate == today)
+                    .ToListAsync();
+
+                var contextData = "";
+
+                // build context cho AI
+                foreach (var student in students)
+                {
+                    var attendance = attendances
+                        .FirstOrDefault(x => x.StudentId == student.StudentId);
+
+                    var report = reports
+                        .FirstOrDefault(x => x.StudentId == student.StudentId);
+
+                    var menuInfo = string.Join(", ",
+                        menus.Select(m => $"{m.MealType}: {m.MenuContent}"));
+
+                    var attendanceInfo = attendance != null
+                        ? attendance.Status
+                        : "chưa điểm danh";
+
+                    var reportInfo = report != null
+                        ? await SummarizeReport(report.LivingData)
+                        : "chưa có báo cáo";
+
+                    contextData +=
+                        $"Bé {student.FullName}: " +
+                        $"Điểm danh: {attendanceInfo}. " +
+                        $"Thực đơn: {menuInfo}. " +
+                        $"Sinh hoạt: {reportInfo}. ";
+                }
+
+                //system prompt
+                string prompt = $@"
             Bạn là trợ lý ảo trường mầm non KMS.
 
             CHỈ trả lời các câu hỏi liên quan:
@@ -163,31 +179,39 @@ namespace KMS.Service.Services
             {request.Prompt}
             ";
 
-            //call gemini ai
-            var googleAi = new GoogleAI(_apiKey);
-            if (string.IsNullOrEmpty(_apiKey)) throw new Exception("API Key is missing! Check Azure Environment Variables.");
-            var model = googleAi.GenerativeModel(Model.Gemini25Flash);
+                //call gemini ai
+                var googleAi = new GoogleAI(_apiKey);
+                var model = googleAi.GenerativeModel(Model.Gemini25Flash);
 
-            var response = await model.GenerateContent(prompt);
+                var response = await model.GenerateContent(prompt);
 
-            string aiAnswer = response.Text;
+                string aiAnswer = response.Text;
 
-            //luu lich su chat
-            _context.KmsChatHistories.Add(new KmsChatHistory
+                //luu lich su chat
+                _context.KmsChatHistories.Add(new KmsChatHistory
+                {
+                    UserId = userId,
+                    UserMessage = request.Prompt,
+                    AiResponse = aiAnswer,
+                    SentAt = DateTime.Now
+                });
+
+                await _context.SaveChangesAsync();
+
+                return new ChatResponseDTO
+                {
+                    Answer = aiAnswer,
+                    SentAt = DateTime.Now
+                };
+            }
+            catch (Exception ex)
             {
-                UserId = userId,
-                UserMessage = request.Prompt,
-                AiResponse = aiAnswer,
-                SentAt = DateTime.Now
-            });
-
-            await _context.SaveChangesAsync();
-
-            return new ChatResponseDTO
-            {
-                Answer = aiAnswer,
-                SentAt = DateTime.Now
-            };
+                return new ChatResponseDTO
+                {
+                    Answer = $"Crash App Service: {ex.Message} | Inner: {ex.InnerException?.Message}",
+                    SentAt = DateTime.Now
+                };
+            }
         }
     }
 }
