@@ -7,7 +7,6 @@
 **A centralized digital platform to manage students, teachers, classes, attendance, tuition, and parent communication — all in one place.**
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
-[![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-CC2927?style=flat-square&logo=microsoftsqlserver)](https://www.microsoft.com/sql-server)
 [![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat-square&logo=jsonwebtokens)](https://jwt.io/)
 [![Swagger](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D?style=flat-square&logo=swagger)](https://swagger.io/)
 
@@ -33,8 +32,8 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 ┌─────────────────────────────────────────────────────┐
 │                   CLIENT LAYER                      │
 │                                                     │
-│   Web Admin (ReactJS)    Mobile App (Flutter)       │
-│   Admin/Principal   /    Teacher / Parent           │
+│   Web Admin (ReactJS)    Mobile App (ReactNative)   │
+│   Admin   /              Teacher / Parent           │
 │   Accountant/Staff                                  │
 └────────────────────┬────────────────────────────────┘
                      │ HTTPS / REST API
@@ -49,7 +48,7 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 ┌────────────────────▼────────────────────────────────┐
 │                DATABASE LAYER                       │
 │                                                     │
-│              SQL Server 2022                        │
+│              PostgreSQL                             │
 │              KMS_SP26SE095                          │
 └─────────────────────────────────────────────────────┘
 ```
@@ -64,14 +63,12 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 - Manage user accounts, roles, and permissions
 - View system-wide reports (attendance, tuition, announcements)
 - Manage system settings (school name, max class size, etc.)
-- Review audit logs
 
 ### 👩‍🏫 Teacher
 - Take daily attendance (Present / Absent / Late / Excused / Sick)
 - Post class activities with photos
 - Manage class timetable and daily menus
 - Report medical incidents and health checks
-- Record kitchen food samples
 
 ### 💰 Accountant / Staff
 - Manage tuition fee templates
@@ -85,7 +82,8 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 - Receive school announcements and notifications
 - View class activities, daily menus, and timetable
 - View tuition invoices and payment status
-
+- Ask AI about their children
+  
 ---
 
 ## 🗂️ Module Overview
@@ -116,7 +114,9 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 | **Campuses** | Multi-campus support |
 | **Password Management** | Admin reset, self-change, OTP-based forgot password |
 | **System Settings** | Configurable school-wide settings |
-| **Audit Logs** | Read-only action log for accountability |
+| **Daily Reports** | Report daily about event, menu, activity children |
+| **Chat Histories** | AI to support children know what their child do based on report |
+
 
 ---
 
@@ -124,8 +124,8 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 
 **Backend**
 - ASP.NET Core 8 Web API
-- Entity Framework Core (Code First / DB First)
-- SQL Server 2022
+- Entity Framework Core (DB First)
+- PostgreSQL 
 - BCrypt.Net (password hashing)
 - JWT Bearer Authentication
 - Gmail SMTP (email notifications)
@@ -137,6 +137,7 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 
 **Infrastructure**
 - Azure / AWS (deployment)
+- Supabase (deployment DB)
 - GitHub (version control)
 
 ---
@@ -145,7 +146,6 @@ Sunshine Kindergarten currently handles daily operations through notebooks, Exce
 
 ### Prerequisites
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- [SQL Server 2022](https://www.microsoft.com/sql-server)
 - [Node.js 18+](https://nodejs.org/) — Web Admin (React)
 - [Node.js 18+](https://nodejs.org/) — Mobile App (React Native)
 - Android Studio — Android Emulator for React Native
