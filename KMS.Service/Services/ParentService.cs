@@ -194,6 +194,17 @@ namespace KMS.Service.Services
             }
         }
 
+        private int CalculateAge(DateOnly dob)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            int age = today.Year - dob.Year;
+
+            if (today < dob.AddYears(age))
+                age--;
+
+            return age;
+        }
+
         private ParentDTO MapToDTO(KmsParent parent)
         {
             return new ParentDTO
@@ -212,7 +223,17 @@ namespace KMS.Service.Services
                     {
                         StudentId = sp.Student.StudentId,
                         FullName = sp.Student.FullName,
-                        StudentCode = sp.Student.StudentCode
+                        StudentCode = sp.Student.StudentCode,
+                        DateOfBirth = sp.Student.DateOfBirth,
+                        Age = CalculateAge(sp.Student.DateOfBirth),
+                        Gender = sp.Student.Gender,
+                        Address = sp.Student.Address,
+                        Photo = sp.Student.Photo,
+                        BloodType = sp.Student.BloodType,
+                        Allergies = sp.Student.Allergies,
+                        MedicalNotes = sp.Student.MedicalNotes,
+                        EnrollmentDate = (DateOnly)sp.Student.EnrollmentDate,
+                        IsActive = (bool)sp.Student.IsActive
                     }).ToList()
                     };
         }
