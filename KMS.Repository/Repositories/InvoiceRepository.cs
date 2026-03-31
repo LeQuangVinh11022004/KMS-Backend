@@ -62,6 +62,7 @@ namespace KMS.Repository.Repositories
                     .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.Template)
                 .Include(i => i.KmsPayments)
+                 .ThenInclude(p => p.ReceivedByNavigation)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
@@ -75,6 +76,7 @@ namespace KMS.Repository.Repositories
                     .ThenInclude(p => p.User)
                     .Include(i => i.KmsInvoiceItems)
                 .Include(i => i.KmsPayments)
+                    .ThenInclude(p => p.ReceivedByNavigation)
                 .Include(i => i.Template)
                 .Where(i => i.StudentId == studentId)
                 .OrderByDescending(i => i.MonthYear)

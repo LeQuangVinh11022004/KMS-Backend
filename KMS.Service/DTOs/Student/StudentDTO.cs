@@ -52,6 +52,8 @@ namespace KMS.Service.DTOs.Student
         public string? MedicalNotes { get; set; }
         public DateOnly EnrollmentDate { get; set; }
         public bool IsActive { get; set; }
+        public int? ClassId { get; set; }
+        public string? ClassName { get; set; }
         public List<ParentDTO>? Parents { get; set; }
     }
 }

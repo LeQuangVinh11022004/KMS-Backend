@@ -19,6 +19,8 @@ using Microsoft.EntityFrameworkCore;
                     .Include(p => p.User)
                     .Include(p => p.KmsStudentParents)
                         .ThenInclude(sp => sp.Student)
+                        .ThenInclude(s => s.KmsClassStudents)
+                        .ThenInclude(cs => cs.Class)
                     .FirstOrDefaultAsync(p => p.ParentId == parentId);
             }
 
@@ -28,6 +30,8 @@ using Microsoft.EntityFrameworkCore;
                     .Include(p => p.User)
                     .Include(p => p.KmsStudentParents)
                         .ThenInclude(sp => sp.Student)
+                        .ThenInclude(s => s.KmsClassStudents)
+                        .ThenInclude(cs => cs.Class)
                     .FirstOrDefaultAsync(p => p.UserId == userId);
             }
 

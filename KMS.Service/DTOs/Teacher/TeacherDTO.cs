@@ -37,5 +37,13 @@ namespace KMS.Service.DTOs.Teacher
         public decimal? Salary { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public List<AssignedClassDTO> AssignedClasses { get; set; } = new();
+    }
+
+    public class AssignedClassDTO
+    {
+        public int ClassId { get; set; }
+        public string ClassName { get; set; } = "";
+        public string Role { get; set; } = ""; // Main / Assistant
     }
 }

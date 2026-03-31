@@ -106,32 +106,14 @@ namespace KMS.API.Controllers
         public async Task<IActionResult> GetProfile()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                return Unauthorized(new
-                {
-                    success = false,
-                    message = "Invalid token"
-                });
-            }
+                return Unauthorized(new { success = false, message = "Invalid token" });
 
-            var user = await _authService.GetUserByIdAsync(userId);
+            var profile = await _authService.GetProfileAsync(userId);
+            if (profile == null)
+                return NotFound(new { success = false, message = "User not found" });
 
-            if (user == null)
-            {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "User not found"
-                });
-            }
-
-            return Ok(new
-            {
-                success = true,
-                data = user
-            });
+            return Ok(new { success = true, data = profile });
         }
     }
 }
