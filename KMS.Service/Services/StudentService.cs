@@ -1,6 +1,7 @@
 ﻿
 using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
+using KMS.Service.DTOs.Parent;
 using KMS.Service.DTOs.Role;
 using KMS.Service.DTOs.Student;
 using KMS.Service.Interfaces;
@@ -219,6 +220,8 @@ namespace KMS.Service.Services
             var age = DateOnly.FromDateTime(DateTime.Now).Year - student.DateOfBirth.Year;
             if (DateOnly.FromDateTime(DateTime.Now) < student.DateOfBirth.AddYears(age)) age--;
 
+            var currentClass = student.KmsClassStudents?.FirstOrDefault();
+
             return new StudentDTO
             {
                 StudentId = student.StudentId,
@@ -233,7 +236,21 @@ namespace KMS.Service.Services
                 Allergies = student.Allergies,
                 MedicalNotes = student.MedicalNotes,
                 EnrollmentDate = student.EnrollmentDate ?? DateOnly.FromDateTime(DateTime.Now),
-                IsActive = student.IsActive == true
+                IsActive = student.IsActive == true,
+                ClassId = currentClass?.ClassId,       
+                ClassName = currentClass?.Class?.ClassName,
+                Parents = student.KmsStudentParents?.Select(sp => new ParentDTO
+                {
+                    ParentId = sp.Parent.ParentId,
+                    UserId = sp.Parent.UserId,                          
+                    FullName = sp.Parent.User?.FullName ?? "",
+                    Email = sp.Parent.User?.Email,
+                    Phone = sp.Parent.User?.Phone,
+                    Occupation = sp.Parent.Occupation,                   
+                    WorkAddress = sp.Parent.WorkAddress,               
+                    EmergencyContact = sp.Parent.EmergencyContact,      
+                    CreatedAt = sp.Parent.CreatedAt ?? DateTime.Now 
+                }).ToList() ?? new()
             };
         }
     }

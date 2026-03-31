@@ -23,6 +23,8 @@ using System.Threading.Tasks;
             {
                 return await _context.KmsTeachers
                     .Include(t => t.User)
+                    .Include(t => t.KmsClassTeachers)
+                    .ThenInclude(ct => ct.Class)
                     .FirstOrDefaultAsync(t => t.TeacherId == teacherId);
             }
 
@@ -30,6 +32,8 @@ using System.Threading.Tasks;
             {
                 return await _context.KmsTeachers
                     .Include(t => t.User)
+                    .Include(t => t.KmsClassTeachers)      
+                        .ThenInclude(ct => ct.Class)
                     .FirstOrDefaultAsync(t => t.UserId == userId);
             }
 

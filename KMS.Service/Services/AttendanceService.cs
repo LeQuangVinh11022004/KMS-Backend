@@ -72,7 +72,7 @@ namespace KMS.Service.Services
                     ClassId = classId,
                     ClassName = klass.ClassName,
                     Date = date,
-                    IsSubmitted = existingRecords.Any(),
+                    IsSubmitted = rows.Count > 0 && rows.All(r => r.Status != null),
                     TotalStudents = rows.Count,
                     PresentCount = rows.Count(r => r.Status == "Present"),
                     AbsentCount = rows.Count(r => r.Status == "Absent"),

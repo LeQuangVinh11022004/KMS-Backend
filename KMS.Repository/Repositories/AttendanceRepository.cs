@@ -77,8 +77,10 @@ namespace KMS.Repository.Repositories
             int studentId, DateOnly? fromDate, DateOnly? toDate)
         {
             var query = _context.KmsAttendances
+                .Include(a => a.Student)
                 .Include(a => a.Class)
                 .Include(a => a.TakenByNavigation).ThenInclude(t => t.User)
+                .Include(a => a.UpdatedByNavigation).ThenInclude(t => t.User)
                 .Where(a => a.StudentId == studentId)
                 .AsQueryable();
 

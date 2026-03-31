@@ -1,4 +1,5 @@
 ﻿using KMS.Service.DTOs.Login;
+using KMS.Service.DTOs.Profile;
 using KMS.Service.DTOs.Register;
 using KMS.Service.DTOs.User;
 using System;
@@ -14,6 +15,6 @@ namespace KMS.Service.Interfaces
         Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request);
         Task<LoginResponseDTO> RegisterAsync(RegisterRequestDTO request);
         Task<UserDTO?> GetUserByIdAsync(int userId);
-
+        Task<ProfileDTO?> GetProfileAsync(int userId);
     }
 }

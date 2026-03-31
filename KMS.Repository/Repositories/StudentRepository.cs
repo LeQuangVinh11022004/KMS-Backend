@@ -97,6 +97,13 @@ namespace KMS.Repository.Repositories
         {
             return await _context.KmsStudentParents
                 .Where(sp => sp.ParentId == parentId)
+                 .Include(sp => sp.Student)
+                    .ThenInclude(s => s.KmsClassStudents)
+                    .ThenInclude(cs => cs.Class)
+                        .Include(sp => sp.Student)
+                            .ThenInclude(s => s.KmsStudentParents) 
+                            .ThenInclude(sp2 => sp2.Parent)   
+                    .ThenInclude(p => p.User)
                 .Select(sp => sp.Student)
                 .OrderBy(s => s.StudentCode)
                 .ToListAsync();

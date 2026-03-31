@@ -1,14 +1,16 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using KMS.Repository.Entities;
+using KMS.Repository.Interfaces;
+using KMS.Service.DTOs.Login;
+using KMS.Service.DTOs.Profile;
+using KMS.Service.DTOs.Register;
+using KMS.Service.DTOs.Teacher;
+using KMS.Service.DTOs.User;
+using KMS.Service.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using KMS.Repository.Entities;
-using KMS.Repository.Interfaces;
-using KMS.Service.Interfaces;
-using KMS.Service.DTOs.Login;
-using KMS.Service.DTOs.Register;
-using KMS.Service.DTOs.User;
 
 namespace KMS.Service.Services
 {
@@ -16,11 +18,19 @@ namespace KMS.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
+        private readonly ITeacherRepository _teacherRepository;   // ← thêm
+        private readonly IParentRepository _parentRepository;     // ← thêm
 
-        public AuthService(IUnitOfWork unitOfWork, IConfiguration configuration)
+        public AuthService(
+            IUnitOfWork unitOfWork,
+            IConfiguration configuration,
+            ITeacherRepository teacherRepository,                 // ← thêm
+            IParentRepository parentRepository)                   // ← thêm
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
+            _teacherRepository = teacherRepository;
+            _parentRepository = parentRepository;
         }
 
         public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
@@ -167,6 +177,61 @@ namespace KMS.Service.Services
                 IsActive = user.IsActive == true,
                 Roles = roles.ToList()
             };
+        }
+
+        public async Task<ProfileDTO> GetProfileAsync(int userId)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null) return null;
+
+            var roles = await _unitOfWork.Users.GetUserRolesAsync(userId);
+
+            var profile = new ProfileDTO
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                FullName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Avatar = user.Avatar,
+                IsActive = user.IsActive == true,
+                Roles = roles.ToList()
+            };
+
+            // Nếu là Teacher → gắn teacherId + assignedClasses
+            if (roles.Contains("Teacher"))
+            {
+                var teacher = await _teacherRepository.GetByUserIdAsync(userId);
+                if (teacher != null)
+                {
+                    profile.TeacherId = teacher.TeacherId;
+                    profile.AssignedClasses = teacher.KmsClassTeachers?.Select(ct => new AssignedClassDTO
+                    {
+                        ClassId = ct.ClassId,
+                        ClassName = ct.Class?.ClassName ?? "",
+                        Role = ct.Role ?? "Main"
+                    }).ToList() ?? new();
+                }
+            }
+
+            // Nếu là Parent → gắn parentId + children
+            if (roles.Contains("Parent"))
+            {
+                var parent = await _parentRepository.GetByUserIdAsync(userId);
+                if (parent != null)
+                {
+                    profile.ParentId = parent.ParentId;
+                    profile.Children = parent.KmsStudentParents?.Select(sp => new ChildSummaryDTO
+                    {
+                        StudentId = sp.Student.StudentId,
+                        FullName = sp.Student.FullName,
+                        ClassId = sp.Student.KmsClassStudents?.FirstOrDefault()?.ClassId,
+                        ClassName = sp.Student.KmsClassStudents?.FirstOrDefault()?.Class?.ClassName
+                    }).ToList() ?? new();
+                }
+            }
+
+            return profile;
         }
 
         private string GenerateJwtToken(KmsUser user, IEnumerable<string> roles)

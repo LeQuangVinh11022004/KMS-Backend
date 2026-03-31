@@ -267,7 +267,13 @@ namespace KMS.Service.Services
                 HireDate = teacher.HireDate,
                 Salary = teacher.Salary,
                 IsActive = teacher.IsActive == true,
-                CreatedAt = teacher.CreatedAt ?? DateTime.Now
+                CreatedAt = teacher.CreatedAt ?? DateTime.Now,
+                AssignedClasses = teacher.KmsClassTeachers?.Select(ct => new AssignedClassDTO
+                {
+                            ClassId = ct.ClassId,
+                            ClassName = ct.Class?.ClassName ?? "",
+                            Role = ct.Role ?? ""
+                }).ToList() ?? new()
             };
         }
     }

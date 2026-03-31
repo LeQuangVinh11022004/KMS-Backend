@@ -218,24 +218,37 @@ namespace KMS.Service.Services
                 WorkAddress = parent.WorkAddress,
                 EmergencyContact = parent.EmergencyContact,
                 CreatedAt = parent.CreatedAt ?? DateTime.Now,
-                Children = parent.KmsStudentParents? 
-                    .Select(sp => new StudentDTO
-                    {
-                        StudentId = sp.Student.StudentId,
-                        FullName = sp.Student.FullName,
-                        StudentCode = sp.Student.StudentCode,
-                        DateOfBirth = sp.Student.DateOfBirth,
-                        Age = CalculateAge(sp.Student.DateOfBirth),
-                        Gender = sp.Student.Gender,
-                        Address = sp.Student.Address,
-                        Photo = sp.Student.Photo,
-                        BloodType = sp.Student.BloodType,
-                        Allergies = sp.Student.Allergies,
-                        MedicalNotes = sp.Student.MedicalNotes,
-                        EnrollmentDate = (DateOnly)sp.Student.EnrollmentDate,
-                        IsActive = (bool)sp.Student.IsActive
-                    }).ToList()
-                    };
+                Children = parent.KmsStudentParents?
+                    .Select(sp => MapStudentToDTO(sp.Student)) 
+                    .ToList() ?? new()
+            };
+        }
+
+        private StudentDTO MapStudentToDTO(KmsStudent student)
+        {
+            var age = DateOnly.FromDateTime(DateTime.Now).Year - student.DateOfBirth.Year;
+            if (DateOnly.FromDateTime(DateTime.Now) < student.DateOfBirth.AddYears(age)) age--;
+
+            var currentClass = student.KmsClassStudents?.FirstOrDefault();
+
+            return new StudentDTO
+            {
+                StudentId = student.StudentId,
+                StudentCode = student.StudentCode,
+                FullName = student.FullName,
+                DateOfBirth = student.DateOfBirth,
+                Age = age,
+                Gender = student.Gender,
+                Address = student.Address,
+                Photo = student.Photo,
+                BloodType = student.BloodType,
+                Allergies = student.Allergies,
+                MedicalNotes = student.MedicalNotes,
+                EnrollmentDate = student.EnrollmentDate ?? DateOnly.FromDateTime(DateTime.Now),
+                IsActive = student.IsActive == true,
+                ClassId = currentClass?.ClassId,
+                ClassName = currentClass?.Class?.ClassName
+            };
         }
     }
 }
