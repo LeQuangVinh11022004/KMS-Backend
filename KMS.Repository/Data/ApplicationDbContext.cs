@@ -19,7 +19,7 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<KmsAttendance> KmsAttendances { get; set; }
     public virtual DbSet<KmsCampus> KmsCampuses { get; set; }
     public virtual DbSet<KmsChatHistory> KmsChatHistories { get; set; }
-    public virtual DbSet<KmsClass> KmsClasses { get; set; }
+    public virtual DbSet<KmsClass> KmsClasses { get; set; } 
     public virtual DbSet<KmsClassActivity> KmsClassActivities { get; set; }
     public virtual DbSet<KmsClassStudent> KmsClassStudents { get; set; }
     public virtual DbSet<KmsClassTeacher> KmsClassTeachers { get; set; }
@@ -65,7 +65,6 @@ public partial class ApplicationDbContext : DbContext
         return config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // ✅ Auto lowercase toàn bộ tên bảng + cột + key + FK + index cho PostgreSQL/Supabase
@@ -358,9 +357,11 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Message).HasMaxLength(1000);
             entity.Property(e => e.ReadAt).HasColumnType("timestamp");
             entity.Property(e => e.RelatedEntityType).HasMaxLength(50);
+            entity.Property(e => e.StudentId).HasColumnName("student_id");
             entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
 
+            entity.HasOne(d => d.Student).WithMany(p => p.KmsNotifications).HasForeignKey(d => d.StudentId).OnDelete(DeleteBehavior.SetNull);
             entity.HasOne(d => d.User).WithMany(p => p.KmsNotifications).HasForeignKey(d => d.UserId);
         });
 

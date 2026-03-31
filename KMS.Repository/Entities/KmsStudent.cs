@@ -59,6 +59,8 @@ public partial class KmsStudent
 
     public virtual ICollection<KmsMedicalIncident> KmsMedicalIncidents { get; set; } = new List<KmsMedicalIncident>();
 
+    public virtual ICollection<KmsNotification> KmsNotifications { get; set; } = new List<KmsNotification>();
+
     public virtual ICollection<KmsStudentParent> KmsStudentParents { get; set; } = new List<KmsStudentParent>();
 
     public virtual KmsUser UpdatedByNavigation { get; set; }
