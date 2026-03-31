@@ -27,5 +27,9 @@ public partial class KmsNotification
 
     public DateTime? CreatedAt { get; set; }
 
+    public int? StudentId { get; set; }
+
+    public virtual KmsStudent Student { get; set; }
+
     public virtual KmsUser User { get; set; }
 }
