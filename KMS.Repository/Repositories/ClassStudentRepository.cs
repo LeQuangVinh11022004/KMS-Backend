@@ -103,5 +103,11 @@ namespace KMS.Repository.Repositories
             _context.KmsClassStudents.RemoveRange(records);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> IsStudentInAnyClassAsync(int studentId)
+        {
+            return await _context.KmsClassStudents
+                .AnyAsync(cs => cs.StudentId == studentId);
+        }
     }
 }
