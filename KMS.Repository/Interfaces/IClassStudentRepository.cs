@@ -23,5 +23,7 @@ namespace KMS.Repository.Interfaces
         // Delete
         Task RemoveAsync(int classId, int studentId);
         Task RemoveAllStudentsFromClassAsync(int classId);
+
+        Task<bool> IsStudentInAnyClassAsync(int studentId);
     }
 }

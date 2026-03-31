@@ -101,6 +101,9 @@ namespace KMS.Service.Services
 
                 if (await _classStudentRepository.IsStudentInClassAsync(classId, dto.StudentId))
                     return new BaseResponseDTO { Success = false, Message = "Student is already enrolled in this class" };
+                
+                if (await _classStudentRepository.IsStudentInAnyClassAsync(dto.StudentId))
+                    return new BaseResponseDTO { Success = false, Message = "Student is already enrolled in another class" };
 
                 var currentCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
                 var maxStudentSetting = await _settingRepository.GetByKeyAsync("MaxStudentsPerClass");
@@ -213,6 +216,12 @@ namespace KMS.Service.Services
                     if (await _classStudentRepository.IsStudentInClassAsync(classId, studentId))
                     {
                         skipped.Add($"{student.FullName} (already enrolled)");
+                        continue;
+                    }
+
+                    if (await _classStudentRepository.IsStudentInAnyClassAsync(studentId))
+                    {
+                        skipped.Add($"{student.FullName} (already enrolled in another class)");
                         continue;
                     }
 
