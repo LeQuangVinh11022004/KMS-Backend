@@ -11,7 +11,7 @@ namespace KMS.Service.DTOs.Notification
         public int NotificationId { get; set; }
 
         public int UserId { get; set; }
-
+        public int? StudentId { get; set; }
         public string Type { get; set; } = null!;
 
         public string Title { get; set; } = null!;
@@ -33,7 +33,7 @@ namespace KMS.Service.DTOs.Notification
         public int UserId { get; set; }
 
         public string Type { get; set; } = null!;
-
+        public int? StudentId { get; set; }
         public string Title { get; set; } = null!;
 
         public string Message { get; set; } = null!;

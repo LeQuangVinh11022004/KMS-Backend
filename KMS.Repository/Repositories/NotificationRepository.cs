@@ -54,5 +54,12 @@ namespace KMS.Repository.Repositories
             _context.KmsNotifications.Remove(notification);
             await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<KmsNotification>> GetByStudentIdAsync(int studentId)
+        {
+            return await _context.KmsNotifications
+                .Where(n => n.StudentId == studentId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+        }
     }
 }
