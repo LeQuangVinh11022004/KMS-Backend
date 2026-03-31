@@ -17,17 +17,20 @@ namespace KMS.Service.Services
         private readonly IClassRepository _classRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IEmailService _emailService;
+        private readonly ISystemSettingRepository _settingRepository;
 
         public ClassStudentService(
             IClassStudentRepository classStudentRepository,
             IClassRepository classRepository,
             IStudentRepository studentRepository,
-            IEmailService emailService)
+            IEmailService emailService,
+            ISystemSettingRepository settingRepository)
         {
             _classStudentRepository = classStudentRepository;
             _classRepository = classRepository;
             _studentRepository = studentRepository;
             _emailService = emailService;
+            _settingRepository = settingRepository;
         }
 
         public async Task<BaseResponseDTO> GetStudentsByClassAsync(int classId)
@@ -103,11 +106,20 @@ namespace KMS.Service.Services
                     return new BaseResponseDTO { Success = false, Message = "Student is already enrolled in another class" };
 
                 var currentCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
-                if (kmsClass.MaxCapacity.HasValue && currentCount >= kmsClass.MaxCapacity.Value)
+                var maxStudentSetting = await _settingRepository.GetByKeyAsync("MaxStudentsPerClass");
+                int maxCapacity = 20;
+                if (maxStudentSetting != null && int.TryParse(maxStudentSetting.SettingValue, out int parsedValue))
+                {
+                    maxCapacity = parsedValue;
+                }
+
+                int finalLimit = kmsClass.MaxCapacity ?? maxCapacity;
+
+                if (currentCount >= finalLimit)
                     return new BaseResponseDTO
                     {
                         Success = false,
-                        Message = $"Class is full (max {kmsClass.MaxCapacity} students)"
+                        Message = $"Lớp đã đầy. Giới hạn hiện tại là {finalLimit} học sinh."
                     };
 
                 var record = new KmsClassStudent
@@ -172,7 +184,15 @@ namespace KMS.Service.Services
                     return new BaseResponseDTO { Success = false, Message = "Class is inactive" };
 
                 var currentCount = await _classStudentRepository.CountStudentsInClassAsync(classId);
-                var remaining = (kmsClass.MaxCapacity ?? 20) - currentCount;
+                var maxStudentSetting = await _settingRepository.GetByKeyAsync("MaxStudentsPerClass");
+                int maxCapacity = 20;
+                if (maxStudentSetting != null && int.TryParse(maxStudentSetting.SettingValue, out int parsedValue))
+                {
+                    maxCapacity = parsedValue;
+                }
+
+                int finalLimit = kmsClass.MaxCapacity ?? maxCapacity;
+                var remaining = finalLimit - currentCount;
 
                 if (dto.StudentIds.Count > remaining)
                     return new BaseResponseDTO
