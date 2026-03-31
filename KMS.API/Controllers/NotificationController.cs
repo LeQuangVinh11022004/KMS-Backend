@@ -60,6 +60,20 @@ namespace KMS.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUserId(int userId)
+        {
+            var result = await _service.GetUserNotificationsAsync(userId);
+            return Ok(result);
+        }
+
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetByStudentId(int studentId)
+        {
+            var result = await _service.GetStudentNotificationsAsync(studentId);
+            return Ok(result);
+        }
+
         private int GetCurrentUserId()
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

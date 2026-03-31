@@ -52,11 +52,19 @@ namespace KMS.Service.Services
             };
         }
 
+        public async Task<BaseResponseDTO> GetStudentNotificationsAsync(int studentId)
+        {
+            var list = await _repository.GetByStudentIdAsync(studentId);
+            var data = list.Select(n => Map(n));
+            return new BaseResponseDTO { Success = true, Message = "Student notifications retrieved", Data = data };
+        }
+
         public async Task<BaseResponseDTO> CreateAsync(CreateNotificationDTO dto)
         {
             var entity = new KmsNotification
             {
                 UserId = dto.UserId,
+                StudentId = dto.StudentId,
                 Type = dto.Type,
                 Title = dto.Title,
                 Message = dto.Message,
@@ -67,6 +75,7 @@ namespace KMS.Service.Services
             };
 
             await _repository.CreateAsync(entity);
+            await _repository.UpdateAsync(entity);
 
             return new BaseResponseDTO
             {
@@ -136,6 +145,7 @@ namespace KMS.Service.Services
             {
                 NotificationId = n.NotificationId,
                 UserId = n.UserId,
+                StudentId = n.StudentId,
                 Type = n.Type,
                 Title = n.Title,
                 Message = n.Message,

@@ -21,5 +21,6 @@ namespace KMS.Service.Interfaces
         Task<BaseResponseDTO> MarkAsReadAsync(int id);
 
         Task<BaseResponseDTO> DeleteAsync(int id);
+        Task<BaseResponseDTO> GetStudentNotificationsAsync(int studentId);
     }
 }
