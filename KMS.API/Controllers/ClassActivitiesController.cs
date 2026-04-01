@@ -11,11 +11,17 @@ namespace KMS.API.Controllers
     {
         private readonly IClassActivityService _service;
         private readonly IActivityMediaService _photoService;
-
-        public ClassActivitiesController(IClassActivityService service, IActivityMediaService photoService)
+        private readonly IWebHostEnvironment _env;
+        public ClassActivitiesController(IClassActivityService service, IActivityMediaService photoService, IWebHostEnvironment env)
         {
             _service = service;
             _photoService = photoService;
+            _env = env;
+        }
+
+        private string GetBaseUrl()
+        {
+            return $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
         }
 
         [HttpGet]
@@ -63,14 +69,20 @@ namespace KMS.API.Controllers
         [HttpGet("{activityId}/photos")]
         public async Task<IActionResult> GetPhotos(int activityId)
         {
-            return Ok(await _photoService.GetByActivityIdAsync(activityId));
+            return Ok(await _photoService.GetByActivityIdAsync(activityId, GetBaseUrl()));
         }
 
         [HttpPost("{activityId}/photos")]
-        public async Task<IActionResult> AddPhoto(int activityId, ActivityMediaDTO dto)
+        public async Task<IActionResult> AddPhoto(int activityId, [FromForm] ActivityMediaCreateDTO dto)
         {
-            await _photoService.AddAsync(activityId, dto);
-            return Ok("Photo added successfully");
+            var webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            var result = await _photoService.AddAsync(activityId, dto, webRootPath, GetBaseUrl());
+            return Ok(new
+            {
+                message = "Photo added successfully",
+                data = result
+            });
         }
 
         [HttpDelete("photos/{photoId}")]
