@@ -40,51 +40,58 @@ namespace KMS.Service.Services
 
         public async Task<ActivityMediaDTO> AddAsync(int activityId, ActivityMediaCreateDTO dto, string webRootPath, string baseUrl)
         {
-            var activity = await _activityRepo.GetByIdAsync(activityId);
-
-            if (activity == null)
-                throw new Exception("Activity not found");
-
-            if (dto.File == null || dto.File.Length == 0)
-                throw new Exception("No file uploaded.");
-
-            var uploadFolder = Path.Combine(webRootPath, "uploads", "activities");
-            if (!Directory.Exists(uploadFolder))
-                Directory.CreateDirectory(uploadFolder);
-
-            // create file unqiue name to avoid conflict
-            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(dto.File.FileName)}";
-            var filePath = Path.Combine(uploadFolder, fileName);
-
-            // save file to server
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await dto.File.CopyToAsync(stream);
+                var activity = await _activityRepo.GetByIdAsync(activityId);
+
+                if (activity == null)
+                    throw new Exception("Activity not found");
+
+                if (dto.File == null || dto.File.Length == 0)
+                    throw new Exception("No file uploaded.");
+
+                var uploadFolder = Path.Combine(webRootPath, "uploads", "activities");
+                if (!Directory.Exists(uploadFolder))
+                    Directory.CreateDirectory(uploadFolder);
+
+                // create file unqiue name to avoid conflict
+                var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(dto.File.FileName)}";
+                var filePath = Path.Combine(uploadFolder, fileName);
+
+                // save file to server
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.File.CopyToAsync(stream);
+                }
+
+                var relativePath = $"uploads/activities/{fileName}";
+
+                var entity = new KmsActivityMedium
+                {
+                    ActivityId = activityId,
+                    MediaUrl = relativePath,
+                    MediaType = dto.MediaType,
+                    Caption = dto.Caption,
+                    UploadedAt = DateTime.Now
+                };
+
+                await _repo.AddAsync(entity);
+                await _repo.SaveChangesAsync();
+
+                return new ActivityMediaDTO
+                {
+                    MediaId = entity.MediaId,
+                    ActivityId = entity.ActivityId,
+                    MediaUrl = $"{baseUrl}/{relativePath}",
+                    MediaType = entity.MediaType,
+                    Caption = entity.Caption,
+                    UploadedAt = entity.UploadedAt.Value
+                };
             }
-
-            var relativePath = $"uploads/activities/{fileName}";
-
-            var entity = new KmsActivityMedium
+            catch (Exception ex)
             {
-                ActivityId = activityId,
-                MediaUrl = relativePath,
-                MediaType = dto.MediaType,
-                Caption = dto.Caption,
-                UploadedAt = DateTime.Now
-            };
-
-            await _repo.AddAsync(entity);
-            await _repo.SaveChangesAsync();
-
-            return new ActivityMediaDTO
-            {
-                MediaId = entity.MediaId,
-                ActivityId = entity.ActivityId,
-                MediaUrl = $"{baseUrl}/{relativePath}",
-                MediaType = entity.MediaType,
-                Caption = entity.Caption,
-                UploadedAt = entity.UploadedAt.Value
-            };
+                throw new Exception($"Lỗi thực tế: {ex.Message} | Inner: {ex.InnerException?.Message}");
+            }
         }
 
         public async Task DeleteAsync(int mediaId)
