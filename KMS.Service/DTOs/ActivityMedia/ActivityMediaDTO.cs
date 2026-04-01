@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,5 +20,13 @@ namespace KMS.Service.DTOs.ActivityMedia
         public string? Caption { get; set; }
 
         public DateTime UploadedAt { get; set; }
+    }
+    public class ActivityMediaCreateDTO
+    {
+        public IFormFile File { get; set; } = null!;
+
+        public string MediaType { get; set; } = "Photo";
+
+        public string? Caption { get; set; }
     }
 }

@@ -49,5 +49,11 @@ namespace KMS.API.Controllers
             await _service.DeleteAsync(id);
             return Ok("Deleted successfully");
         }
+        [HttpGet("by-class/{classId}")]
+        public async Task<IActionResult> GetByClass(int classId)
+        {
+            var result = await _service.GetByClassIdAsync(classId);
+            return Ok(result);
+        }
     }
 }

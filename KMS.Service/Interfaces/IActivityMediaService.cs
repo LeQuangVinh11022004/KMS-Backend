@@ -9,10 +9,9 @@ namespace KMS.Service.Interfaces
 {
     public interface IActivityMediaService
     {
-        Task<List<ActivityMediaDTO>> GetByActivityIdAsync(int activityId);
+        Task<List<ActivityMediaDTO>> GetByActivityIdAsync(int activityId, string baseUrl);
 
-        Task AddAsync(int activityId, ActivityMediaDTO dto);
-
+        Task<ActivityMediaDTO> AddAsync(int activityId, ActivityMediaCreateDTO dto, string webRootPath, string baseUrl);
         Task DeleteAsync(int mediaId);
     }
 }

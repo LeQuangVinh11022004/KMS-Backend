@@ -99,5 +99,22 @@ namespace KMS.Service.Services
             _repo.Delete(entity);
             await _repo.SaveChangesAsync();
         }
+        public async Task<List<AnnouncementDTO>> GetByClassIdAsync(int classId)
+        {
+            var list = await _repo.GetByClassIdAsync(classId);
+
+            return list.Select(x => new AnnouncementDTO
+            {
+                AnnouncementId = x.AnnouncementId,
+                Title = x.Title,
+                Content = x.Content,
+                TargetAudience = x.TargetAudience,
+                TargetClassId = x.TargetClassId,
+                Priority = x.Priority,
+                IsPublished = x.IsPublished,
+                PublishedAt = x.PublishedAt,
+                ExpiresAt = x.ExpiresAt
+            }).ToList();
+        }
     }
 }

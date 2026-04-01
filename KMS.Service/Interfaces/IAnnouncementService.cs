@@ -14,5 +14,6 @@ namespace KMS.Service.Interfaces
         Task CreateAsync(AnnouncementDTO dto, int userId);
         Task UpdateAsync(int id, AnnouncementDTO dto, int userId);
         Task DeleteAsync(int id);
+        Task<List<AnnouncementDTO>> GetByClassIdAsync(int classId);
     }
 }

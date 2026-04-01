@@ -15,5 +15,6 @@ namespace KMS.Repository.Interfaces
         void Update(KmsAnnouncement entity);
         void Delete(KmsAnnouncement entity);
         Task SaveChangesAsync();
+        Task<List<KmsAnnouncement>> GetByClassIdAsync(int classId);
     }
 }

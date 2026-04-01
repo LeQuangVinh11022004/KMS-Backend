@@ -50,5 +50,13 @@ namespace KMS.Repository.Repositories
         {
             await _context.SaveChangesAsync();
         }
+        public async Task<List<KmsAnnouncement>> GetByClassIdAsync(int classId)
+        {
+            return await _context.KmsAnnouncements
+                .Include(x => x.TargetClass)
+                .Where(x => x.TargetClassId == classId || x.TargetClassId == null)
+                .OrderByDescending(x => x.PublishedAt ?? x.CreatedAt)
+                .ToListAsync();
+        }
     }
 }
