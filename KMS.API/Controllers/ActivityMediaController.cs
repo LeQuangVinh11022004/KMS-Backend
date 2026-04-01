@@ -1,6 +1,7 @@
 ﻿using KMS.Service.DTOs.ActivityMedia;
 using KMS.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 
 namespace KMS.API.Controllers
 {
@@ -9,10 +10,18 @@ namespace KMS.API.Controllers
     public class ActivityMediaController : ControllerBase
     {
         private readonly IActivityMediaService _service;
+        private readonly IWebHostEnvironment _env;
 
-        public ActivityMediaController(IActivityMediaService service)
+        public ActivityMediaController(IActivityMediaService service, IWebHostEnvironment env)
         {
             _service = service;
+                _env = env;
+        }
+
+        // get base url for media url
+        private string GetBaseUrl()
+        {
+            return $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
         }
 
         // get media by activity
@@ -20,7 +29,7 @@ namespace KMS.API.Controllers
         [HttpGet("activity/{activityId}")]
         public async Task<IActionResult> GetByActivity(int activityId)
         {
-            var result = await _service.GetByActivityIdAsync(activityId);
+            var result = await _service.GetByActivityIdAsync(activityId, GetBaseUrl());
 
             return Ok(result);
         }
@@ -28,13 +37,16 @@ namespace KMS.API.Controllers
         // Add media
 
         [HttpPost("activity/{activityId}")]
-        public async Task<IActionResult> AddMedia(int activityId, [FromBody] ActivityMediaDTO dto)
+        public async Task<IActionResult> AddMedia(int activityId, [FromForm] ActivityMediaCreateDTO dto)
         {
-            await _service.AddAsync(activityId, dto);
+            var webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            var result = await _service.AddAsync(activityId, dto, webRootPath, GetBaseUrl());
 
             return Ok(new
             {
-                message = "Media added successfully"
+                message = "Media added successfully",
+                data = result
             });
         }
 
