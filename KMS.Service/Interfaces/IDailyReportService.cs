@@ -13,7 +13,7 @@ namespace KMS.Service.Interfaces
 
         Task<DailyReportDTO?> GetByIdAsync(int id);
 
-        Task CreateAsync(CreateDailyReportDTO dto);
+        Task CreateAsync(CreateDailyReportDTO dto, int userId);
 
         Task UpdateAsync(int id, UpdateDailyReportDTO dto);
 

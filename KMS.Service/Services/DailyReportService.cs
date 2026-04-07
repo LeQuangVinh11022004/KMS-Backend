@@ -55,7 +55,7 @@ namespace KMS.Service.Services
             };
         }
 
-        public async Task CreateAsync(CreateDailyReportDTO dto)
+        public async Task CreateAsync(CreateDailyReportDTO dto, int userId)
         {
             var entity = new KmsDailyReport
             {
@@ -63,7 +63,7 @@ namespace KMS.Service.Services
                 ClassId = dto.ClassId,
                 LivingData = dto.LivingData,
                 EducationalData = dto.EducationalData,
-                CreatedBy = dto.CreatedBy,
+                CreatedBy = userId,
                 ReviewedBy = dto.ReviewedBy,
                 Status = dto.Status ?? "Draft",
                 CreatedAt = DateTime.Now,
