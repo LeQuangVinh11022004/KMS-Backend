@@ -1,6 +1,7 @@
 ﻿using KMS.Service.DTOs.SchoolYear;
 using KMS.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KMS.API.Controllers
 {
@@ -13,6 +14,11 @@ namespace KMS.API.Controllers
         public SchoolYearsController(ISchoolYearService service)
         {
             _service = service;
+        }
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : 0;
         }
 
         [HttpGet]
@@ -30,14 +36,14 @@ namespace KMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(SchoolYearCreateDTO dto)
         {
-            await _service.CreateAsync(dto, createdBy: 1);
+            await _service.CreateAsync(dto, GetUserId());
             return Ok("SchoolYear created");
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, SchoolYearUpdateDTO dto)
         {
-            var ok = await _service.UpdateAsync(id, dto, updatedBy: 1);
+            var ok = await _service.UpdateAsync(id, dto, GetUserId());
             if (!ok) return NotFound();
             return Ok("SchoolYear updated");
         }
