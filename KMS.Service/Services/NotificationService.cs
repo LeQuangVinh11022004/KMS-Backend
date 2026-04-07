@@ -75,7 +75,6 @@ namespace KMS.Service.Services
             };
 
             await _repository.CreateAsync(entity);
-            await _repository.UpdateAsync(entity);
 
             return new BaseResponseDTO
             {

@@ -2,6 +2,7 @@
 using KMS.Service.DTOs.ClassActivity;
 using KMS.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KMS.API.Controllers
 {
@@ -22,6 +23,11 @@ namespace KMS.API.Controllers
         private string GetBaseUrl()
         {
             return $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+        }
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : 0;
         }
 
         [HttpGet]
@@ -47,14 +53,14 @@ namespace KMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ClassActivityDTO dto)
         {
-            await _service.CreateAsync(dto, 1); // temp teacherId
+            await _service.CreateAsync(dto, GetUserId());
             return Ok("Created successfully");
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, ClassActivityDTO dto)
         {
-            await _service.UpdateAsync(id, dto, 1);
+            await _service.UpdateAsync(id, dto, GetUserId());
             return Ok("Updated successfully");
         }
 

@@ -31,8 +31,6 @@ namespace KMS.Service.DTOs.DailyReport
 
         public string LivingData { get; set; }
 
-        public int CreatedBy { get; set; }
-
         public string EducationalData { get; set; }
 
         public int? ReviewedBy { get; set; }

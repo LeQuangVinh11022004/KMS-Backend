@@ -1,6 +1,7 @@
 ﻿using KMS.Service.DTOs.Class;
 using KMS.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KMS.API.Controllers
 {
@@ -13,6 +14,11 @@ namespace KMS.API.Controllers
         public ClassesController(IClassService service)
         {
             _service = service;
+        }
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : 0;
         }
 
         [HttpGet]
@@ -29,7 +35,7 @@ namespace KMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ClassCreateRequestDTO request)
         {
-            var result = await _service.CreateAsync(request, 1);
+            var result = await _service.CreateAsync(request, GetUserId());
             return CreatedAtAction(nameof(GetById), new { id = result.ClassId }, result);
         }
 
