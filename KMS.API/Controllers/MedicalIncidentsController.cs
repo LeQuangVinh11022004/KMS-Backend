@@ -16,7 +16,11 @@ namespace KMS.API.Controllers
         {
             _service = service;
         }
-
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : 0;
+        }
         [HttpGet]
         public async Task<IActionResult> GetAll()
             => Ok(await _service.GetAllAsync());
@@ -36,7 +40,7 @@ namespace KMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(MedicalIncidentDTO dto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = GetUserId();
             await _service.CreateAsync(dto, userId);
             return Ok("Created successfully");
         }
