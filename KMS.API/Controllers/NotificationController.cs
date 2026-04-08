@@ -8,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _service;
@@ -35,7 +36,9 @@ namespace KMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateNotificationDTO dto)
         {
-            var result = await _service.CreateAsync(dto);
+            var userId = GetCurrentUserId();
+
+            var result = await _service.CreateAsync(dto, userId);
             return Ok(result);
         }
 
