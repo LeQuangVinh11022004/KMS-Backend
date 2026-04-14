@@ -1,5 +1,6 @@
 ﻿using KMS.Service.DTOs.Menu;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class MenusController : ControllerBase
     {
         private readonly IMenuService _service;
@@ -37,6 +39,7 @@ namespace KMS.API.Controllers
             => Ok(await _service.GetByClassIdAsync(classId));
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Create(MenuCreateDTO dto)
         {
             await _service.CreateAsync(dto, GetUserId());
@@ -44,6 +47,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(int id, MenuUpdateDTO dto)
         {
             var ok = await _service.UpdateAsync(id, dto, GetUserId());
@@ -52,6 +56,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             var ok = await _service.DeleteAsync(id);

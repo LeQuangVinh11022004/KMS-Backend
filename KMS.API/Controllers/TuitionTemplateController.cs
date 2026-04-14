@@ -1,6 +1,7 @@
 ﻿using KMS.Service.DTOs;
 using KMS.Service.DTOs.TuitionTemplate;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
@@ -8,6 +9,7 @@ namespace KMS.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,Staff")]
     public class TuitionTemplateController : ControllerBase
     {
         private readonly ITuitionTemplateService _templateService;

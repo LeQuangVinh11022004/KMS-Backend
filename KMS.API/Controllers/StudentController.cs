@@ -2,12 +2,14 @@
 using KMS.Service.DTOs.Role;
 using KMS.Service.DTOs.Student;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;
@@ -41,6 +43,7 @@ namespace KMS.API.Controllers
         /// Create new student
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> CreateStudent([FromBody] CreateStudentDTO dto)
         {
             if (!ModelState.IsValid)
@@ -67,6 +70,7 @@ namespace KMS.API.Controllers
         /// Delete student
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
             var result = await _studentService.DeleteStudentAsync(id);

@@ -1,5 +1,6 @@
 ﻿using KMS.Service.DTOs.Announcement;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Staff")]
     public class AnnouncementsController : ControllerBase
     {
         private readonly IAnnouncementService _service;

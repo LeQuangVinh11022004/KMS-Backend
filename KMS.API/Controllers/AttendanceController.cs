@@ -29,7 +29,7 @@ namespace KMS.API.Controllers
         /// List class by day (EX: date=2026-03-13)
         /// </summary>
         [HttpGet("class/{classId}")]
-        [Authorize(Roles = "Teacher,Admin")]
+        [Authorize(Roles = "Teacher,Admin,Staff")]
         public async Task<IActionResult> GetClassSheet(int classId, [FromQuery] DateTime? date)
         {
             var targetDate = date ?? DateTime.Today;
@@ -41,7 +41,7 @@ namespace KMS.API.Controllers
         /// Teacher save attendance for 1 student (can be use for many student)
         /// </summary>
         [HttpPost("bulk")]
-        [Authorize(Roles = "Teacher,Admin")]
+        [Authorize(Roles = "Teacher,Admin,Staff")]
         public async Task<IActionResult> SubmitBulk([FromBody] BulkAttendanceDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -62,7 +62,7 @@ namespace KMS.API.Controllers
         /// Teacher update attendance for 1 student 
         /// </summary>
         [HttpPut("{attendanceId}")]
-        [Authorize(Roles = "Teacher,Admin")]
+        [Authorize(Roles = "Teacher,Admin,Staff")]
         public async Task<IActionResult> Update(int attendanceId, [FromBody] UpdateAttendanceDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -83,7 +83,7 @@ namespace KMS.API.Controllers
         /// Teacher check out 1 attendance record (set checkout time = now)
         /// </summary>
         [HttpPatch("{attendanceId}/checkout")]
-        [Authorize(Roles = "Teacher,Admin")]
+        [Authorize(Roles = "Teacher,Admin,Staff")]
         public async Task<IActionResult> CheckOut(int attendanceId, [FromBody] CheckOutDTO dto)
         {
             var teacherId = await GetCurrentTeacherIdAsync();
@@ -102,7 +102,7 @@ namespace KMS.API.Controllers
         /// Check attendance history of a student (EX: fromDate=2026-03-01 to Date=2026-03-31)
         /// </summary>
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Teacher,Admin,Parent")]
+        [Authorize(Roles = "Teacher,Admin,Parent,Staff")]
         public async Task<IActionResult> GetStudentHistory(
             int studentId,
             [FromQuery] DateTime? fromDate,

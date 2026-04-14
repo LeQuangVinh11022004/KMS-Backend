@@ -8,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Staff,Teacher")]
     public class MedicalIncidentsController : ControllerBase
     {
         private readonly IMedicalIncidentService _service;
