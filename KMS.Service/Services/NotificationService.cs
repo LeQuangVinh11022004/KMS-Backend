@@ -15,10 +15,12 @@ namespace KMS.Service.Services
     {
         private readonly INotificationRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
-        public NotificationService(INotificationRepository repository, IUnitOfWork unitOfWork)
+        private readonly INotificationHubService _notificationHub;
+        public NotificationService(INotificationRepository repository, IUnitOfWork unitOfWork, INotificationHubService notificationHub)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _notificationHub = notificationHub;
         }
 
         public async Task<BaseResponseDTO> GetUserNotificationsAsync(int userId)
@@ -60,11 +62,11 @@ namespace KMS.Service.Services
             return new BaseResponseDTO { Success = true, Message = "Student notifications retrieved", Data = data };
         }
 
-        public async Task<BaseResponseDTO> CreateAsync(CreateNotificationDTO dto, int userId)
+        public async Task<BaseResponseDTO> CreateAsync(CreateNotificationDTO dto)
         {
             var entity = new KmsNotification
             {
-                UserId = userId,
+                UserId = dto.UserId,
                 StudentId = dto.StudentId,
                 Type = dto.Type,
                 Title = dto.Title,
@@ -78,6 +80,8 @@ namespace KMS.Service.Services
             await _repository.CreateAsync(entity);
             await _unitOfWork.SaveChangesAsync();
 
+            var notificationDto = Map(entity);
+            await _notificationHub.SendNotificationToUserAsync(dto.UserId, notificationDto);
             return new BaseResponseDTO
             {
                 Success = true,
