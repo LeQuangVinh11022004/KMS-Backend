@@ -36,9 +36,7 @@ namespace KMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateNotificationDTO dto)
         {
-            var userId = GetCurrentUserId();
-
-            var result = await _service.CreateAsync(dto, userId);
+            var result = await _service.CreateAsync(dto);
             return Ok(result);
         }
 

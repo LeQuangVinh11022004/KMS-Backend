@@ -1,4 +1,5 @@
 using KMS.API;
+using KMS.API.Hubs;
 using KMS.Repository;
 using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
@@ -112,6 +113,18 @@ builder.Services.AddAuthentication(options =>
 
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
+
         OnAuthenticationFailed = context =>
         {
             if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
@@ -136,9 +149,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.AllowAnyOrigin()
+        builder.SetIsOriginAllowed(origin => true)
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials();
     });
 });
 // Dependency Injection
@@ -209,7 +223,9 @@ builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
 builder.Services.AddScoped<IChatAiService, ChatAiService>();
 builder.Services.AddScoped<IDailyReportService, DailyReportService>();
+builder.Services.AddScoped<INotificationHubService, SignalRNotificationService>();
 
+builder.Services.AddSignalR();
 // Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -234,5 +250,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<NotificationHub>("/notificationHub");
 app.Run();

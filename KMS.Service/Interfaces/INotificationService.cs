@@ -14,7 +14,7 @@ namespace KMS.Service.Interfaces
 
         Task<BaseResponseDTO> GetByIdAsync(int id);
 
-        Task<BaseResponseDTO> CreateAsync(CreateNotificationDTO dto, int userId);
+        Task<BaseResponseDTO> CreateAsync(CreateNotificationDTO dto);
 
         Task<BaseResponseDTO> UpdateAsync(int id, UpdateNotificationDTO dto);
 

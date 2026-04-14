@@ -30,6 +30,7 @@ namespace KMS.Service.DTOs.Notification
     }
     public class CreateNotificationDTO
     {
+        public int UserId { get; set; }
         public string Type { get; set; } = null!;
         public int? StudentId { get; set; }
         public string Title { get; set; } = null!;
