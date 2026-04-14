@@ -1,12 +1,14 @@
 ﻿using KMS.Service.DTOs.Role;
 using KMS.Service.DTOs.Teacher;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,Staff")]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherService _teacherService;

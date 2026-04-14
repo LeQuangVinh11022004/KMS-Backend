@@ -1,11 +1,13 @@
 ﻿using KMS.Service.DTOs.Campus;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Staff")]
     public class CampusesController : ControllerBase
     {
         private readonly ICampusService _service;

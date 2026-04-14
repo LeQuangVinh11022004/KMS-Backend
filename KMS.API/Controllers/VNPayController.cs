@@ -23,7 +23,7 @@ namespace KMS.API.Controllers
         /// Create VNPay payment URL
         /// </summary>
         [HttpPost("create-payment")]
-        [Authorize(Roles = "Parent,Admin,Accountant")]
+        [Authorize(Roles = "Parent,Admin,Staff")]
         public async Task<IActionResult> CreatePayment([FromBody] CreateVNPayPaymentDTO dto)
         {
             var userId = GetCurrentUserId();

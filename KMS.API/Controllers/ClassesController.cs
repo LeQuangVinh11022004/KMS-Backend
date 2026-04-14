@@ -1,5 +1,6 @@
 ﻿using KMS.Service.DTOs.Class;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/classes")]
+    [Authorize(Roles = "Admin,Staff")]
     public class ClassesController : ControllerBase
     {
         private readonly IClassService _service;

@@ -35,7 +35,7 @@ namespace KMS.API.Controllers
         /// Get all registration requests (Admin)
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Admin,Principal")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _registrationService.GetAllRegistrationsAsync();
@@ -46,7 +46,7 @@ namespace KMS.API.Controllers
         /// Get pending registration requests (Admin)
         /// </summary>
         [HttpGet("pending")]
-        [Authorize(Roles = "Admin,Principal")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPending()
         {
             var result = await _registrationService.GetPendingRegistrationsAsync();
@@ -57,7 +57,7 @@ namespace KMS.API.Controllers
         /// Get registration request by ID (Admin)
         /// </summary>
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Principal")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _registrationService.GetRegistrationByIdAsync(id);
@@ -68,7 +68,7 @@ namespace KMS.API.Controllers
         /// Approve registration request (Admin)
         /// </summary>
         [HttpPost("{id}/approve")]
-        [Authorize(Roles = "Admin,Principal")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Approve(int id, [FromBody] ReviewRegistrationDTO dto)
         {
             var reviewedBy = GetCurrentUserId();
@@ -83,7 +83,7 @@ namespace KMS.API.Controllers
         /// Reject registration request (Admin)
         /// </summary>
         [HttpPost("{id}/reject")]
-        [Authorize(Roles = "Admin,Principal")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Reject(int id, [FromBody] ReviewRegistrationDTO dto)
         {
             var reviewedBy = GetCurrentUserId();

@@ -2,12 +2,14 @@
 using KMS.Service.DTOs.Parent;
 using KMS.Service.DTOs.Role;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,Staff")]
     public class ParentController : ControllerBase
     {
         private readonly IParentService _parentService;

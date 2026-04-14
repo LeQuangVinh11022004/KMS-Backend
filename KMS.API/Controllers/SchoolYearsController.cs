@@ -1,5 +1,6 @@
 ﻿using KMS.Service.DTOs.SchoolYear;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/school-years")]
+    [Authorize(Roles = "Admin,Staff")]
     public class SchoolYearsController : ControllerBase
     {
         private readonly ISchoolYearService _service;

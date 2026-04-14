@@ -1,11 +1,13 @@
 ﻿using KMS.Service.DTOs.Payment;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
@@ -62,7 +64,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Record a payment for an invoice. Auto-updates invoice status (Partial / Paid).
+        /// Record a payment for an invoice. Auto-updates invoice status (Paid/Unpaid).
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePaymentDTO dto)

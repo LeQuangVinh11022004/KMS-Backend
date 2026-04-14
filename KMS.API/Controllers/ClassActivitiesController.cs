@@ -1,6 +1,7 @@
 ﻿using KMS.Service.DTOs.ActivityMedia;
 using KMS.Service.DTOs.ClassActivity;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -8,6 +9,7 @@ namespace KMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Teacher,Staff")]
     public class ClassActivitiesController : ControllerBase
     {
         private readonly IClassActivityService _service;

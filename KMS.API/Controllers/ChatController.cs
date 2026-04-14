@@ -9,6 +9,7 @@ namespace KMS.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Parent")]
     public class ChatController : ControllerBase
     {
         private readonly IChatAiService _chatService;

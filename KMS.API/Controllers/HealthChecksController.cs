@@ -1,5 +1,6 @@
 ﻿using KMS.Service.DTOs.HealthCheck;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin,Staff,Teacher")]
     public class HealthChecksController : ControllerBase
     {
         private readonly IHealthCheckService _service;

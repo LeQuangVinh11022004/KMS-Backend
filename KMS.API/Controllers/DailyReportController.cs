@@ -1,5 +1,6 @@
 ﻿using KMS.Service.DTOs.DailyReport;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace KMS.API.Controllers
 {
     [Route("api/daily-reports")]
     [ApiController]
+    [Authorize]
     public class DailyReportController : ControllerBase
     {
         private readonly IDailyReportService _service;
@@ -41,6 +43,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Create([FromBody] CreateDailyReportDTO dto)
         {
             await _service.CreateAsync(dto, GetUserId());
@@ -52,6 +55,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateDailyReportDTO dto)
         {
             await _service.UpdateAsync(id, dto);
@@ -63,6 +67,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteAsync(id);

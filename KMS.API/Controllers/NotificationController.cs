@@ -34,6 +34,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         public async Task<IActionResult> Create(CreateNotificationDTO dto)
         {
             var result = await _service.CreateAsync(dto);
@@ -41,6 +42,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         public async Task<IActionResult> Update(int id, UpdateNotificationDTO dto)
         {
             var result = await _service.UpdateAsync(id, dto);
@@ -55,6 +57,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteAsync(id);

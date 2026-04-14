@@ -2,10 +2,12 @@
 using KMS.Service.DTOs.Invoice;
 using KMS.Service.DTOs.Role;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Staff")]
 public class InvoiceController : ControllerBase
 {
     private readonly IInvoiceService _invoiceService;

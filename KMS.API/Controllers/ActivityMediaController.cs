@@ -1,12 +1,14 @@
 ﻿using KMS.Service.DTOs.ActivityMedia;
 using KMS.Service.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KMS.API.Controllers
 {
     [Route("api/activity-media")]
     [ApiController]
+    [Authorize(Roles = "Admin,Teacher,Staff")]
     public class ActivityMediaController : ControllerBase
     {
         private readonly IActivityMediaService _service;
