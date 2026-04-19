@@ -10,7 +10,7 @@ namespace KMS.Service.DTOs.Student
 {
     public class CreateStudentDTO
     {
-        [Required] public string StudentCode { get; set; } = string.Empty;
+        //[Required] public string StudentCode { get; set; } = string.Empty;
         [Required] public string FullName { get; set; } = string.Empty;
         [Required] public DateOnly DateOfBirth { get; set; }
         [Required] public string Gender { get; set; } = string.Empty;
@@ -34,6 +34,7 @@ namespace KMS.Service.DTOs.Student
         public string? MedicalNotes { get; set; }
         public bool? IsActive { get; set; }
         public string? CurrentClass { get; set; }
+        public int? ClassId { get; set; }
 
     }
 

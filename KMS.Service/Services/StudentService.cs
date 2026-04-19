@@ -64,14 +64,29 @@ namespace KMS.Service.Services
         {
             try
             {
-                if (await _studentRepository.StudentCodeExistsAsync(dto.StudentCode))
+                int currentYear = DateTime.Now.Year;
+                string prefix = $"STU{currentYear}";
+
+                var lastStudentCode = await _studentRepository.GetLatestStudentCodeAsync(prefix);
+
+                int nextSequence = 1; // Mac dinh bat dau tu 001
+
+                if (!string.IsNullOrEmpty(lastStudentCode) && lastStudentCode.Length >= 10)
                 {
-                    return new BaseResponseDTO { Success = false, Message = "Student code already exists" };
+                    // cat phan chuoi so cuoi cung (3 chu so) de lay so thu tu hien tai
+                    string lastSequenceStr = lastStudentCode.Substring(7);
+                    if (int.TryParse(lastSequenceStr, out int lastNumber))
+                    {
+                        nextSequence = lastNumber + 1;
+                    }
                 }
+
+                // format lai thanh chuoi 3 chu so
+                string newStudentCode = $"{prefix}{nextSequence:D3}";
 
                 var student = new KmsStudent
                 {
-                    StudentCode = dto.StudentCode,
+                    StudentCode = newStudentCode,
                     FullName = dto.FullName,
                     DateOfBirth = dto.DateOfBirth,
                     Gender = dto.Gender,
@@ -120,6 +135,42 @@ namespace KMS.Service.Services
                 if (dto.MedicalNotes != null) student.MedicalNotes = dto.MedicalNotes;
                 if (dto.IsActive.HasValue) student.IsActive = dto.IsActive.Value;
 
+                if (dto.ClassId.HasValue)
+                {
+                    var currentClassMapping = student.KmsClassStudents?.FirstOrDefault();
+
+                    if (currentClassMapping != null)
+                    {
+                        if (currentClassMapping.ClassId != dto.ClassId.Value)
+                        {
+                            if (dto.ClassId.Value > 0)
+                            {
+                                student.KmsClassStudents!.Remove(currentClassMapping);
+                                student.KmsClassStudents.Add(new Repository.Entities.KmsClassStudent
+                                {
+                                    StudentId = student.StudentId,
+                                    ClassId = dto.ClassId.Value
+                                });
+                            }
+                            else
+                            {
+                                student.KmsClassStudents!.Remove(currentClassMapping);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (dto.ClassId.Value > 0)
+                        {
+                            student.KmsClassStudents ??= new List<KmsClassStudent>();
+                            student.KmsClassStudents.Add(new KmsClassStudent
+                            {
+                                StudentId = student.StudentId,
+                                ClassId = dto.ClassId.Value
+                            });
+                        }
+                    }
+                }
                 await _studentRepository.UpdateAsync(student);
 
                 return new BaseResponseDTO
