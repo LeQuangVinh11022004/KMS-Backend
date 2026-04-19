@@ -31,5 +31,7 @@ namespace KMS.Repository.Interfaces
 
         // Statistics
         Task<int> CountActiveStudentsAsync();
+
+        Task<string?> GetLatestStudentCodeAsync(string prefix);
     }
 }

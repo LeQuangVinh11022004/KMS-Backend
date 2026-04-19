@@ -130,5 +130,14 @@ namespace KMS.Repository.Repositories
             return await _context.KmsStudents
                 .CountAsync(s => s.IsActive == true);
         }
+
+        public async Task<string?> GetLatestStudentCodeAsync(string prefix)
+        {
+            return await _context.KmsStudents
+                .Where(s => s.StudentCode != null && s.StudentCode.StartsWith(prefix))
+                .OrderByDescending(s => s.StudentCode)
+                .Select(s => s.StudentCode)
+                .FirstOrDefaultAsync();
+        }
     }
 }
