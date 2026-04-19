@@ -17,4 +17,12 @@ namespace KMS.Service.DTOs.User
         public bool IsActive { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
     }
+    public class UpdateUserDTO
+    {
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
+        public string? Avatar { get; set; }
+        public int? CampusId { get; set; }
+    }
 }
