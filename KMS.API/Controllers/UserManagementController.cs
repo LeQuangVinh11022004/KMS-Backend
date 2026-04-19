@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using KMS.Service.DTOs.Role;
+using KMS.Service.DTOs.User;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace KMS.API.Controllers
@@ -137,6 +139,29 @@ namespace KMS.API.Controllers
 
             if (!result.Success)
                 return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update user information
+        /// </summary>
+        [HttpPut("users/{userId}")]
+        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UpdateUserDTO dto)
+        {
+            if (dto == null)
+            {
+                return BadRequest(new BaseResponseDTO { Success = false, Message = "Invalid data" });
+            }
+
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+            var result = await _userManagementService.UpdateUserAsync(userId, dto);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            _logger.LogInformation($"Admin (UserId: {currentUserId}) updated UserId {userId}");
 
             return Ok(result);
         }

@@ -1,4 +1,5 @@
 ﻿using KMS.Service.DTOs.Role;
+using KMS.Service.DTOs.User;
 
 namespace KMS.Service.Interfaces
 {
@@ -16,5 +17,7 @@ namespace KMS.Service.Interfaces
 
         // Statistics
         Task<BaseResponseDTO> GetUserStatusStatisticsAsync();
+
+        Task<BaseResponseDTO> UpdateUserAsync(int userId, UpdateUserDTO dto);
     }
 }

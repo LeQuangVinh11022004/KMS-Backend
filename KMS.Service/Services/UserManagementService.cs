@@ -303,5 +303,65 @@ namespace KMS.Service.Services
                 };
             }
         }
+
+        public async Task<BaseResponseDTO> UpdateUserAsync(int userId, UpdateUserDTO dto)
+        {
+            try
+            {
+                var user = await _unitOfWork.Users.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return new BaseResponseDTO
+                    {
+                        Success = false,
+                        Message = "User not found"
+                    };
+                }
+
+                if (!string.IsNullOrEmpty(dto.Email) && dto.Email != user.Email)
+                {
+                    var emailExists = await _unitOfWork.Users.EmailExistsAsync(dto.Email);
+                    if (emailExists)
+                    {
+                        return new BaseResponseDTO
+                        {
+                            Success = false,
+                            Message = "Email already exists in the system"
+                        };
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(dto.FullName)) user.FullName = dto.FullName;
+                if (!string.IsNullOrEmpty(dto.Email)) user.Email = dto.Email;
+                if (!string.IsNullOrEmpty(dto.Phone)) user.Phone = dto.Phone;
+                if (!string.IsNullOrEmpty(dto.Avatar)) user.Avatar = dto.Avatar;
+                if (dto.CampusId.HasValue) user.CampusId = dto.CampusId.Value;
+
+                await _unitOfWork.Users.UpdateAsync(user);
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"User '{user.Username}' updated successfully",
+                    Data = new UserDTO
+                    {
+                        UserId = user.UserId,
+                        Username = user.Username,
+                        FullName = user.FullName,
+                        Email = user.Email,
+                        Phone = user.Phone,
+                        IsActive = user.IsActive ?? false
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
     }
 }
