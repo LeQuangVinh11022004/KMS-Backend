@@ -217,7 +217,8 @@ namespace KMS.Service.Services
                     FullName = u.FullName,
                     Email = u.Email,
                     Phone = u.Phone,
-                    IsActive = true
+                    IsActive = true,
+                    Roles = u.KmsUserRoleUsers?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>()
                 }).ToList();
 
                 return new BaseResponseDTO
@@ -249,7 +250,8 @@ namespace KMS.Service.Services
                     FullName = u.FullName,
                     Email = u.Email,
                     Phone = u.Phone,
-                    IsActive = false
+                    IsActive = false,
+                    Roles = u.KmsUserRoleUsers?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>()
                 }).ToList();
 
                 return new BaseResponseDTO

@@ -116,9 +116,11 @@ namespace KMS.Repository.Repositories
         public async Task<IEnumerable<KmsUser>> GetActiveUsersAsync()
         {
             return await _context.KmsUsers
-                .Where(u => u.IsActive == true)
-                .OrderBy(u => u.Username)
-                .ToListAsync();
+            .Include(u => u.KmsUserRoleUsers)
+                .ThenInclude(ur => ur.Role) 
+            .Where(u => u.IsActive == true)
+            .OrderBy(u => u.Username)
+            .ToListAsync();
         }
 
         public async Task<IEnumerable<KmsUser>> GetInactiveUsersAsync()
