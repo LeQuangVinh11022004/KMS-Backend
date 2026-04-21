@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize]
 public class InvoiceController : ControllerBase
 {
     private readonly IInvoiceService _invoiceService;
@@ -77,6 +77,7 @@ public class InvoiceController : ControllerBase
 
     /// <summary>Create invoice manually</summary>
     [HttpPost]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> Create([FromBody] CreateInvoiceDTO dto, [FromQuery] int createdBy)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -89,6 +90,7 @@ public class InvoiceController : ControllerBase
 
     /// <summary>Create invoice from tuition template</summary>
     [HttpPost("from-template")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> CreateFromTemplate(
         [FromQuery] int studentId,
         [FromQuery] int templateId,
@@ -106,6 +108,7 @@ public class InvoiceController : ControllerBase
 
     /// <summary>Update invoice (discount, status, due date, notes)</summary>
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateInvoiceDTO dto, [FromQuery] int updatedBy)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -116,6 +119,7 @@ public class InvoiceController : ControllerBase
 
     /// <summary>Delete invoice (blocked if already paid)</summary>
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _invoiceService.DeleteInvoiceAsync(id);
@@ -124,6 +128,7 @@ public class InvoiceController : ControllerBase
 
     /// <summary>Batch mark all expired unpaid invoices as Overdue</summary>
     [HttpPost("mark-overdue")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> MarkOverdue()
     {
         var result = await _invoiceService.MarkOverdueInvoicesAsync();

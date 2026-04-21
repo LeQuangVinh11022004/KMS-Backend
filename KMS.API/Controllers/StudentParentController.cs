@@ -8,7 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin, Staff")]
+    [Authorize]
     public class StudentParentController : ControllerBase
     {
         private readonly IStudentParentService _studentParentService;
@@ -42,6 +42,7 @@ namespace KMS.API.Controllers
         /// Assign relationship between student and parent
         /// </summary>
         [HttpPost("student/{studentId}/link")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> Link(int studentId, [FromBody] LinkStudentParentDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -54,6 +55,7 @@ namespace KMS.API.Controllers
         /// Update relationship between student and parent (relationship type, primary contact)
         /// </summary>
         [HttpPatch("student/{studentId}/parent/{parentId}")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> UpdateLink(
             int studentId, int parentId, [FromBody] UpdateStudentParentDTO dto)
         {
@@ -67,6 +69,7 @@ namespace KMS.API.Controllers
         /// Delete relationship between student and parent
         /// </summary>
         [HttpDelete("student/{studentId}/parent/{parentId}")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> Unlink(int studentId, int parentId)
         {
             var result = await _studentParentService.UnlinkAsync(studentId, parentId);

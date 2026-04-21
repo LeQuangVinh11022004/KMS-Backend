@@ -8,7 +8,6 @@ namespace KMS.API.Controllers
 {
     [Route("api/activity-media")]
     [ApiController]
-    [Authorize(Roles = "Admin,Teacher,Staff")]
     public class ActivityMediaController : ControllerBase
     {
         private readonly IActivityMediaService _service;
@@ -27,7 +26,7 @@ namespace KMS.API.Controllers
         }
 
         // get media by activity
-
+        [Authorize]
         [HttpGet("activity/{activityId}")]
         public async Task<IActionResult> GetByActivity(int activityId)
         {
@@ -37,7 +36,7 @@ namespace KMS.API.Controllers
         }
 
         // Add media
-
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         [HttpPost("activity/{activityId}")]
         public async Task<IActionResult> AddMedia(int activityId, [FromForm] ActivityMediaCreateDTO dto)
         {
@@ -55,6 +54,7 @@ namespace KMS.API.Controllers
         // delete media
 
         [HttpDelete("{mediaId}")]
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         public async Task<IActionResult> DeleteMedia(int mediaId)
         {
             await _service.DeleteAsync(mediaId);

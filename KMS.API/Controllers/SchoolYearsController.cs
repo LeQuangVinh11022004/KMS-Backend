@@ -8,7 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/school-years")]
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize]
     public class SchoolYearsController : ControllerBase
     {
         private readonly ISchoolYearService _service;
@@ -36,6 +36,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Create(SchoolYearCreateDTO dto)
         {
             await _service.CreateAsync(dto, GetUserId());
@@ -43,6 +44,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(int id, SchoolYearUpdateDTO dto)
         {
             var ok = await _service.UpdateAsync(id, dto, GetUserId());

@@ -11,7 +11,7 @@ namespace KMS.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,Teacher,Staff")]
+    [Authorize]
     public class ClassStudentController : ControllerBase
     {
         private readonly IClassStudentService _classStudentService;
@@ -39,6 +39,7 @@ namespace KMS.API.Controllers
 
         /// <summary>Assign student to class</summary>
         [HttpPost("class/{classId}/enroll")]
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         public async Task<IActionResult> EnrollStudent(int classId, [FromBody] EnrollStudentDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -53,6 +54,7 @@ namespace KMS.API.Controllers
         /// Body: { "studentIds": [1, 2, 3] }
         /// </summary>
         [HttpPost("class/{classId}/enroll-multiple")]
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         public async Task<IActionResult> EnrollMultiple(int classId, [FromBody] EnrollMultipleStudentsDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -64,6 +66,7 @@ namespace KMS.API.Controllers
 
         /// <summary>Delete student from class</summary>
         [HttpDelete("class/{classId}/student/{studentId}")]
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         public async Task<IActionResult> RemoveStudent(int classId, int studentId)
         {
             var result = await _classStudentService.RemoveStudentFromClassAsync(classId, studentId);
@@ -74,6 +77,7 @@ namespace KMS.API.Controllers
         /// Switch student to another class
         /// </summary>
         [HttpPost("student/{studentId}/transfer")]
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         public async Task<IActionResult> Transfer(
             int studentId,
             [FromQuery] int fromClassId,

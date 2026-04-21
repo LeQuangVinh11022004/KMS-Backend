@@ -8,7 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize]
     public class TeacherController : ControllerBase
     {
         private readonly ITeacherService _teacherService;
@@ -42,6 +42,7 @@ namespace KMS.API.Controllers
         /// Create new teacher
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> CreateTeacher([FromBody] CreateTeacherDTO dto)
         {
             if (!ModelState.IsValid)
@@ -55,6 +56,7 @@ namespace KMS.API.Controllers
         /// Update teacher
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateTeacher(int id, [FromBody] UpdateTeacherDTO dto)
         {
             if (!ModelState.IsValid)
@@ -68,6 +70,7 @@ namespace KMS.API.Controllers
         /// Delete teacher
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> DeleteTeacher(int id)
         {
             var result = await _teacherService.DeleteTeacherAsync(id);

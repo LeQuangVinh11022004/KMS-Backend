@@ -102,7 +102,6 @@ namespace KMS.API.Controllers
         /// Check attendance history of a student (EX: fromDate=2026-03-01 to Date=2026-03-31)
         /// </summary>
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Teacher,Admin,Parent,Staff")]
         public async Task<IActionResult> GetStudentHistory(
             int studentId,
             [FromQuery] DateTime? fromDate,
