@@ -1,11 +1,12 @@
-﻿using KMS.Repository.Interfaces;
-using KMS.Service.DTOs;
-using KMS.Service.Interfaces;
-using KMS.Service.Services;
+﻿using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
-using KMS.Service.Interfaces;
+using KMS.Repository.Interfaces;
+using KMS.Service.DTOs;
 using KMS.Service.DTOs.Role;
 using KMS.Service.DTOs.User;
+using KMS.Service.Interfaces;
+using KMS.Service.Interfaces;
+using KMS.Service.Services;
 
 namespace KMS.Service.Services
 {
@@ -370,6 +371,7 @@ namespace KMS.Service.Services
                     };
                 }
 
+                // check email
                 if (!string.IsNullOrEmpty(dto.Email) && dto.Email != user.Email)
                 {
                     var emailExists = await _unitOfWork.Users.EmailExistsAsync(dto.Email);
@@ -383,6 +385,7 @@ namespace KMS.Service.Services
                     }
                 }
 
+                // update info
                 if (!string.IsNullOrEmpty(dto.FullName)) user.FullName = dto.FullName;
                 if (!string.IsNullOrEmpty(dto.Email)) user.Email = dto.Email;
                 if (!string.IsNullOrEmpty(dto.Phone)) user.Phone = dto.Phone;
@@ -390,6 +393,33 @@ namespace KMS.Service.Services
                 if (dto.CampusId.HasValue) user.CampusId = dto.CampusId.Value;
 
                 await _unitOfWork.Users.UpdateAsync(user);
+
+                if (dto.RoleIds != null)
+                {
+                    // lay role hien tai
+                    var currentRoles = await _userRoleRepository.GetByUserIdAsync(userId);
+
+                    // xoa role cu
+                    foreach (var ur in currentRoles)
+                    {
+                        await _userRoleRepository.DeleteAsync(ur);
+                    }
+
+                    //add role moi
+                    foreach (var roleId in dto.RoleIds)
+                    {
+                        var newUserRole = new KmsUserRole
+                        {
+                            UserId = userId,
+                            RoleId = roleId,
+                            AssignedAt = DateTime.Now
+                        };
+
+                        await _userRoleRepository.AddAsync(newUserRole);
+                    }
+                }
+
+                var roles = (await _unitOfWork.Users.GetUserRolesAsync(userId)).ToList();
 
                 return new BaseResponseDTO
                 {
@@ -402,7 +432,8 @@ namespace KMS.Service.Services
                         FullName = user.FullName,
                         Email = user.Email,
                         Phone = user.Phone,
-                        IsActive = user.IsActive ?? false
+                        IsActive = user.IsActive ?? false,
+                        Roles = roles
                     }
                 };
             }

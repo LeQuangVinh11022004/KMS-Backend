@@ -31,5 +31,8 @@ namespace KMS.Repository.Interfaces
         Task<IEnumerable<KmsUser>> GetActiveUsersAsync();
         Task<IEnumerable<KmsUser>> GetInactiveUsersAsync();
         Task<int> CountPendingUsersAsync();
+        Task<List<KmsUserRole>> GetByUserIdAsync(int userId);
+        Task AddAsync(KmsUserRole userRole);
+        Task DeleteAsync(KmsUserRole userRole);
     }
 }

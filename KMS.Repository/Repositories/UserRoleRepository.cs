@@ -219,5 +219,23 @@ namespace KMS.Repository.Repositories
             return await _context.KmsUsers
                 .CountAsync(u => u.IsActive != true);
         }
+        public async Task<List<KmsUserRole>> GetByUserIdAsync(int userId)
+        {
+            return await _context.KmsUserRoles
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task AddAsync(KmsUserRole entity)
+        {
+            _context.KmsUserRoles.Add(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(KmsUserRole entity)
+        {
+            _context.KmsUserRoles.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -24,5 +24,6 @@ namespace KMS.Service.DTOs.User
         public string? Phone { get; set; }
         public string? Avatar { get; set; }
         public int? CampusId { get; set; }
+        public List<int>? RoleIds { get; set; }
     }
 }
