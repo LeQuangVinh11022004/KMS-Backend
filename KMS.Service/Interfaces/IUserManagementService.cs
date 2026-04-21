@@ -9,6 +9,7 @@ namespace KMS.Service.Interfaces
         Task<BaseResponseDTO> ApproveUserAsync(int userId, int approvedBy);
         Task<BaseResponseDTO> RejectUserAsync(int userId, int rejectedBy);
         Task<BaseResponseDTO> DeactivateUserAsync(int userId, int deactivatedBy);
+        Task<BaseResponseDTO> ReactivateUserAsync(int userId, int reactivatedBy);
 
         // Get Users by Status
         Task<BaseResponseDTO> GetPendingUsersAsync();
