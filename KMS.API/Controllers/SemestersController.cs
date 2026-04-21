@@ -7,7 +7,7 @@ namespace KMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize]
     public class SemestersController : ControllerBase
     {
         private readonly ISemesterService _service;
@@ -30,6 +30,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Create(SemesterDTO dto)
         {
             await _service.CreateAsync(dto);
@@ -37,6 +38,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(int id, SemesterDTO dto)
         {
             await _service.UpdateAsync(id, dto);
@@ -44,6 +46,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteAsync(id);

@@ -9,7 +9,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize]
     public class ParentController : ControllerBase
     {
         private readonly IParentService _parentService;
@@ -43,6 +43,7 @@ namespace KMS.API.Controllers
         /// Create new parent
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> CreateParent([FromBody] CreateParentDTO dto)
         {
             if (!ModelState.IsValid)
@@ -56,6 +57,7 @@ namespace KMS.API.Controllers
         /// Update parent
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateParent(int id, [FromBody] UpdateParentDTO dto)
         {
             if (!ModelState.IsValid)
@@ -69,6 +71,7 @@ namespace KMS.API.Controllers
         /// Delete parent
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> DeleteParent(int id)
         {
             var result = await _parentService.DeleteParentAsync(id);

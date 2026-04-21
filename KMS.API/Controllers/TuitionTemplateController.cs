@@ -9,7 +9,7 @@ namespace KMS.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize]
     public class TuitionTemplateController : ControllerBase
     {
         private readonly ITuitionTemplateService _templateService;
@@ -53,6 +53,7 @@ namespace KMS.API.Controllers
         /// Create new tuition template with items
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Create([FromBody] CreateTuitionTemplateDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -67,6 +68,7 @@ namespace KMS.API.Controllers
         /// Update template (pass Items to replace all items)
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTuitionTemplateDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -79,6 +81,7 @@ namespace KMS.API.Controllers
         /// Delete template (blocked if used by invoices)
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _templateService.DeleteTemplateAsync(id);
@@ -89,6 +92,7 @@ namespace KMS.API.Controllers
         /// Activate / Deactivate template
         /// </summary>
         [HttpPatch("{id}/toggle-status")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> ToggleStatus(int id)
         {
             var result = await _templateService.ToggleTemplateStatusAsync(id);

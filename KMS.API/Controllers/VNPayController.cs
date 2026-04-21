@@ -46,7 +46,6 @@ namespace KMS.API.Controllers
         {
             var result = await _vnpayService.ProcessCallbackAsync(Request.Query);
 
-            // TODO: Đổi thành URL frontend thật khi deploy
             var frontendUrl = result.Success
                 ? "http://localhost:3000/payment/success"
                 : "http://localhost:3000/payment/failed";

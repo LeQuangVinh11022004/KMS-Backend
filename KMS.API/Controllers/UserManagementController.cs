@@ -9,7 +9,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")] // Chỉ Admin mới quản lý users
+    [Authorize(Roles = "Admin")]
     public class UserManagementController : ControllerBase
     {
         private readonly IUserManagementService _userManagementService;

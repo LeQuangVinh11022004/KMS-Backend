@@ -8,7 +8,7 @@ namespace KMS.API.Controllers
 {
     [ApiController]
     [Route("api/classes")]
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize]
     public class ClassesController : ControllerBase
     {
         private readonly IClassService _service;
@@ -35,6 +35,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Create(ClassCreateRequestDTO request)
         {
             var result = await _service.CreateAsync(request, GetUserId());
@@ -42,6 +43,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(int id, ClassUpdateRequestDTO request)
         {
             var success = await _service.UpdateAsync(id, request);
@@ -49,6 +51,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _service.DeleteAsync(id);

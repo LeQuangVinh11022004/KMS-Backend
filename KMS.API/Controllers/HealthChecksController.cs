@@ -8,7 +8,7 @@ namespace KMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,Staff,Teacher")]
+    [Authorize]
     public class HealthChecksController : ControllerBase
     {
         private readonly IHealthCheckService _service;
@@ -40,6 +40,7 @@ namespace KMS.API.Controllers
             => Ok(await _service.GetByStudentIdAsync(studentId));
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         public async Task<IActionResult> Create(HealthCheckDTO dto)
         {
             await _service.CreateAsync(dto, GetUserId());
@@ -47,6 +48,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         public async Task<IActionResult> Update(int id, HealthCheckDTO dto)
         {
             await _service.UpdateAsync(id, dto, GetUserId());
@@ -54,6 +56,7 @@ namespace KMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteAsync(id);
