@@ -88,6 +88,21 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
+        /// Reactivate inactive user
+        /// </summary>
+        [HttpPut("users/{userId}/reactivate")]
+        public async Task<IActionResult> ReactivateUser(int userId)
+        {
+            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var result = await _userManagementService.ReactivateUserAsync(userId, adminId);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Get all pending users (waiting for approval)
         /// </summary>
         [HttpGet("users/pending")]

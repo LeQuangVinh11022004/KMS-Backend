@@ -163,6 +163,56 @@ namespace KMS.Service.Services
             }
         }
 
+        // REACTIVATE USER
+        public async Task<BaseResponseDTO> ReactivateUserAsync(int userId, int reactivatedBy)
+        {
+            try
+            {
+                var user = await _unitOfWork.Users.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return new BaseResponseDTO
+                    {
+                        Success = false,
+                        Message = "User not found"
+                    };
+                }
+
+                if (user.IsActive == true)
+                {
+                    return new BaseResponseDTO
+                    {
+                        Success = false,
+                        Message = "User is already active"
+                    };
+                }
+
+                var success = await _unitOfWork.Users.ActivateUserAsync(userId, reactivatedBy);
+                if (!success)
+                {
+                    return new BaseResponseDTO
+                    {
+                        Success = false,
+                        Message = "Failed to reactivate user"
+                    };
+                }
+
+                return new BaseResponseDTO
+                {
+                    Success = true,
+                    Message = $"User '{user.Username}' has been reactivated successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseDTO
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
         // GET USERS BY STATUS
 
         public async Task<BaseResponseDTO> GetPendingUsersAsync()
