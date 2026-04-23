@@ -47,8 +47,8 @@ namespace KMS.API.Controllers
             var result = await _vnpayService.ProcessCallbackAsync(Request.Query);
 
             var frontendUrl = result.Success
-                ? "http://localhost:3000/payment/success"
-                : "http://localhost:3000/payment/failed";
+                ? "https://mobile-cap.vercel.app/success"
+                : "https://mobile-cap.vercel.app/failed";
 
             return Redirect(frontendUrl);
         }
