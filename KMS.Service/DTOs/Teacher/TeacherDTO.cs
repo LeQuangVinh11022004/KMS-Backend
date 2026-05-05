@@ -44,6 +44,5 @@ namespace KMS.Service.DTOs.Teacher
     {
         public int ClassId { get; set; }
         public string ClassName { get; set; } = "";
-        public string Role { get; set; } = ""; // Main / Assistant
     }
 }

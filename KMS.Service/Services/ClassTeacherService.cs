@@ -3,16 +3,13 @@ using KMS.Repository.Interfaces;
 using KMS.Service.DTOs.ClassTeacher;
 using KMS.Service.DTOs.Role;
 using KMS.Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KMS.Service.Services
 {
     public class ClassTeacherService : IClassTeacherService
     {
+        private const int MaxTeachersPerClass = 2;
+
         private readonly IClassTeacherRepository _classTeacherRepository;
         private readonly IClassRepository _classRepository;
         private readonly ITeacherRepository _teacherRepository;
@@ -36,12 +33,12 @@ namespace KMS.Service.Services
                     return new BaseResponseDTO { Success = false, Message = "Class not found" };
 
                 var records = await _classTeacherRepository.GetTeachersByClassAsync(classId);
-                var dtos = records.Select(MapToTeacherDTO).ToList();
+                var dtos = records.Select(MapToDTO).ToList();
 
                 return new BaseResponseDTO
                 {
                     Success = true,
-                    Message = $"Found {dtos.Count} teachers in class",
+                    Message = $"Found {dtos.Count} teacher(s) in class",
                     Data = dtos
                 };
             }
@@ -60,12 +57,12 @@ namespace KMS.Service.Services
                     return new BaseResponseDTO { Success = false, Message = "Teacher not found" };
 
                 var records = await _classTeacherRepository.GetClassesByTeacherAsync(teacherId);
-                var dtos = records.Select(MapToTeacherDTO).ToList();
+                var dtos = records.Select(MapToDTO).ToList();
 
                 return new BaseResponseDTO
                 {
                     Success = true,
-                    Message = $"Found {dtos.Count} classes for teacher",
+                    Message = $"Found {dtos.Count} class(es) for teacher",
                     Data = dtos
                 };
             }
@@ -96,22 +93,19 @@ namespace KMS.Service.Services
                 if (await _classTeacherRepository.IsTeacherInClassAsync(classId, dto.TeacherId))
                     return new BaseResponseDTO { Success = false, Message = "Teacher is already assigned to this class" };
 
-                var validRoles = new[] { "Main", "Assistant" };
-                if (!validRoles.Contains(dto.Role))
-                    return new BaseResponseDTO { Success = false, Message = "Invalid role. Must be 'Main' or 'Assistant'" };
-
-                if (dto.Role == "Main" && await _classTeacherRepository.ClassHasMainTeacherAsync(classId))
+                // Kiểm tra giới hạn 2 giáo viên/lớp
+                var currentCount = await _classTeacherRepository.CountTeachersInClassAsync(classId);
+                if (currentCount >= MaxTeachersPerClass)
                     return new BaseResponseDTO
                     {
                         Success = false,
-                        Message = "Class already has a Main teacher. Remove or change the existing Main teacher first."
+                        Message = $"Class already has {MaxTeachersPerClass} teachers. Remove one before adding another."
                     };
 
                 var record = new KmsClassTeacher
                 {
                     ClassId = classId,
                     TeacherId = dto.TeacherId,
-                    Role = dto.Role,
                     AssignedAt = DateTime.Now,
                     AssignedBy = assignedBy
                 };
@@ -121,47 +115,8 @@ namespace KMS.Service.Services
                 return new BaseResponseDTO
                 {
                     Success = true,
-                    Message = $"Teacher '{teacher.User?.FullName}' assigned as {dto.Role} successfully",
-                    Data = MapToTeacherDTO(created)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseDTO { Success = false, Message = $"Error: {ex.Message}" };
-            }
-        }
-
-        public async Task<BaseResponseDTO> UpdateTeacherRoleAsync(
-            int classId, int teacherId, UpdateTeacherRoleDTO dto)
-        {
-            try
-            {
-                var record = await _classTeacherRepository.GetAsync(classId, teacherId);
-                if (record == null)
-                    return new BaseResponseDTO { Success = false, Message = "Teacher is not assigned to this class" };
-
-                var validRoles = new[] { "Main", "Assistant" };
-                if (!validRoles.Contains(dto.Role))
-                    return new BaseResponseDTO { Success = false, Message = "Invalid role. Must be 'Main' or 'Assistant'" };
-
-                if (dto.Role == "Main" && record.Role != "Main")
-                {
-                    if (await _classTeacherRepository.ClassHasMainTeacherAsync(classId))
-                        return new BaseResponseDTO
-                        {
-                            Success = false,
-                            Message = "Class already has a Main teacher. Remove or change the existing Main teacher first."
-                        };
-                }
-
-                record.Role = dto.Role;
-                await _classTeacherRepository.UpdateAsync(record);
-
-                return new BaseResponseDTO
-                {
-                    Success = true,
-                    Message = $"Teacher role updated to '{dto.Role}' successfully",
-                    Data = MapToTeacherDTO(record)
+                    Message = $"Teacher '{teacher.User?.FullName}' assigned to class successfully",
+                    Data = MapToDTO(created)
                 };
             }
             catch (Exception ex)
@@ -188,7 +143,7 @@ namespace KMS.Service.Services
             }
         }
 
-        private ClassTeacherDTO MapToTeacherDTO(KmsClassTeacher ct)
+        private ClassTeacherDTO MapToDTO(KmsClassTeacher ct)
         {
             return new ClassTeacherDTO
             {
@@ -199,7 +154,6 @@ namespace KMS.Service.Services
                 TeacherName = ct.Teacher?.User?.FullName ?? "",
                 Email = ct.Teacher?.User?.Email,
                 Specialization = ct.Teacher?.Specialization,
-                Role = ct.Role ?? "Main",
                 AssignedAt = ct.AssignedAt ?? DateTime.Now,
                 AssignedByName = ct.AssignedByNavigation?.FullName
             };

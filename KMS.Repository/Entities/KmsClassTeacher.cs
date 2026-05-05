@@ -11,8 +11,6 @@ public partial class KmsClassTeacher
 
     public int TeacherId { get; set; }
 
-    public string Role { get; set; }
-
     public DateTime? AssignedAt { get; set; }
 
     public int? AssignedBy { get; set; }

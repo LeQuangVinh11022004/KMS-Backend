@@ -25,8 +25,6 @@ public partial class KmsTeacher
 
     public int? CampusId { get; set; }
 
-    public string StaffType { get; set; }
-
     public virtual KmsCampus Campus { get; set; }
 
     public virtual ICollection<KmsAttendance> KmsAttendanceTakenByNavigations { get; set; } = new List<KmsAttendance>();

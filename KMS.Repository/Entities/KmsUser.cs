@@ -88,4 +88,5 @@ public partial class KmsUser
     public virtual ICollection<KmsUserRole> KmsUserRoleAssignedByNavigations { get; set; } = new List<KmsUserRole>();
 
     public virtual ICollection<KmsUserRole> KmsUserRoleUsers { get; set; } = new List<KmsUserRole>();
+    public virtual ICollection<KmsStudentEvaluation> KmsStudentEvaluations { get; set; } = new List<KmsStudentEvaluation>();
 }

@@ -36,7 +36,7 @@ namespace KMS.API.Controllers
         }
 
         /// <summary>
-        /// Assign teacher to class with specific role(each class just have 1 "Main" teacher)
+        /// Assign teacher to class
         /// </summary>
         [HttpPost("class/{classId}/assign")]
         [Authorize(Roles = "Admin,Staff")]
@@ -46,20 +46,6 @@ namespace KMS.API.Controllers
 
             var assignedBy = GetCurrentUserId();
             var result = await _classTeacherService.AssignTeacherAsync(classId, dto, assignedBy);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        /// <summary>
-        /// Update teacher role in class (Main/Support)
-        /// </summary>
-        [HttpPatch("class/{classId}/teacher/{teacherId}/role")]
-        [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> UpdateRole(
-            int classId, int teacherId, [FromBody] UpdateTeacherRoleDTO dto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var result = await _classTeacherService.UpdateTeacherRoleAsync(classId, teacherId, dto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
