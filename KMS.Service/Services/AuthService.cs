@@ -208,8 +208,7 @@ namespace KMS.Service.Services
                     profile.AssignedClasses = teacher.KmsClassTeachers?.Select(ct => new AssignedClassDTO
                     {
                         ClassId = ct.ClassId,
-                        ClassName = ct.Class?.ClassName ?? "",
-                        Role = ct.Role ?? "Main"
+                        ClassName = ct.Class?.ClassName ?? ""
                     }).ToList() ?? new();
                 }
             }

@@ -14,14 +14,10 @@ namespace KMS.Repository.Interfaces
         Task<IEnumerable<KmsClassTeacher>> GetClassesByTeacherAsync(int teacherId);
         Task<KmsClassTeacher?> GetAsync(int classId, int teacherId);
         Task<bool> IsTeacherInClassAsync(int classId, int teacherId);
-        Task<bool> ClassHasMainTeacherAsync(int classId);
         Task<int> CountTeachersInClassAsync(int classId);
 
         // Create
         Task<KmsClassTeacher> AssignAsync(KmsClassTeacher classTeacher);
-
-        // Update
-        Task UpdateAsync(KmsClassTeacher classTeacher);
 
         // Delete
         Task RemoveAsync(int classId, int teacherId);

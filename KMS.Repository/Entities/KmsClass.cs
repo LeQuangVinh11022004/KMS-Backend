@@ -49,5 +49,7 @@ public partial class KmsClass
 
     public virtual ICollection<KmsTimetable> KmsTimetables { get; set; } = new List<KmsTimetable>();
 
+    public virtual ICollection<KmsStudentEvaluation> KmsStudentEvaluations { get; set; } = new List<KmsStudentEvaluation>();
+
     public virtual KmsSchoolYear SchoolYear { get; set; }
 }

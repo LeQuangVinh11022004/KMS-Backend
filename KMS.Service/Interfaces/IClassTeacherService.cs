@@ -13,7 +13,6 @@ namespace KMS.Service.Interfaces
         Task<BaseResponseDTO> GetTeachersByClassAsync(int classId);
         Task<BaseResponseDTO> GetClassesByTeacherAsync(int teacherId);
         Task<BaseResponseDTO> AssignTeacherAsync(int classId, AssignTeacherDTO dto, int assignedBy);
-        Task<BaseResponseDTO> UpdateTeacherRoleAsync(int classId, int teacherId, UpdateTeacherRoleDTO dto);
         Task<BaseResponseDTO> RemoveTeacherFromClassAsync(int classId, int teacherId);
     }
 }

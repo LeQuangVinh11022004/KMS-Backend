@@ -189,6 +189,8 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IActivityMediaRepository, ActivityMediaRepository>();
 builder.Services.AddScoped<IDailyReportRepository, DailyReportRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
+builder.Services.AddScoped<IEvaluationCriteriaRepository, EvaluationCriteriaRepository>();
+builder.Services.AddScoped<IEvaluationRepository, EvaluationRepository>();
 // Services
 
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -225,6 +227,8 @@ builder.Services.AddScoped<IChatAiService, ChatAiService>();
 builder.Services.AddScoped<IDailyReportService, DailyReportService>();
 builder.Services.AddScoped<INotificationHubService, SignalRNotificationService>();
 builder.Services.AddScoped<ITimetableService, TimetableService>();
+builder.Services.AddScoped<IEvaluationCriteriaService, EvaluationCriteriaService>();
+builder.Services.AddScoped<IEvaluationService, EvaluationService>();
 
 builder.Services.AddSignalR();
 // Logging

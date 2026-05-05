@@ -46,6 +46,9 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<KmsTuitionTemplate> KmsTuitionTemplates { get; set; }
     public virtual DbSet<KmsUser> KmsUsers { get; set; }
     public virtual DbSet<KmsUserRole> KmsUserRoles { get; set; }
+    public virtual DbSet<KmsEvaluationCriteria> KmsEvaluationCriteria { get; set; }
+    public virtual DbSet<KmsStudentEvaluation> KmsStudentEvaluations { get; set; }
+    public virtual DbSet<KmsEvaluationDetail> KmsEvaluationDetails { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -232,7 +235,6 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("kms_classteachers");
 
             entity.Property(e => e.AssignedAt).HasDefaultValueSql("now()").HasColumnType("timestamp");
-            entity.Property(e => e.Role).HasMaxLength(20).HasDefaultValue("Main");
 
             entity.HasOne(d => d.AssignedByNavigation).WithMany(p => p.KmsClassTeachers).HasForeignKey(d => d.AssignedBy);
             entity.HasOne(d => d.Class).WithMany(p => p.KmsClassTeachers).HasForeignKey(d => d.ClassId);
@@ -538,7 +540,6 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Salary).HasColumnType("numeric(10,2)");
             entity.Property(e => e.Specialization).HasMaxLength(100);
-            entity.Property(e => e.StaffType).HasMaxLength(50).HasDefaultValue("Teacher");
             entity.Property(e => e.TeacherCode).HasMaxLength(20);
 
             entity.HasOne(d => d.Campus).WithMany(p => p.KmsTeachers).HasForeignKey(d => d.CampusId);
@@ -585,6 +586,127 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.TemplateName).IsRequired().HasMaxLength(100);
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.KmsTuitionTemplates).HasForeignKey(d => d.CreatedBy);
+        });
+
+
+
+        modelBuilder.Entity<KmsEvaluationCriteria>(entity =>
+        {
+            entity.HasKey(e => e.CriteriaId);
+            entity.ToTable("kms_evaluation_criteria");
+
+            entity.Property(e => e.CriteriaId).HasColumnName("criteriaid");
+
+            entity.Property(e => e.Category)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnName("category");
+
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasColumnName("name");
+
+            entity.Property(e => e.Description)
+                .HasColumnName("description");
+
+            entity.Property(e => e.RatingType)
+                .IsRequired()
+                .HasMaxLength(10)
+                .HasDefaultValue("scale")
+                .HasColumnName("rating_type");
+
+            entity.Property(e => e.SortOrder)
+                .HasDefaultValue(0)
+                .HasColumnName("sort_order");
+
+            entity.Property(e => e.IsDefault)
+                .HasDefaultValue(true)
+                .HasColumnName("is_default");
+
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp")
+                .HasColumnName("created_at");
+        });
+
+
+        modelBuilder.Entity<KmsStudentEvaluation>(entity =>
+        {
+            entity.HasKey(e => e.EvaluationId);
+            entity.ToTable("kms_student_evaluations");
+
+            entity.Property(e => e.EvaluationId).HasColumnName("evaluationid");
+            entity.Property(e => e.StudentId).HasColumnName("studentid");
+            entity.Property(e => e.ClassId).HasColumnName("classid");
+            entity.Property(e => e.EvaluatedBy).HasColumnName("evaluated_by");
+
+            entity.HasIndex(e => new { e.StudentId, e.PeriodType, e.PeriodStart })
+                .IsUnique()
+                .HasDatabaseName("uq_student_period");
+
+            entity.Property(e => e.PeriodType)
+                .HasMaxLength(20)
+                .HasDefaultValue("monthly")
+                .HasColumnName("period_type");
+
+            entity.Property(e => e.PeriodStart).HasColumnName("period_start");
+            entity.Property(e => e.PeriodEnd).HasColumnName("period_end");
+
+            entity.Property(e => e.IsGoodStudent).HasColumnName("is_good_student");
+            entity.Property(e => e.GeneralComment).HasColumnName("general_comment");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp")
+                .HasColumnName("created_at");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(e => e.Student)
+                .WithMany(s => s.KmsStudentEvaluations)
+                .HasForeignKey(e => e.StudentId);
+
+            entity.HasOne(e => e.Class)
+                .WithMany(c => c.KmsStudentEvaluations)
+                .HasForeignKey(e => e.ClassId);
+
+            entity.HasOne(e => e.EvaluatedByNavigation)
+                .WithMany(u => u.KmsStudentEvaluations)
+                .HasForeignKey(e => e.EvaluatedBy);
+        });
+
+        modelBuilder.Entity<KmsEvaluationDetail>(entity =>
+        {
+            entity.HasKey(e => e.DetailId);
+            entity.ToTable("kms_evaluation_details");
+
+            entity.Property(e => e.DetailId).HasColumnName("detailid");
+            entity.Property(e => e.EvaluationId).HasColumnName("evaluationid");
+            entity.Property(e => e.CriteriaId).HasColumnName("criteriaid");
+
+            entity.HasIndex(e => new { e.EvaluationId, e.CriteriaId })
+                .IsUnique()
+                .HasDatabaseName("uq_eval_criteria");
+
+            entity.Property(e => e.Score).HasColumnName("score");
+            entity.Property(e => e.RatingLabel).HasColumnName("rating_label");
+            entity.Property(e => e.Comment).HasColumnName("comment");
+
+            entity.HasOne(e => e.Evaluation)
+                .WithMany(ev => ev.KmsEvaluationDetails)
+                .HasForeignKey(e => e.EvaluationId);
+
+            entity.HasOne(e => e.Criteria)
+                .WithMany(c => c.KmsEvaluationDetails)
+                .HasForeignKey(e => e.CriteriaId);
         });
 
         modelBuilder.Entity<KmsUser>(entity =>

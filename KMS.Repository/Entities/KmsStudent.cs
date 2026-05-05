@@ -63,5 +63,7 @@ public partial class KmsStudent
 
     public virtual ICollection<KmsStudentParent> KmsStudentParents { get; set; } = new List<KmsStudentParent>();
 
+    public virtual ICollection<KmsStudentEvaluation> KmsStudentEvaluations { get; set; } = new List<KmsStudentEvaluation>();
+
     public virtual KmsUser UpdatedByNavigation { get; set; }
 }

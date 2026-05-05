@@ -1,11 +1,6 @@
 ﻿using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KMS.Repository.Repositories
 {
@@ -26,7 +21,6 @@ namespace KMS.Repository.Repositories
                 .Include(ct => ct.Class)
                 .Include(ct => ct.AssignedByNavigation)
                 .Where(ct => ct.ClassId == classId)
-                .OrderBy(ct => ct.Role)
                 .ToListAsync();
         }
 
@@ -57,12 +51,6 @@ namespace KMS.Repository.Repositories
                 .AnyAsync(ct => ct.ClassId == classId && ct.TeacherId == teacherId);
         }
 
-        public async Task<bool> ClassHasMainTeacherAsync(int classId)
-        {
-            return await _context.KmsClassTeachers
-                .AnyAsync(ct => ct.ClassId == classId && ct.Role == "Main");
-        }
-
         public async Task<int> CountTeachersInClassAsync(int classId)
         {
             return await _context.KmsClassTeachers
@@ -78,16 +66,11 @@ namespace KMS.Repository.Repositories
             return classTeacher;
         }
 
-        public async Task UpdateAsync(KmsClassTeacher classTeacher)
-        {
-            _context.KmsClassTeachers.Update(classTeacher);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task RemoveAsync(int classId, int teacherId)
         {
             var record = await _context.KmsClassTeachers
                 .FirstOrDefaultAsync(ct => ct.ClassId == classId && ct.TeacherId == teacherId);
+
             if (record != null)
             {
                 _context.KmsClassTeachers.Remove(record);
@@ -100,9 +83,9 @@ namespace KMS.Repository.Repositories
             var records = await _context.KmsClassTeachers
                 .Where(ct => ct.ClassId == classId)
                 .ToListAsync();
+
             _context.KmsClassTeachers.RemoveRange(records);
             await _context.SaveChangesAsync();
         }
     }
 }
-

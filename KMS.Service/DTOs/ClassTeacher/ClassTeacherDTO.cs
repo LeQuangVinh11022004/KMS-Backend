@@ -15,7 +15,6 @@ namespace KMS.Service.DTOs.ClassTeacher
         public string TeacherName { get; set; } = null!;
         public string? Email { get; set; }
         public string? Specialization { get; set; }
-        public string Role { get; set; } = "Main"; // Main, Assistant
         public DateTime AssignedAt { get; set; }
         public string? AssignedByName { get; set; }
     }
@@ -23,11 +22,6 @@ namespace KMS.Service.DTOs.ClassTeacher
     public class AssignTeacherDTO
     {
         public int TeacherId { get; set; }
-        public string Role { get; set; } = "Main"; // Main, Assistant
     }
 
-    public class UpdateTeacherRoleDTO
-    {
-        public string Role { get; set; } = null!; // Main, Assistant
-    }
 }
