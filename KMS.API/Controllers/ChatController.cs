@@ -19,6 +19,24 @@ namespace KMS.API.Controllers
             _chatService = chatService;
         }
 
+        /// <summary>
+        /// Call api này để mở màn hình chat
+        /// </summary>
+        [HttpGet("history")]
+        public async Task<IActionResult> GetHistory()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized("Không tìm thấy UserId");
+
+            var userId = int.Parse(userIdClaim);
+            var history = await _chatService.GetUserChatHistoryAsync(userId);
+
+            return Ok(history);
+        }
+
+        /// <summary>
+        /// Gửi câu hỏi mới cho AI
+        /// </summary>
         [HttpPost("ask")]
         public async Task<IActionResult> Ask([FromBody] ChatRequestDTO request)
         {

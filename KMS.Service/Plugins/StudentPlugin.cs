@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
+using System.Text.Json;
+using System.Linq;
 
 namespace KMS.Service.Plugins
 {
@@ -23,11 +25,14 @@ namespace KMS.Service.Plugins
             var students = await (from sp in _context.KmsStudentParents
                                   join s in _context.KmsStudents on sp.StudentId equals s.StudentId
                                   where sp.Parent.UserId == _userId
-                                  select new { s.StudentId, s.FullName }).ToListAsync();
+                                  select new { studentId = s.StudentId, fullName = s.FullName }).ToListAsync();
 
-            if (!students.Any()) return "Không tìm thấy học sinh nào.";
+            if (!students.Any())
+            {
+                return JsonSerializer.Serialize(new { hasData = false, message = "no_students_found" });
+            }
 
-            return "Danh sách học sinh:\n" + string.Join("\n", students.Select(s => $"- {s.FullName} (Mã StudentId: {s.StudentId})"));
+            return JsonSerializer.Serialize(new { hasData = true, students = students });
         }
     }
 }

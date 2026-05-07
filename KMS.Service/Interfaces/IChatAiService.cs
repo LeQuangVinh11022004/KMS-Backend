@@ -1,4 +1,5 @@
-﻿using KMS.Service.DTOs.Chat;
+﻿using KMS.Repository.Entities;
+using KMS.Service.DTOs.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace KMS.Service.Interfaces
     public interface IChatAiService
     {
         Task<ChatResponseDTO> GetAiResponseAsync(int userId, ChatRequestDTO request);
+        Task<List<KmsChatHistory>> GetUserChatHistoryAsync(int userId);
     }
 }

@@ -20,7 +20,13 @@ namespace KMS.Service.Services
             _context = context;
             _apiKey = config["Gemini:ApiKey"]?.Trim() ?? string.Empty;
         }
-
+        public async Task<List<KmsChatHistory>> GetUserChatHistoryAsync(int userId)
+        {
+            return await _context.KmsChatHistories
+                .Where(x => x.UserId == userId)
+                .OrderBy(x => x.SentAt)
+                .ToListAsync();
+        }
         public async Task<ChatResponseDTO> GetAiResponseAsync(int userId, ChatRequestDTO request)
         {
             if (string.IsNullOrEmpty(_apiKey))
@@ -46,19 +52,26 @@ namespace KMS.Service.Services
                 var chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
 
                 var history = new ChatHistory();
-                history.AddSystemMessage(@"
-                    Bạn là trợ lý ảo thân thiện của trường mầm non KMS.
-                    - CHỈ giải đáp các vấn đề về học sinh, thực đơn, điểm danh, sinh hoạt.
-                    - Từ chối khéo léo các câu hỏi ngoài lề (ví dụ: thời tiết, chứng khoán...).
-                    - Luôn dùng công cụ 'get_my_students' để kiểm tra danh sách con của phụ huynh trước khi tra cứu các thông tin cần StudentId.
+                history.AddSystemMessage($@"
+                Bạn là trợ lý ảo AI thông minh và tận tâm của trường mầm non KMS. 
+                Nhiệm vụ của bạn là hỗ trợ phụ huynh tra cứu thông tin học tập, sinh hoạt của con em họ.
+
+                Quy tắc hoạt động:
+                1. LUÔN GIAO TIẾP TỰ NHIÊN: Khi nhận được dữ liệu (JSON) từ các công cụ (plugins), hãy chuyển hóa nó thành câu trả lời tự nhiên, thân thiện. Không bao giờ hiển thị mã nguồn hoặc chuỗi JSON cho người dùng.
+                2. THẤU HIỂU NGỮ CẢNH: Dựa vào lịch sử chat, nếu phụ huynh đang hỏi tiếp về một bé (đã biết StudentId từ câu trước), hãy tự động dùng lại StudentId đó mà không bắt họ phải chọn lại.
+                3. Nếu không có dữ liệu, hãy xin lỗi nhẹ nhàng và gợi ý họ liên hệ giáo viên phụ trách.
+                4. KHÔNG trả lời các chủ đề ngoài lề (chính trị, thời tiết, giải trí...). Nhẹ nhàng lái câu chuyện về lại trường mầm non KMS.
+
+                Thời gian hiện tại của hệ thống: {DateTime.Now:dd/MM/yyyy HH:mm}.
                 ");
 
-                var oldChats = await _context.KmsChatHistories
+                var recentChats = await _context.KmsChatHistories
                     .Where(x => x.UserId == userId)
                     .OrderByDescending(x => x.SentAt)
-                    .Take(3).ToListAsync();
+                    .Take(10)
+                    .ToListAsync();
 
-                foreach (var chat in oldChats.OrderBy(x => x.SentAt))
+                foreach (var chat in recentChats.OrderBy(x => x.SentAt))
                 {
                     history.AddUserMessage(chat.UserMessage);
                     history.AddAssistantMessage(chat.AiResponse);
@@ -74,13 +87,14 @@ namespace KMS.Service.Services
                 var response = await chatCompletion.GetChatMessageContentAsync(history, executionSettings, kernel);
                 string aiAnswer = response.Content;
 
-                _context.KmsChatHistories.Add(new KmsChatHistory
+                var newHistory = new KmsChatHistory
                 {
                     UserId = userId,
                     UserMessage = request.Prompt,
                     AiResponse = aiAnswer,
                     SentAt = DateTime.Now
-                });
+                };
+                _context.KmsChatHistories.Add(newHistory);
                 await _context.SaveChangesAsync();
 
                 return new ChatResponseDTO

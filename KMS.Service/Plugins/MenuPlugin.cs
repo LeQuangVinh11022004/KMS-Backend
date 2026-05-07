@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
+using System.Text.Json;
+using System.Linq;
 
 namespace KMS.Service.Plugins
 {
@@ -17,8 +19,13 @@ namespace KMS.Service.Plugins
             var today = DateOnly.FromDateTime(DateTime.Today);
             var menus = await _context.KmsMenus.Where(x => x.MenuDate == today).ToListAsync();
 
-            if (!menus.Any()) return "Hôm nay chưa có thực đơn.";
-            return string.Join("\n", menus.Select(m => $"- {m.MealType}: {m.MenuContent}"));
+            if (!menus.Any())
+            {
+                return JsonSerializer.Serialize(new { hasData = false, message = "no_menu_today" });
+            }
+
+            var menuData = menus.Select(m => new { mealType = m.MealType, menuContent = m.MenuContent }).ToList();
+            return JsonSerializer.Serialize(new { hasData = true, menus = menuData });
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
+using System.Text.Json;
 
 namespace KMS.Service.Plugins
 {
@@ -27,9 +28,11 @@ namespace KMS.Service.Plugins
                                        && x.Status == "Published");
 
             if (report == null)
-                return $"Bé (StudentId={studentId}) chưa có báo cáo sinh hoạt hôm nay.";
+            {
+                return JsonSerializer.Serialize(new { studentId = studentId, hasData = false, message = "no_data" });
+            }
 
-            return $"Báo cáo sinh hoạt của bé (StudentId={studentId}):\n{report.LivingData}";
+            return JsonSerializer.Serialize(new { studentId = studentId, hasData = true, livingData = report.LivingData });
         }
     }
 }
