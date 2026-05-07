@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
+using System.Text.Json;
 
 namespace KMS.Service.Plugins
 {
@@ -26,9 +27,11 @@ namespace KMS.Service.Plugins
                                        && x.AttendanceDate == today);
 
             if (attendance == null)
-                return $"Bé (StudentId={studentId}) chưa có dữ liệu điểm danh hôm nay.";
+            {
+                return JsonSerializer.Serialize(new { studentId = studentId, hasData = false, message = "no_data" });
+            }
 
-            return $"Bé (StudentId={studentId}) - Trạng thái: {attendance.Status}.";
+            return JsonSerializer.Serialize(new { studentId = studentId, hasData = true, status = attendance.Status });
         }
     }
 }
