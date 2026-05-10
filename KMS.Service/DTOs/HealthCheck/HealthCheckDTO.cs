@@ -8,6 +8,7 @@ namespace KMS.Service.DTOs.HealthCheck
 {
     public class HealthCheckDTO
     {
+        public int CheckId { get; set; }
         public int StudentId { get; set; }
         public DateOnly? CheckDate { get; set; }
         public decimal? Height { get; set; }
