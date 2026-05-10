@@ -20,6 +20,9 @@ namespace KMS.Service.DTOs.VNPay
         /// <summary>Để trống = hiện danh sách | VNBANK = ATM | VNPAYQR = QR</summary>
         [DefaultValue("")]
         public string? BankCode { get; set; }
+
+        /// <summary>URL frontend để VNPay chuyển về sau khi thanh toán</summary>
+        public string? ReturnUrl { get; set; }
     }
 
     public class VNPayPaymentUrlDTO

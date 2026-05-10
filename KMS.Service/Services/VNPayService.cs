@@ -53,6 +53,10 @@ namespace KMS.Service.Services
                 var amount = (long)(invoice.FinalAmount * 100);
                 var payDate = DateTime.Now.ToString("yyyyMMddHHmmss");
 
+                var returnUrl = string.IsNullOrWhiteSpace(dto.ReturnUrl)
+                    ? _settings.ReturnUrl
+                    : dto.ReturnUrl.Trim();
+
                 var vnpParams = new SortedDictionary<string, string>
                 {
                     { "vnp_Amount",     amount.ToString() },
@@ -63,7 +67,7 @@ namespace KMS.Service.Services
                     { "vnp_Locale",     _settings.Locale },
                     { "vnp_OrderInfo",  dto.OrderInfo },
                     { "vnp_OrderType",  "other" },
-                    { "vnp_ReturnUrl",  _settings.ReturnUrl },
+                    { "vnp_ReturnUrl",  returnUrl },
                     { "vnp_TmnCode",    _settings.TmnCode },
                     { "vnp_TxnRef",     orderId },
                     { "vnp_Version",    _settings.Version },
@@ -100,6 +104,12 @@ namespace KMS.Service.Services
         {
             try
             {
+                if (!queryParams.ContainsKey("vnp_TxnRef") || !queryParams.ContainsKey("vnp_ResponseCode"))
+                    return new BaseResponseDTO { Success = false, Message = "Missing required VNPAY parameters" };
+
+                if (!queryParams.ContainsKey("vnp_SecureHash"))
+                    return new BaseResponseDTO { Success = false, Message = "Missing secure hash" };
+
                 var vnpParams = new SortedDictionary<string, string>();
                 foreach (var (key, value) in queryParams)
                 {
@@ -108,18 +118,17 @@ namespace KMS.Service.Services
                 }
 
                 var secureHash = queryParams["vnp_SecureHash"].ToString();
-
                 var queryString = BuildQueryString(vnpParams);
                 var checkHash = HmacSHA512(_settings.HashSecret, queryString);
 
                 if (!checkHash.Equals(secureHash, StringComparison.OrdinalIgnoreCase))
                     return new BaseResponseDTO { Success = false, Message = "Chữ ký không hợp lệ" };
 
-                var orderId = queryParams["vnp_TxnRef"].ToString();          
-                var responseCode = queryParams["vnp_ResponseCode"].ToString(); 
-                var vnpTransactionNo = queryParams["vnp_TransactionNo"].ToString();
-                var bankCode = queryParams["vnp_BankCode"].ToString();
-                var amountStr = queryParams["vnp_Amount"].ToString();
+                var orderId = queryParams["vnp_TxnRef"].ToString();
+                var responseCode = queryParams["vnp_ResponseCode"].ToString();
+                var vnpTransactionNo = queryParams.ContainsKey("vnp_TransactionNo") ? queryParams["vnp_TransactionNo"].ToString() : "";
+                var bankCode = queryParams.ContainsKey("vnp_BankCode") ? queryParams["vnp_BankCode"].ToString() : "";
+                var amountStr = queryParams.ContainsKey("vnp_Amount") ? queryParams["vnp_Amount"].ToString() : "0";
 
                 var invoiceId = ParseInvoiceId(orderId);
                 if (invoiceId == 0)
@@ -134,7 +143,7 @@ namespace KMS.Service.Services
                 if (isSuccess && invoice.Status != "Paid")
                 {
                     var paymentNumber = $"VNPAY-{DateTime.Now:yyyyMMdd}-{vnpTransactionNo}";
-                    var paidAmount = decimal.Parse(amountStr) / 100; 
+                    var paidAmount = decimal.Parse(amountStr) / 100;
 
                     var payment = new KmsPayment
                     {
@@ -143,7 +152,7 @@ namespace KMS.Service.Services
                         PaidAmount = paidAmount,
                         PaymentDate = DateOnly.FromDateTime(DateTime.Now),
                         PaymentMethod = "VNPay",
-                        TransactionReference = vnpTransactionNo, 
+                        TransactionReference = vnpTransactionNo,
                         Notes = $"VNPay | OrderId: {orderId} | Bank: {bankCode}",
                         ReceivedBy = invoice.CreatedBy ?? 1,
                         CreatedAt = DateTime.Now
