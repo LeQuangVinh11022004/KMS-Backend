@@ -25,6 +25,7 @@ namespace KMS.Service.Services
 
             return data.Select(x => new HealthCheckDTO
             {
+                CheckId = x.CheckId,
                 StudentId = x.StudentId,
                 CheckDate = x.CheckDate,
                 Height = x.Height,
@@ -42,6 +43,7 @@ namespace KMS.Service.Services
 
             return new HealthCheckDTO
             {
+                CheckId = x.CheckId,
                 StudentId = x.StudentId,
                 CheckDate = x.CheckDate,
                 Height = x.Height,
@@ -58,6 +60,7 @@ namespace KMS.Service.Services
 
             return data.Select(x => new HealthCheckDTO
             {
+                CheckId = x.CheckId,
                 StudentId = x.StudentId,
                 CheckDate = x.CheckDate,
                 Height = x.Height,
