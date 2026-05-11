@@ -14,10 +14,19 @@ namespace KMS.Service.Services
     public class TimetableService : ITimetableService
     {
         private readonly ITimetableRepository _repository;
-
-        public TimetableService(ITimetableRepository repository)
+        private readonly INotificationRepository _notificationRepo;
+        private readonly IParentRepository _parentRepo;
+        private readonly IStudentRepository _studentRepo;
+        public TimetableService(
+            ITimetableRepository repository,
+            INotificationRepository notificationRepo,
+            IParentRepository parentRepo,
+            IStudentRepository studentRepo)
         {
             _repository = repository;
+            _notificationRepo = notificationRepo;
+            _parentRepo = parentRepo;
+            _studentRepo = studentRepo;
         }
 
         public async Task<BaseResponseDTO> GetByClassIdAsync(int classId)
@@ -51,7 +60,7 @@ namespace KMS.Service.Services
             };
 
             await _repository.CreateAsync(entity);
-
+            await SendTimetableNotificationAsync(dto.ClassId, dto.Subject, "thêm mới");
             return new BaseResponseDTO { Success = true, Message = "Timetable created successfully", Data = Map(entity) };
         }
 
@@ -69,7 +78,7 @@ namespace KMS.Service.Services
             entity.IsActive = dto.IsActive;
 
             await _repository.UpdateAsync(entity);
-
+            await SendTimetableNotificationAsync(entity.ClassId, dto.Subject, "cập nhật");
             return new BaseResponseDTO { Success = true, Message = "Timetable updated successfully" };
         }
 
@@ -82,7 +91,35 @@ namespace KMS.Service.Services
 
             return new BaseResponseDTO { Success = true, Message = "Timetable deleted successfully" };
         }
+        private async Task SendTimetableNotificationAsync(int classId, string subject, string action)
+        {
+            var students = await _studentRepo.GetStudentsByClassIdAsync(classId);
+            if (!students.Any()) return;
 
+            var studentIds = students.Select(s => s.StudentId).ToList();
+
+            var parentLinks = await _parentRepo.GetParentsByStudentIdsAsync(studentIds);
+            if (!parentLinks.Any()) return;
+
+            var notifications = new List<KmsNotification>();
+
+            foreach (var link in parentLinks)
+            {
+                notifications.Add(new KmsNotification
+                {
+                    UserId = link.Parent.UserId,
+                    Type = "Timetable",
+                    Title = "Cập nhật Lịch học",
+                    Message = $"Nhà trường vừa {action} lịch học môn {subject} cho lớp của bé.",
+                    RelatedEntityType = "Timetable",
+                    RelatedEntityId = classId,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                });
+            }
+
+            await _notificationRepo.CreateBulkAsync(notifications);
+        }
         private TimetableDTO Map(KmsTimetable t) => new TimetableDTO
         {
             TimetableId = t.TimetableId,

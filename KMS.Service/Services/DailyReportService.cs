@@ -13,10 +13,16 @@ namespace KMS.Service.Services
     public class DailyReportService : IDailyReportService
     {
         private readonly IDailyReportRepository _repo;
-
-        public DailyReportService(IDailyReportRepository repo)
+        private readonly INotificationRepository _notificationRepo;
+        private readonly IParentRepository _parentRepo;
+        public DailyReportService(
+            IDailyReportRepository repo,
+            INotificationRepository notificationRepo,
+            IParentRepository parentRepo)
         {
             _repo = repo;
+            _notificationRepo = notificationRepo;
+            _parentRepo = parentRepo;
         }
 
         public async Task<List<DailyReportDTO>> GetAllAsync()
@@ -72,6 +78,8 @@ namespace KMS.Service.Services
 
             await _repo.AddAsync(entity);
             await _repo.SaveChangesAsync();
+
+            await SendDailyReportNotificationAsync(entity.StudentId, entity.ReportDate);
         }
 
         public async Task UpdateAsync(int id, UpdateDailyReportDTO dto)
@@ -90,6 +98,8 @@ namespace KMS.Service.Services
             _repo.Update(entity);
 
             await _repo.SaveChangesAsync();
+
+            await SendDailyReportNotificationAsync(entity.StudentId, entity.ReportDate);
         }
 
         public async Task DeleteAsync(int id)
@@ -102,6 +112,31 @@ namespace KMS.Service.Services
             _repo.Delete(entity);
 
             await _repo.SaveChangesAsync();
+        }
+        private async Task SendDailyReportNotificationAsync(int studentId, DateOnly? reportDate)
+        {
+            var parents = await _parentRepo.GetParentsByStudentIdAsync(studentId);
+
+            if (!parents.Any()) return;
+
+            var notifications = new List<KmsNotification>();
+
+            foreach (var parent in parents)
+            {
+                notifications.Add(new KmsNotification
+                {
+                    UserId = parent.UserId,
+                    Type = "DailyReport",
+                    Title = "Thông báo sinh hoạt, bữa ăn",
+                    Message = $"Giáo viên vừa cập nhật đánh giá bữa ăn và sinh hoạt của bé ngày {reportDate?.ToString("dd/MM/yyyy")}.",
+                    RelatedEntityType = "DailyReport",
+                    RelatedEntityId = studentId,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                });
+            }
+
+            await _notificationRepo.CreateBulkAsync(notifications);
         }
     }
 }
