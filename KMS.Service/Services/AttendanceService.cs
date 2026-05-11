@@ -246,6 +246,7 @@ namespace KMS.Service.Services
 
                 await _attendanceRepository.UpdateAsync(attendance);
 
+                await SendAttendanceNotification(attendance.StudentId, dto.Status);
                 return new BaseResponseDTO
                 {
                     Success = true,

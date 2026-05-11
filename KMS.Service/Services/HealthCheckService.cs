@@ -13,10 +13,16 @@ namespace KMS.Service.Services
     public class HealthCheckService : IHealthCheckService
     {
         private readonly IHealthCheckRepository _repo;
-
-        public HealthCheckService(IHealthCheckRepository repo)
+        private readonly INotificationRepository _notificationRepo;
+        private readonly IParentRepository _parentRepo;
+        public HealthCheckService(
+            IHealthCheckRepository repo,
+            INotificationRepository notificationRepo,
+            IParentRepository parentRepo)
         {
             _repo = repo;
+            _notificationRepo = notificationRepo;
+            _parentRepo = parentRepo;
         }
 
         public async Task<List<HealthCheckDTO>> GetAllAsync()
@@ -86,6 +92,7 @@ namespace KMS.Service.Services
             };
 
             await _repo.AddAsync(entity);
+            await SendHealthNotificationAsync(entity.StudentId, entity.CheckDate);
         }
 
         public async Task UpdateAsync(int id, HealthCheckDTO dto, int userId)
@@ -103,6 +110,7 @@ namespace KMS.Service.Services
             entity.CheckedBy = userId; 
 
             await _repo.UpdateAsync(entity);
+            await SendHealthNotificationAsync(entity.StudentId, entity.CheckDate);
         }
 
         public async Task DeleteAsync(int id)
@@ -112,6 +120,25 @@ namespace KMS.Service.Services
                 throw new Exception("Health check not found");
 
             await _repo.DeleteAsync(entity);
+        }
+        private async Task SendHealthNotificationAsync(int studentId, DateOnly? checkDate)
+        {
+            var parents = await _parentRepo.GetParentsByStudentIdAsync(studentId);
+            if (!parents.Any()) return;
+
+            var notifications = parents.Select(p => new KmsNotification
+            {
+                UserId = p.UserId,
+                Type = "Health",
+                Title = "Cập nhật khám sức khỏe",
+                Message = $"Nhà trường vừa cập nhật chỉ số sức khỏe (chiều cao, cân nặng...) cho con bạn vào ngày {checkDate}.",
+                RelatedEntityType = "HealthCheck",
+                RelatedEntityId = studentId,
+                IsRead = false,
+                CreatedAt = DateTime.Now
+            }).ToList();
+
+            await _notificationRepo.CreateBulkAsync(notifications);
         }
     }
 }
