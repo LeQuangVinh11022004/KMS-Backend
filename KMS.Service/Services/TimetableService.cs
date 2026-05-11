@@ -1,5 +1,6 @@
 ﻿using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
+using KMS.Service.DTOs.Notification;
 using KMS.Service.DTOs.Role;
 using KMS.Service.DTOs.Timetable;
 using KMS.Service.Interfaces;
@@ -17,16 +18,19 @@ namespace KMS.Service.Services
         private readonly INotificationRepository _notificationRepo;
         private readonly IParentRepository _parentRepo;
         private readonly IStudentRepository _studentRepo;
+        private readonly INotificationHubService _notificationHub;
         public TimetableService(
             ITimetableRepository repository,
             INotificationRepository notificationRepo,
             IParentRepository parentRepo,
-            IStudentRepository studentRepo)
+            IStudentRepository studentRepo,
+            INotificationHubService notificationHub)
         {
             _repository = repository;
             _notificationRepo = notificationRepo;
             _parentRepo = parentRepo;
             _studentRepo = studentRepo;
+            _notificationHub = notificationHub;
         }
 
         public async Task<BaseResponseDTO> GetByClassIdAsync(int classId)
@@ -119,6 +123,20 @@ namespace KMS.Service.Services
             }
 
             await _notificationRepo.CreateBulkAsync(notifications);
+
+            foreach (var n in notifications)
+            {
+                await _notificationHub.SendNotificationToUserAsync(n.UserId, new NotificationDTO
+                {
+                    UserId = n.UserId,
+                    Type = n.Type,
+                    Title = n.Title,
+                    Message = n.Message,
+                    StudentId = n.StudentId,
+                    IsRead = false,
+                    CreatedAt = n.CreatedAt
+                });
+            }
         }
         private TimetableDTO Map(KmsTimetable t) => new TimetableDTO
         {
