@@ -2,6 +2,7 @@
 using KMS.Repository.Interfaces;
 using KMS.Service.DTOs;
 using KMS.Service.DTOs.Attendance;
+using KMS.Service.DTOs.Notification;
 using KMS.Service.DTOs.Role;
 using KMS.Service.Interfaces;
 
@@ -14,6 +15,7 @@ namespace KMS.Service.Services
         private readonly IParentRepository _parentRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IEmailService _emailService;
+        private readonly INotificationHubService _notificationHub;
 
         private static readonly HashSet<string> ValidStatuses =
             new() { "Present", "Absent", "Late", "Excused", "Sick" };
@@ -23,13 +25,15 @@ namespace KMS.Service.Services
             IClassRepository classRepository,
             IParentRepository parentRepository,
             INotificationRepository notificationRepository,
-            IEmailService emailService)
+            IEmailService emailService,
+            INotificationHubService notificationHub)
         {
             _attendanceRepository = attendanceRepository;
             _classRepository = classRepository;
             _parentRepository = parentRepository;
             _notificationRepository = notificationRepository;
             _emailService = emailService;
+            _notificationHub = notificationHub;
         }
 
         public async Task<BaseResponseDTO> GetClassAttendanceSheetAsync(int classId, DateTime date)
@@ -143,6 +147,7 @@ namespace KMS.Service.Services
                 var notifications = new List<KmsNotification>();
 
 
+
                 foreach (var record in dto.Records)
                 {
                     attendanceMap.TryGetValue(record.StudentId, out var existing);
@@ -184,6 +189,7 @@ namespace KMS.Service.Services
                                 notifications.Add(new KmsNotification
                                 {
                                     UserId = link.Parent.UserId,
+                                    StudentId = link.StudentId,
                                     Type = "Attendance",
                                     Title = "Thông báo điểm danh",
                                     Message = $"{link.Student.FullName} hôm nay {record.Status}",
@@ -359,6 +365,7 @@ namespace KMS.Service.Services
                 notifications.Add(new KmsNotification
                 {
                     UserId = parent.UserId,
+                    StudentId = studentId,
                     Type = "Attendance",
                     Title = "Thông báo điểm danh",
                     Message = status == "Absent"
@@ -386,6 +393,23 @@ namespace KMS.Service.Services
             }
 
             await _notificationRepository.CreateBulkAsync(notifications);
+
+            foreach (var n in notifications)
+            {
+                await _notificationHub.SendNotificationToUserAsync(n.UserId, new NotificationDTO
+                {
+                    NotificationId = n.NotificationId,
+                    UserId = n.UserId,
+                    StudentId = n.StudentId,
+                    Type = n.Type,
+                    Title = n.Title,
+                    Message = n.Message,
+                    RelatedEntityType = n.RelatedEntityType,
+                    RelatedEntityId = n.RelatedEntityId,
+                    IsRead = false,
+                    CreatedAt = n.CreatedAt
+                });
+            }
         }
 
         private static TimeOnly? ParseTime(string? timeStr)

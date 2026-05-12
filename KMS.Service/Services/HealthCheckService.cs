@@ -1,6 +1,7 @@
 ﻿using KMS.Repository.Entities;
 using KMS.Repository.Interfaces;
 using KMS.Service.DTOs.HealthCheck;
+using KMS.Service.DTOs.Notification;
 using KMS.Service.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,14 +16,17 @@ namespace KMS.Service.Services
         private readonly IHealthCheckRepository _repo;
         private readonly INotificationRepository _notificationRepo;
         private readonly IParentRepository _parentRepo;
+        private readonly INotificationHubService _notificationHub;
         public HealthCheckService(
             IHealthCheckRepository repo,
             INotificationRepository notificationRepo,
-            IParentRepository parentRepo)
+            IParentRepository parentRepo,
+            INotificationHubService notificationHub)
         {
             _repo = repo;
             _notificationRepo = notificationRepo;
             _parentRepo = parentRepo;
+            _notificationHub = notificationHub;
         }
 
         public async Task<List<HealthCheckDTO>> GetAllAsync()
@@ -139,6 +143,19 @@ namespace KMS.Service.Services
             }).ToList();
 
             await _notificationRepo.CreateBulkAsync(notifications);
+
+            foreach (var n in notifications)
+            {
+                await _notificationHub.SendNotificationToUserAsync(n.UserId, new NotificationDTO
+                {
+                    UserId = n.UserId,
+                    Type = n.Type,
+                    Title = n.Title,
+                    Message = n.Message,
+                    IsRead = false,
+                    CreatedAt = n.CreatedAt
+                });
+            }
         }
     }
 }
