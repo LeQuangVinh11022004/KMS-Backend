@@ -180,27 +180,6 @@ namespace KMS.Service.Services
                     await SendAttendanceNotification(record.StudentId, record.Status);
                     // notification
 
-                    if (record.Status == "Absent" || record.Status == "Late")
-                    {
-                        if (parentMap.TryGetValue(record.StudentId, out var parents))
-                        {
-                            foreach (var link in parents)
-                            {
-                                notifications.Add(new KmsNotification
-                                {
-                                    UserId = link.Parent.UserId,
-                                    StudentId = link.StudentId,
-                                    Type = "Attendance",
-                                    Title = "Thông báo điểm danh",
-                                    Message = $"{link.Student.FullName} hôm nay {record.Status}",
-                                    RelatedEntityType = "Attendance",
-                                    RelatedEntityId = record.StudentId,
-                                    IsRead = false,
-                                    CreatedAt = DateTime.Now
-                                });
-                            }
-                        }
-                    }
                 }
                 if (toCreate.Any())
                     await _attendanceRepository.CreateBulkAsync(toCreate);

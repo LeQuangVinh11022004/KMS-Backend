@@ -130,6 +130,7 @@ namespace KMS.Service.Services
                 notifications.Add(new KmsNotification
                 {
                     UserId = parent.UserId,
+                    StudentId = studentId,
                     Type = "DailyReport",
                     Title = "Thông báo sinh hoạt, bữa ăn",
                     Message = $"Giáo viên vừa cập nhật đánh giá bữa ăn và sinh hoạt của bé ngày {reportDate?.ToString("dd/MM/yyyy")}.",
@@ -147,10 +148,14 @@ namespace KMS.Service.Services
             {
                 await _notificationHub.SendNotificationToUserAsync(n.UserId, new NotificationDTO
                 {
+                    NotificationId = n.NotificationId,
                     UserId = n.UserId,
+                    StudentId = n.StudentId,
                     Type = n.Type,
                     Title = n.Title,
                     Message = n.Message,
+                    RelatedEntityType = n.RelatedEntityType,
+                    RelatedEntityId = n.RelatedEntityId,
                     IsRead = false,
                     CreatedAt = n.CreatedAt
                 });

@@ -133,6 +133,7 @@ namespace KMS.Service.Services
             var notifications = parents.Select(p => new KmsNotification
             {
                 UserId = p.UserId,
+                StudentId = studentId,
                 Type = "Health",
                 Title = "Cập nhật khám sức khỏe",
                 Message = $"Nhà trường vừa cập nhật chỉ số sức khỏe (chiều cao, cân nặng...) cho con bạn vào ngày {checkDate}.",
@@ -148,10 +149,14 @@ namespace KMS.Service.Services
             {
                 await _notificationHub.SendNotificationToUserAsync(n.UserId, new NotificationDTO
                 {
+                    NotificationId = n.NotificationId,
                     UserId = n.UserId,
+                    StudentId = n.StudentId,
                     Type = n.Type,
                     Title = n.Title,
                     Message = n.Message,
+                    RelatedEntityType = n.RelatedEntityType,
+                    RelatedEntityId = n.RelatedEntityId,
                     IsRead = false,
                     CreatedAt = n.CreatedAt
                 });
