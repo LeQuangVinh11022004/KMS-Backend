@@ -22,7 +22,9 @@ namespace KMS.Service.DTOs.VNPay
         public string? BankCode { get; set; }
 
         /// <summary>URL frontend để VNPay chuyển về sau khi thanh toán</summary>
-        public string? ReturnUrl { get; set; }
+
+        [DefaultValue("")]
+        public string? ReturnUrl { get; set; } = null;
     }
 
     public class VNPayPaymentUrlDTO
