@@ -1,4 +1,4 @@
-using KMS.API;
+﻿using KMS.API;
 using KMS.API.Hubs;
 using KMS.Repository;
 using KMS.Repository.Entities;
@@ -13,9 +13,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
+using Supabase;
 using System;
 using System.Reflection;
 using System.Text;
+using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -144,6 +146,20 @@ builder.Services.Configure<EmailSettings>(
 builder.Services.Configure<VNPaySettings>(
     builder.Configuration.GetSection("VNPaySettings"));
 
+var supabaseUrl = builder.Configuration["Supabase:Url"];
+var supabaseKey = builder.Configuration["Supabase:Key"];
+
+if (string.IsNullOrWhiteSpace(supabaseUrl) || string.IsNullOrWhiteSpace(supabaseKey))
+{
+    throw new Exception("Supabase:Url hoặc Supabase:Key không tìm thấy. Hãy kiểm tra Environment Variables trên Azure!");
+}
+
+builder.Services.AddScoped(_ => new Supabase.Client(
+    supabaseUrl,
+    supabaseKey,
+    new SupabaseOptions { AutoConnectRealtime = false }
+));
+
 // CORS configuration
 builder.Services.AddCors(options =>
 {
@@ -222,7 +238,6 @@ builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
-builder.Services.AddScoped<IActivityMediaService, ActivityMediaService>();
 builder.Services.AddScoped<IChatAiService, ChatAiService>();
 builder.Services.AddScoped<IDailyReportService, DailyReportService>();
 builder.Services.AddScoped<INotificationHubService, SignalRNotificationService>();
