@@ -40,7 +40,17 @@ namespace KMS.API.Controllers
             var result = await _service.CreateAsync(dto);
             return Ok(result);
         }
-
+        [HttpPost("send-mass")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
+        public async Task<IActionResult> SendMassNotification([FromBody] CreateMassNotificationDTO dto)
+        {
+            var result = await _service.CreateMassNotificationAsync(dto);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Staff,Teacher")]
         public async Task<IActionResult> Update(int id, UpdateNotificationDTO dto)

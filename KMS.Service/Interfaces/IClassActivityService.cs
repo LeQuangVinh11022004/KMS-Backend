@@ -1,4 +1,5 @@
 ﻿using KMS.Service.DTOs.ClassActivity;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace KMS.Service.Interfaces
         Task<List<ClassActivityDTO>> GetByClassIdAsync(int classId);
         Task<ClassActivityDTO?> GetByIdAsync(int id);
         Task CreateAsync(ClassActivityDTO dto, int teacherId);
+        Task<int> CreateWithMediaAsync(ActivityWithMediaCreateDTO dto, List<IFormFile> passedFiles, int teacherId);
         Task UpdateAsync(int id, ClassActivityDTO dto, int teacherId);
         Task DeleteAsync(int id);
     }

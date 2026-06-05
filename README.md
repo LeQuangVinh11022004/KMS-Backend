@@ -191,11 +191,12 @@ dotnet run
 
 Để tiện cho Hội đồng nghiệm thu và kiểm thử hệ thống, nhóm đã chuẩn bị sẵn các tài khoản demo tương ứng với từng phân quyền (Role) trong hệ thống:
 
-| Role | Username| Password | Ghi chú |
-|------|------------------|----------|---------|
-| **Admin** | admin001 | Admin@123 Toàn quyền quản trị hệ thống |
-| **Teacher** | teacher001| Admin@123 | Giáo viên điểm danh, báo cáo |
-| **Parent** | parent001 | Admin@123 | Phụ huynh |
+| Role | Username| Password |
+|------|------------------|----------|
+| **Admin** | admin | Admin@123 |
+| **Accountant** | accountant | Admin@123 |
+| **Teacher** | teacher001| Admin@123 |
+| **Parent** | parent001 | Admin@123 |
 
 *Lưu ý: Hệ thống đang sử dụng môi trường VNPay Sandbox để test thanh toán, thông tin thẻ test được mô tả chi tiết trong tài liệu đính kèm.*
 

@@ -47,4 +47,16 @@ namespace KMS.Service.DTOs.Notification
 
         public string Message { get; set; } = null!;
     }
+    public class CreateMassNotificationDTO
+    {
+        public string TargetScope { get; set; } = null!;
+
+        public int TargetId { get; set; }
+
+        public string Type { get; set; } = "Announcement";
+        public string Title { get; set; } = null!;
+        public string Message { get; set; } = null!;
+        public string? RelatedEntityType { get; set; }
+        public int? RelatedEntityId { get; set; }
+    }
 }

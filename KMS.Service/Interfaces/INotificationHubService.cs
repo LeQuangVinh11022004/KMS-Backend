@@ -10,5 +10,6 @@ namespace KMS.Service.Interfaces
     public interface INotificationHubService
     {
         Task SendNotificationToUserAsync(int userId, NotificationDTO notification);
+        Task SendNotificationToMultipleUsersAsync(IEnumerable<int> userIds, NotificationDTO notification);
     }
 }

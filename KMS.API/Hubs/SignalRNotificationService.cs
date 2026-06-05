@@ -18,5 +18,10 @@ namespace KMS.API.Hubs
             // Bắn event "ReceiveNotification" tới user có ID tương ứng
             await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", notification);
         }
+        public async Task SendNotificationToMultipleUsersAsync(IEnumerable<int> userIds, NotificationDTO notification)
+        {
+            var userIdStrings = userIds.Select(id => id.ToString()).ToList();
+            await _hubContext.Clients.Users(userIdStrings).SendAsync("ReceiveNotification", notification);
+        }
     }
 }

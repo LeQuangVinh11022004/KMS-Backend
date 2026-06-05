@@ -2,6 +2,7 @@
 using KMS.Repository.Interfaces;
 using KMS.Service.DTOs.ClassActivity;
 using KMS.Service.Interfaces;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,17 @@ namespace KMS.Service.Services
     public class ClassActivityService : IClassActivityService
     {
         private readonly IClassActivityRepository _repo;
+        private readonly IActivityMediaRepository _mediaRepo;
+        private readonly Supabase.Client _supabaseClient;
 
-        public ClassActivityService(IClassActivityRepository repo)
+        public ClassActivityService(
+            IClassActivityRepository repo,
+            IActivityMediaRepository mediaRepo,
+            Supabase.Client supabaseClient)
         {
             _repo = repo;
+            _mediaRepo = mediaRepo;
+            _supabaseClient = supabaseClient;
         }
 
         public async Task<List<ClassActivityDTO>> GetAllAsync()
@@ -76,6 +84,63 @@ namespace KMS.Service.Services
 
             await _repo.AddAsync(entity);
             await _repo.SaveChangesAsync();
+        }
+        public async Task<int> CreateWithMediaAsync(ActivityWithMediaCreateDTO dto, List<IFormFile> passedFiles, int teacherId)
+        {
+            var activityEntity = new KmsClassActivity
+            {
+                ClassId = dto.ClassId,
+                Title = dto.Title,
+                Content = dto.Content,
+                ActivityDate = dto.ActivityDate,
+                PostedBy = teacherId,
+                CreatedAt = DateTime.Now
+            };
+
+            await _repo.AddAsync(activityEntity);
+            await _repo.SaveChangesAsync();
+
+            int newActivityId = activityEntity.ActivityId;
+
+            if (passedFiles != null && passedFiles.Any())
+            {
+                string bucketName = "activities";
+
+                foreach (var file in passedFiles)
+                {
+                    if (file.Length == 0) continue;
+
+                    string fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+                    byte[] fileData;
+
+                    using (var stream = file.OpenReadStream())
+                    using (var ms = new MemoryStream())
+                    {
+                        await stream.CopyToAsync(ms);
+                        fileData = ms.ToArray();
+                    }
+
+                    var options = new Supabase.Storage.FileOptions { ContentType = file.ContentType };
+                    await _supabaseClient.Storage.From(bucketName).Upload(fileData, fileName, options);
+
+                    string publicUrl = _supabaseClient.Storage.From(bucketName).GetPublicUrl(fileName);
+
+                    var mediaEntity = new KmsActivityMedium
+                    {
+                        ActivityId = newActivityId,
+                        MediaUrl = publicUrl,
+                        MediaType = file.ContentType.StartsWith("video") ? "Video" : "Photo",
+                        Caption = null,
+                        UploadedAt = DateTime.Now
+                    };
+
+                    await _mediaRepo.AddAsync(mediaEntity);
+                }
+
+                await _mediaRepo.SaveChangesAsync();
+            }
+
+            return newActivityId;
         }
 
         public async Task UpdateAsync(int id, ClassActivityDTO dto, int teacherId)

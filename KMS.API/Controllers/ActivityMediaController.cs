@@ -16,7 +16,7 @@ namespace KMS.API.Controllers
         public ActivityMediaController(IActivityMediaService service, IWebHostEnvironment env)
         {
             _service = service;
-                _env = env;
+            _env = env;
         }
 
         // get base url for media url

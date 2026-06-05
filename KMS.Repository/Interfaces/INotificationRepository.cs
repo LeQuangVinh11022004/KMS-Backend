@@ -19,5 +19,7 @@ namespace KMS.Repository.Interfaces
 
         Task DeleteAsync(KmsNotification notification);
         Task<IEnumerable<KmsNotification>> GetByStudentIdAsync(int studentId);
+        Task<IEnumerable<int>> GetUserIdsByScopeAsync(string scope, int targetId);
+
     }
 }

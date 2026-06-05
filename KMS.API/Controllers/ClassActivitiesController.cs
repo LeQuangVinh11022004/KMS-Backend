@@ -1,6 +1,7 @@
 ﻿using KMS.Service.DTOs.ActivityMedia;
 using KMS.Service.DTOs.ClassActivity;
 using KMS.Service.Interfaces;
+using KMS.Service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -58,6 +59,30 @@ namespace KMS.API.Controllers
         {
             await _service.CreateAsync(dto, GetUserId());
             return Ok("Created successfully");
+        }
+        [HttpPost("with-media")]
+        [Authorize(Roles = "Admin,Teacher,Staff")]
+        public async Task<IActionResult> CreateActivityWithMedia([FromForm] ActivityWithMediaCreateDTO dto)
+        {
+            try
+            {
+                int teacherId = GetUserId();
+                if (teacherId == 0) return Unauthorized(new { message = "Không thể xác thực." });
+
+                var uploadedFiles = Request.Form.Files.ToList();
+
+                var activityId = await _service.CreateWithMediaAsync(dto, uploadedFiles, teacherId);
+
+                return Ok(new
+                {
+                    message = "Đã đăng hoạt động và tải ảnh lên thành công!",
+                    activityId = activityId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi đăng bài: " + ex.Message });
+            }
         }
 
         [HttpPut("{id}")]

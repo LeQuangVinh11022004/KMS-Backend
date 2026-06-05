@@ -14,19 +14,17 @@ namespace KMS.Service.Services
     public class NotificationService : INotificationService
     {
         private readonly INotificationRepository _repository;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationHubService _notificationHub;
-        public NotificationService(INotificationRepository repository, IUnitOfWork unitOfWork, INotificationHubService notificationHub)
+
+        public NotificationService(INotificationRepository repository, INotificationHubService notificationHub)
         {
             _repository = repository;
-            _unitOfWork = unitOfWork;
             _notificationHub = notificationHub;
         }
 
         public async Task<BaseResponseDTO> GetUserNotificationsAsync(int userId)
         {
             var list = await _repository.GetByUserIdAsync(userId);
-
             var data = list.Select(n => Map(n));
 
             return new BaseResponseDTO
@@ -78,10 +76,10 @@ namespace KMS.Service.Services
             };
 
             await _repository.CreateAsync(entity);
-            await _unitOfWork.SaveChangesAsync();
 
             var notificationDto = Map(entity);
             await _notificationHub.SendNotificationToUserAsync(dto.UserId, notificationDto);
+
             return new BaseResponseDTO
             {
                 Success = true,
@@ -141,6 +139,55 @@ namespace KMS.Service.Services
             {
                 Success = true,
                 Message = "Notification deleted"
+            };
+        }
+
+        public async Task<BaseResponseDTO> CreateMassNotificationAsync(CreateMassNotificationDTO dto)
+        {
+            var targetUserIds = (await _repository.GetUserIdsByScopeAsync(dto.TargetScope, dto.TargetId)).ToList();
+
+            if (!targetUserIds.Any())
+            {
+                return new BaseResponseDTO { Success = false, Message = "No destination users found for this scope." };
+            }
+
+            var notificationsToCreate = new List<KmsNotification>();
+            var now = DateTime.Now;
+
+            foreach (var userId in targetUserIds)
+            {
+                notificationsToCreate.Add(new KmsNotification
+                {
+                    UserId = userId,
+                    Type = dto.Type,
+                    Title = dto.Title,
+                    Message = dto.Message,
+                    RelatedEntityType = dto.RelatedEntityType,
+                    RelatedEntityId = dto.RelatedEntityId,
+                    IsRead = false,
+                    CreatedAt = now
+                });
+            }
+
+            await _repository.CreateBulkAsync(notificationsToCreate);
+
+            var sampleNotificationDto = new NotificationDTO
+            {
+                Type = dto.Type,
+                Title = dto.Title,
+                Message = dto.Message,
+                RelatedEntityType = dto.RelatedEntityType,
+                RelatedEntityId = dto.RelatedEntityId,
+                IsRead = false,
+                CreatedAt = now
+            };
+
+            await _notificationHub.SendNotificationToMultipleUsersAsync(targetUserIds, sampleNotificationDto);
+
+            return new BaseResponseDTO
+            {
+                Success = true,
+                Message = $"Mass notification successfully sent to {targetUserIds.Count} users."
             };
         }
 

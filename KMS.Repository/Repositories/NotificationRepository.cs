@@ -35,6 +35,7 @@ namespace KMS.Repository.Repositories
         public async Task CreateAsync(KmsNotification notification)
         {
             await _context.KmsNotifications.AddAsync(notification);
+            await _context.SaveChangesAsync();
         }
 
         public async Task CreateBulkAsync(IEnumerable<KmsNotification> notifications)
@@ -54,12 +55,36 @@ namespace KMS.Repository.Repositories
             _context.KmsNotifications.Remove(notification);
             await _context.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<KmsNotification>> GetByStudentIdAsync(int studentId)
         {
             return await _context.KmsNotifications
                 .Where(n => n.StudentId == studentId)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<int>> GetUserIdsByScopeAsync(string scope, int targetId)
+        {
+            if (scope.Equals("Class", StringComparison.OrdinalIgnoreCase))
+            {
+                return await _context.Set<KmsClassStudent>()
+                    .Where(cs => cs.ClassId == targetId)
+                    .SelectMany(cs => cs.Student.KmsStudentParents.Select(sp => sp.Parent.UserId))
+                    .Distinct()
+                    .ToListAsync();
+            }
+
+            if (scope.Equals("Campus", StringComparison.OrdinalIgnoreCase))
+            {
+                return await _context.Set<KmsClassStudent>()
+                    .Where(cs => cs.Class.CampusId == targetId)
+                    .SelectMany(cs => cs.Student.KmsStudentParents.Select(sp => sp.Parent.UserId))
+                    .Distinct()
+                    .ToListAsync();
+            }
+
+            return Enumerable.Empty<int>();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,14 @@ namespace KMS.Service.DTOs.ClassActivity
         public string Title { get; set; }
         public string Content { get; set; }
         public DateOnly? ActivityDate { get; set; }
+    }
+    public class ActivityWithMediaCreateDTO
+    {
+        public int ClassId { get; set; }
+        public string Title { get; set; } = null!;
+        public string Content { get; set; } = null!;
+        public DateOnly? ActivityDate { get; set; }
+
+        public List<IFormFile>? Files { get; set; }
     }
 }

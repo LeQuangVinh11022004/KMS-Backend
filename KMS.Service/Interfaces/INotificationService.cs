@@ -22,5 +22,6 @@ namespace KMS.Service.Interfaces
 
         Task<BaseResponseDTO> DeleteAsync(int id);
         Task<BaseResponseDTO> GetStudentNotificationsAsync(int studentId);
+        Task<BaseResponseDTO> CreateMassNotificationAsync(CreateMassNotificationDTO dto);
     }
 }
